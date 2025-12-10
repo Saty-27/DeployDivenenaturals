@@ -1,0 +1,173 @@
+Several admin and user UI flows are broken or inconsistent. Fix UI styling, interaction states, form failures, slow updates, and page layout so all admin pages share a common header/footer and consistent theme. Also make the newsletter area redirect to a newsletter card/list. Provide clear error handling and stable create/update actions for categories, products and subscriptions.
+
+Tasks (priority order)
+1) Admin: homepage — theme & newsletter
+
+Problem: Admin homepage currently shows a black/transparent form that looks wrong and does not match admin banner/theme.
+
+Request:
+
+Apply the admin “banner” theme (colors, spacing, header) consistently on admin/homepage.
+
+Convert the newsletter section to a clear CTA that redirects to the newsletter card/list view (not an inline broken form). Clicking the CTA should open the newsletter list or the newsletter-create card.
+
+Acceptance criteria:
+
+Admin homepage uses the banner theme (same header, title style, primary button).
+
+Newsletter area has one clear action button: View Newsletters (redirects to newsletter list) and Create Newsletter (opens card/modal).
+
+No transparent black form visible.
+
+2) Add sidebar + fix active/inactive button state
+
+Problem: There is no functional sidebar or wrong visual state for active/inactive buttons. Buttons do not show active/inactive properly.
+
+Request:
+
+Add a left sidebar (collapsible) consistent with admin theme.
+
+Ensure active menu item has a visible active style (highlight, left border or background) and inactive items are un-highlighted.
+
+Ensure buttons that toggle active/inactive update both visually and in data (API).
+
+Acceptance criteria:
+
+Sidebar present on admin pages, links work.
+
+Active menu item visibly different from others.
+
+Toggling active/inactive reflects immediately in UI and persists.
+
+3) Admin/subscriptions — failing to create subscription
+
+Problem: Creating a subscription shows “failed to add subscription”.
+
+Request:
+
+Reproduce the creation flow; capture network response and server error message.
+
+If API returns validation error, show user-friendly validation messages inline.
+
+Fix create API call or client payload (fields, headers, auth).
+
+Reproduction steps (for dev):
+
+Go to /admin/subscriptions, fill the subscription form, click Create → observe error message and check console/network.
+
+Acceptance criteria:
+
+Creating a subscription returns 200/201 and newly created subscription appears in the list.
+
+On failure, show clear error message (e.g., “Missing field: price”) and a retry option.
+
+4) Admin/delivery — cancel button text & styling
+
+Problem: Black button with no readable text — needs white “Cancel” text.
+
+Request:
+
+For the cancel/danger buttons in delivery page, ensure button background and text contrast: add white text on dark background or flip to outline style.
+
+Ensure button has aria-label and accessible contrast.
+
+Acceptance criteria:
+
+Cancel button shows readable “Cancel” text (white) with accessible contrast.
+
+Hover/focus/active styles present.
+
+5) User side: card add/update is very slow
+
+Problem: When user adds a card (or a product/card), the update takes long and the UX shows delay.
+
+Request:
+
+Profile the client & server to identify bottleneck (client awaiting entire list vs. optimistic UI).
+
+Implement optimistic update: show card immediately while completing background save.
+
+Show spinner/disabled state while saving, and error toast if save fails.
+
+Acceptance criteria:
+
+Adding a card shows immediate UI feedback (optimistic) and then saves in background.
+
+If server fails, the UI shows error and rollback option.
+
+6) Admin category & product forms — "failed to make / doctyle error / authorized error"
+
+Problem: Submitting category form shows “failed to make” or “doctype error”. Clicking product page shows “authorized error”.
+
+Request:
+
+Reproduce both flows and capture server responses (validation errors, 4xx/5xx or CORS/Auth errors).
+
+Validate client payloads: required fields, content-type, file uploads (multipart).
+
+Fix front-end validation to avoid sending malformed data (doctype errors usually come from wrong file or body type).
+
+Ensure product page access uses correct auth token/permissions; if user lacks permission show a policy message, not raw error.
+
+Acceptance criteria:
+
+Category creation succeeds when valid data provided.
+
+Product page loads for authorized users with correct data.
+
+If unauthorized, show “You don’t have permission to view this page” with a contact/admin action.
+
+7) Consolidate pages under main layout
+
+Problem: Pages like /natural/home, /natural/subscription, /natural/order, /billing, /auth/login look like separate fragments and do not share the main header/footer.
+
+Request:
+
+Create a consistent main layout (header + footer + sidebar for admin) and wrap all admin pages with it.
+
+Ensure /auth/login uses the same header/footer if required (or a minimal version) so pages feel cohesive.
+
+Keep consistent spacing, fonts and primary actions.
+
+Acceptance criteria:
+
+All listed pages render with consistent header/footer and main layout.
+
+Navigation between these pages retains layout (no full page layout jumps).
+
+Suggested bug report template (copy into tracker)
+
+Title: [Area] Short description (e.g. Admin/subscriptions: subscription creation fails)
+Priority: High / Medium / Low
+Environment: staging / production (browser, OS, user)
+Steps to reproduce: numbered steps
+Actual result: error message / UI behavior
+Expected result: what should happen
+Console / Network: attach screenshots or copy of server response
+Suggested fix / notes: optional dev hints (payload shape, auth header, optimistic UI)
+
+Quick test cases to include with each fix
+
+Create subscription with valid data → subscription shows in list.
+
+Create category with image and no image → both succeed with proper messages.
+
+Product page load when logged in as admin → shows products; as guest → shows permission error message.
+
+Click newsletter CTA on admin/home → opens newsletter list/modal.
+
+Toggle active/inactive on sidebar → visually updates and persists.
+
+Add card on user page → immediate UI feedback + save complete.
+
+Small UX suggestions (optional, but helpful)
+
+Use consistent primary color and banner for admin header (your existing banner theme).
+
+Use toasts for success/error messages (top-right) with concise copy.
+
+Use skeleton loaders for lists instead of long spinner.
+
+Use optimistic updates for quick user feedback.
+
+Log network error bodies to Sentry (or similar) for rapid debugging.
