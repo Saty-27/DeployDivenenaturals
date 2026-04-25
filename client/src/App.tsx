@@ -22,21 +22,28 @@ import DeliveryDashboard from "@/pages/delivery/dashboard";
 import ProfileCompletion from "@/pages/delivery/profile-completion";
 import DeliveryRoutingPage from "@/pages/admin/delivery-routing";
 import ContactSubmissionsPage from "@/pages/admin/contact-submissions";
+import PagesManagement from "@/pages/admin/pages-management";
+import AboutPageManager from "@/pages/admin/about-manager";
+import ContactPageManager from "@/pages/admin/contact-manager";
+import BrandIdentityManager from "@/pages/admin/brand-identity";
 import AboutPage from "@/pages/about";
 import ContactPage from "@/pages/contact";
 import TermsPage from "@/pages/terms";
 import PrivacyPage from "@/pages/privacy";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 function ProtectedRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAuthenticated, isLoading } = useAuth();
+  const { settings } = useSiteSettings();
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="text-5xl font-bold text-green-600 mb-4">🥛</div>
-          <p className="text-gray-600 text-lg">Divine Naturals</p>
+          <img src={settings.logoUrl || logoImage} className="w-16 h-16 md:w-20 md:h-20 object-contain mb-6 mx-auto animate-pulse" />
+          <p className="text-gray-600 text-lg font-bold">{settings.brandName}</p>
           <p className="text-gray-400 text-sm">Loading...</p>
         </div>
       </div>
@@ -52,14 +59,15 @@ function ProtectedRoute({ component: Component }: { component: React.ComponentTy
 
 function AdminRoute({ component: Component }: { component: React.ComponentType }) {
   const { isAdminLoggedIn, isLoading } = useAdminAuth();
+  const { settings } = useSiteSettings();
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-screen bg-gray-50">
         <div className="text-center">
-          <div className="text-5xl font-bold text-green-600 mb-4">🥛</div>
-          <p className="text-gray-600 text-lg">Divine Naturals</p>
-          <p className="text-gray-400 text-sm">Loading...</p>
+          <img src={settings.logoUrl || logoImage} className="w-16 h-16 md:w-20 md:h-20 object-contain mb-6 mx-auto animate-pulse" />
+          <p className="text-gray-600 text-lg font-bold">{settings.brandName}</p>
+          <p className="text-gray-400 text-sm">Loading Dashboard...</p>
         </div>
       </div>
     );
@@ -82,6 +90,10 @@ function Router() {
       <Route path="/admin" component={() => <AdminRoute component={AdminDashboard} />} />
       <Route path="/admin/routing" component={DeliveryRoutingPage} />
       <Route path="/admin/contact-submissions" component={ContactSubmissionsPage} />
+      <Route path="/admin/pages" component={() => <AdminRoute component={PagesManagement} />} />
+      <Route path="/admin/pages/about" component={() => <AdminRoute component={AboutPageManager} />} />
+      <Route path="/admin/pages/contact" component={() => <AdminRoute component={ContactPageManager} />} />
+      <Route path="/admin/brand" component={() => <AdminRoute component={BrandIdentityManager} />} />
       <Route path="/admin/*" component={() => <AdminRoute component={AdminDashboard} />} />
       
       {/* DELIVERY PARTNER ROUTES - PUBLIC */}

@@ -21,7 +21,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { Plus, Pencil, Trash2, Leaf, Heart, Users, Recycle, Package, MapPin, Calendar, HelpCircle, Mail, Globe } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, Pencil, Trash2, Leaf, Heart, Users, Recycle, Package, MapPin, Calendar, HelpCircle, Mail, Globe, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/layout/admin-layout";
 
@@ -76,6 +86,8 @@ export default function HomepageCMS() {
 
 function EthosSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const [editingCard, setEditingCard] = useState<any>(null);
   const [formData, setFormData] = useState({ title: "", description: "", icon: "Leaf", displayOrder: 0, isActive: true });
   const queryClient = useQueryClient();
@@ -179,41 +191,64 @@ function EthosSection() {
           <DialogTrigger asChild>
             <Button className="bg-green-600 hover:bg-green-700"><Plus className="w-4 h-4 mr-2" /> Add Card</Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingCard ? "Edit Card" : "Add Ethos Card"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>Title</Label>
-                <Input value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} required />
+          <DialogContent className="bg-white text-gray-900 border-0 shadow-2xl rounded-3xl overflow-hidden p-0 max-w-lg">
+            <div className="bg-green-600 p-6 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">{editingCard ? "Edit Ethos Card" : "Add Ethos Card"}</DialogTitle>
+              </DialogHeader>
+            </div>
+            <form onSubmit={handleSubmit} className="p-8 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-gray-700">Title</Label>
+                <Input 
+                  className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12" 
+                  value={formData.title} 
+                  onChange={(e) => setFormData({ ...formData, title: e.target.value })} 
+                  required 
+                />
               </div>
-              <div>
-                <Label>Description</Label>
-                <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} required />
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-gray-700">Description</Label>
+                <Textarea 
+                  className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl min-h-[100px]" 
+                  value={formData.description} 
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })} 
+                  required 
+                />
               </div>
-              <div>
-                <Label>Icon</Label>
-                <Select value={formData.icon} onValueChange={(v) => setFormData({ ...formData, icon: v })}>
-                  <SelectTrigger><SelectValue /></SelectTrigger>
-                  <SelectContent>
-                    {iconOptions.map(icon => (
-                      <SelectItem key={icon} value={icon}>{icon}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Icon</Label>
+                  <Select value={formData.icon} onValueChange={(v) => setFormData({ ...formData, icon: v })}>
+                    <SelectTrigger className="bg-gray-50 border-gray-200 rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
+                      {iconOptions.map(icon => (
+                        <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Display Order</Label>
+                  <Input 
+                    type="number" 
+                    className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                    value={formData.displayOrder} 
+                    onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })} 
+                  />
+                </div>
               </div>
-              <div>
-                <Label>Display Order</Label>
-                <Input type="number" value={formData.displayOrder} onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })} />
-              </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
                 <Switch checked={formData.isActive} onCheckedChange={(c) => setFormData({ ...formData, isActive: c })} />
-                <Label>Active</Label>
+                <Label className="font-bold text-gray-700 cursor-pointer">Active on Website</Label>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">{editingCard ? "Update" : "Create"}</Button>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={resetForm} className="rounded-xl px-6 h-12">Cancel</Button>
+                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8 h-12 font-bold shadow-lg shadow-green-200 transition-all active:scale-95">
+                  {editingCard ? "Update Card" : "Create Card"}
+                </Button>
               </div>
             </form>
           </DialogContent>
@@ -241,13 +276,42 @@ function EthosSection() {
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(card)}><Pencil className="w-4 h-4" /></Button>
-                    <Button variant="ghost" size="sm" className="text-red-600" onClick={() => confirm("Delete this card?") && deleteMutation.mutate(card.id)}><Trash2 className="w-4 h-4" /></Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-red-600" 
+                      onClick={() => {
+                        setItemToDelete(card.id);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent className="bg-white border-2 border-red-100 shadow-2xl rounded-3xl p-8">
+            <AlertDialogHeader className="items-center text-center space-y-4">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-2">
+                <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+              </div>
+              <AlertDialogTitle className="text-3xl font-black text-gray-900">Delete Card?</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-500 text-lg font-medium">This action cannot be undone.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-8 gap-4 sm:justify-center">
+              <AlertDialogCancel className="h-14 px-8 rounded-2xl border-2 border-gray-100 hover:bg-gray-50 font-bold text-gray-600 transition-all">Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => { if (itemToDelete) { deleteMutation.mutate(itemToDelete); setItemToDelete(null); } }}
+                className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-lg transition-all"
+              >Confirm Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
@@ -255,6 +319,8 @@ function EthosSection() {
 
 function StatsSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const [editingCounter, setEditingCounter] = useState<any>(null);
   const [formData, setFormData] = useState({ label: "", value: 0, suffix: "+", icon: "Users", displayOrder: 0, isActive: true });
   const queryClient = useQueryClient();
@@ -349,47 +415,75 @@ function StatsSection() {
           <DialogTrigger asChild>
             <Button className="bg-green-600 hover:bg-green-700"><Plus className="w-4 h-4 mr-2" /> Add Counter</Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingCounter ? "Edit Counter" : "Add Stats Counter"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>Label</Label>
-                <Input value={formData.label} onChange={(e) => setFormData({ ...formData, label: e.target.value })} placeholder="Happy Customers" required />
+          <DialogContent className="bg-white text-gray-900 border-0 shadow-2xl rounded-3xl overflow-hidden p-0 max-w-lg">
+            <div className="bg-green-600 p-6 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">{editingCounter ? "Edit Counter" : "Add Stats Counter"}</DialogTitle>
+              </DialogHeader>
+            </div>
+            <form onSubmit={handleSubmit} className="p-8 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-gray-700">Label</Label>
+                <Input 
+                  className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                  value={formData.label} 
+                  onChange={(e) => setFormData({ ...formData, label: e.target.value })} 
+                  placeholder="Happy Customers" 
+                  required 
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Value</Label>
-                  <Input type="number" value={formData.value} onChange={(e) => setFormData({ ...formData, value: parseInt(e.target.value) || 0 })} required />
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Value</Label>
+                  <Input 
+                    type="number" 
+                    className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                    value={formData.value} 
+                    onChange={(e) => setFormData({ ...formData, value: parseInt(e.target.value) || 0 })} 
+                    required 
+                  />
                 </div>
-                <div>
-                  <Label>Suffix</Label>
-                  <Input value={formData.suffix} onChange={(e) => setFormData({ ...formData, suffix: e.target.value })} placeholder="+" />
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Suffix</Label>
+                  <Input 
+                    className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                    value={formData.suffix} 
+                    onChange={(e) => setFormData({ ...formData, suffix: e.target.value })} 
+                    placeholder="+" 
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Icon</Label>
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Icon</Label>
                   <Select value={formData.icon} onValueChange={(v) => setFormData({ ...formData, icon: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="bg-gray-50 border-gray-200 rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
                       {iconOptions.map(icon => (<SelectItem key={icon} value={icon}>{icon}</SelectItem>))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Display Order</Label>
-                  <Input type="number" value={formData.displayOrder} onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })} />
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Display Order</Label>
+                  <Input 
+                    type="number" 
+                    className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                    value={formData.displayOrder} 
+                    onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })} 
+                  />
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
                 <Switch checked={formData.isActive} onCheckedChange={(c) => setFormData({ ...formData, isActive: c })} />
-                <Label>Active</Label>
+                <Label className="font-bold text-gray-700 cursor-pointer">Active</Label>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">{editingCounter ? "Update" : "Create"}</Button>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={resetForm} className="rounded-xl px-6 h-12">Cancel</Button>
+                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8 h-12 font-bold shadow-lg shadow-green-200 transition-all active:scale-95">
+                  {editingCounter ? "Update Counter" : "Create Counter"}
+                </Button>
               </div>
             </form>
           </DialogContent>
@@ -408,12 +502,41 @@ function StatsSection() {
                 <p className="text-sm text-gray-600">{counter.label}</p>
                 <div className="flex justify-center gap-1 mt-2">
                   <Button variant="ghost" size="sm" onClick={() => handleEdit(counter)}><Pencil className="w-3 h-3" /></Button>
-                  <Button variant="ghost" size="sm" className="text-red-600" onClick={() => confirm("Delete?") && deleteMutation.mutate(counter.id)}><Trash2 className="w-3 h-3" /></Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    className="text-red-600" 
+                    onClick={() => {
+                      setItemToDelete(counter.id);
+                      setIsDeleteDialogOpen(true);
+                    }}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent className="bg-white border-2 border-red-100 shadow-2xl rounded-3xl p-8">
+            <AlertDialogHeader className="items-center text-center space-y-4">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-2">
+                <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+              </div>
+              <AlertDialogTitle className="text-3xl font-black text-gray-900">Delete Stat?</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-500 text-lg font-medium">This action cannot be undone.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-8 gap-4 sm:justify-center">
+              <AlertDialogCancel className="h-14 px-8 rounded-2xl border-2 border-gray-100 hover:bg-gray-50 font-bold text-gray-600 transition-all">Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => { if (itemToDelete) { deleteMutation.mutate(itemToDelete); setItemToDelete(null); } }}
+                className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-lg transition-all"
+              >Confirm Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
@@ -421,6 +544,8 @@ function StatsSection() {
 
 function DealsSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const [editingDeal, setEditingDeal] = useState<any>(null);
   const [formData, setFormData] = useState({ productId: 0, dealType: "PERCENT", dealValue: 0, badgeText: "", priority: 0, isActive: true });
   const queryClient = useQueryClient();
@@ -531,16 +656,20 @@ function DealsSection() {
           <DialogTrigger asChild>
             <Button className="bg-green-600 hover:bg-green-700"><Plus className="w-4 h-4 mr-2" /> Add Deal</Button>
           </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>{editingDeal ? "Edit Deal" : "Add Product Deal"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>Product</Label>
+          <DialogContent className="bg-white text-gray-900 border-0 shadow-2xl rounded-3xl overflow-hidden p-0 max-w-lg">
+            <div className="bg-green-600 p-6 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">{editingDeal ? "Edit Deal" : "Add Product Deal"}</DialogTitle>
+              </DialogHeader>
+            </div>
+            <form onSubmit={handleSubmit} className="p-8 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-gray-700">Product</Label>
                 <Select value={String(formData.productId)} onValueChange={(v) => setFormData({ ...formData, productId: parseInt(v) })}>
-                  <SelectTrigger><SelectValue placeholder="Select product" /></SelectTrigger>
-                  <SelectContent>
+                  <SelectTrigger className="bg-gray-50 border-gray-200 rounded-xl h-12">
+                    <SelectValue placeholder="Select product" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-gray-200">
                     {products.filter((p: any) => p.isActive).map((product: any) => (
                       <SelectItem key={product.id} value={String(product.id)}>{product.name} - ₹{product.price}</SelectItem>
                     ))}
@@ -548,38 +677,58 @@ function DealsSection() {
                 </Select>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Deal Type</Label>
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Deal Type</Label>
                   <Select value={formData.dealType} onValueChange={(v) => setFormData({ ...formData, dealType: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="bg-gray-50 border-gray-200 rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
                       <SelectItem value="PERCENT">Percentage Off</SelectItem>
                       <SelectItem value="FIXED">Fixed Amount Off</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Value ({formData.dealType === "PERCENT" ? "%" : "₹"})</Label>
-                  <Input type="number" value={formData.dealValue} onChange={(e) => setFormData({ ...formData, dealValue: parseFloat(e.target.value) || 0 })} required />
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Value ({formData.dealType === "PERCENT" ? "%" : "₹"})</Label>
+                  <Input 
+                    type="number" 
+                    className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                    value={formData.dealValue} 
+                    onChange={(e) => setFormData({ ...formData, dealValue: parseFloat(e.target.value) || 0 })} 
+                    required 
+                  />
                 </div>
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Badge Text</Label>
-                  <Input value={formData.badgeText} onChange={(e) => setFormData({ ...formData, badgeText: e.target.value })} placeholder="25% OFF" />
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Badge Text</Label>
+                  <Input 
+                    className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                    value={formData.badgeText} 
+                    onChange={(e) => setFormData({ ...formData, badgeText: e.target.value })} 
+                    placeholder="25% OFF" 
+                  />
                 </div>
-                <div>
-                  <Label>Priority</Label>
-                  <Input type="number" value={formData.priority} onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })} />
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Priority</Label>
+                  <Input 
+                    type="number" 
+                    className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                    value={formData.priority} 
+                    onChange={(e) => setFormData({ ...formData, priority: parseInt(e.target.value) || 0 })} 
+                  />
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
                 <Switch checked={formData.isActive} onCheckedChange={(c) => setFormData({ ...formData, isActive: c })} />
-                <Label>Active</Label>
+                <Label className="font-bold text-gray-700 cursor-pointer">Active</Label>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">{editingDeal ? "Update" : "Create"}</Button>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={resetForm} className="rounded-xl px-6 h-12">Cancel</Button>
+                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8 h-12 font-bold shadow-lg shadow-green-200 transition-all active:scale-95">
+                  {editingDeal ? "Update Deal" : "Create Deal"}
+                </Button>
               </div>
             </form>
           </DialogContent>
@@ -604,13 +753,42 @@ function DealsSection() {
                   </div>
                   <div className="flex gap-1">
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(deal)}><Pencil className="w-4 h-4" /></Button>
-                    <Button variant="ghost" size="sm" className="text-red-600" onClick={() => confirm("Delete?") && deleteMutation.mutate(deal.id)}><Trash2 className="w-4 h-4" /></Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-red-600" 
+                      onClick={() => {
+                        setItemToDelete(deal.id);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent className="bg-white border-2 border-red-100 shadow-2xl rounded-3xl p-8">
+            <AlertDialogHeader className="items-center text-center space-y-4">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-2">
+                <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+              </div>
+              <AlertDialogTitle className="text-3xl font-black text-gray-900">Delete Deal?</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-500 text-lg font-medium">This action cannot be undone.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-8 gap-4 sm:justify-center">
+              <AlertDialogCancel className="h-14 px-8 rounded-2xl border-2 border-gray-100 hover:bg-gray-50 font-bold text-gray-600 transition-all">Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => { if (itemToDelete) { deleteMutation.mutate(itemToDelete); setItemToDelete(null); } }}
+                className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-lg transition-all"
+              >Confirm Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
@@ -618,6 +796,8 @@ function DealsSection() {
 
 function FaqsSection() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const [editingFaq, setEditingFaq] = useState<any>(null);
   const [formData, setFormData] = useState({ question: "", answer: "", category: "General", displayOrder: 0, isActive: true });
   const queryClient = useQueryClient();
@@ -712,43 +892,65 @@ function FaqsSection() {
           <DialogTrigger asChild>
             <Button className="bg-green-600 hover:bg-green-700"><Plus className="w-4 h-4 mr-2" /> Add FAQ</Button>
           </DialogTrigger>
-          <DialogContent className="max-w-lg">
-            <DialogHeader>
-              <DialogTitle>{editingFaq ? "Edit FAQ" : "Add FAQ"}</DialogTitle>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div>
-                <Label>Question</Label>
-                <Input value={formData.question} onChange={(e) => setFormData({ ...formData, question: e.target.value })} required />
+          <DialogContent className="bg-white text-gray-900 border-0 shadow-2xl rounded-3xl overflow-hidden p-0 max-w-lg">
+            <div className="bg-green-600 p-6 text-white">
+              <DialogHeader>
+                <DialogTitle className="text-2xl font-bold">{editingFaq ? "Edit FAQ" : "Add FAQ"}</DialogTitle>
+              </DialogHeader>
+            </div>
+            <form onSubmit={handleSubmit} className="p-8 space-y-5">
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-gray-700">Question</Label>
+                <Input 
+                  className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                  value={formData.question} 
+                  onChange={(e) => setFormData({ ...formData, question: e.target.value })} 
+                  required 
+                />
               </div>
-              <div>
-                <Label>Answer</Label>
-                <Textarea value={formData.answer} onChange={(e) => setFormData({ ...formData, answer: e.target.value })} rows={4} required />
+              <div className="space-y-2">
+                <Label className="text-sm font-bold text-gray-700">Answer</Label>
+                <Textarea 
+                  className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl min-h-[100px]"
+                  value={formData.answer} 
+                  onChange={(e) => setFormData({ ...formData, answer: e.target.value })} 
+                  rows={4} 
+                  required 
+                />
               </div>
               <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label>Category</Label>
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Category</Label>
                   <Select value={formData.category} onValueChange={(v) => setFormData({ ...formData, category: v })}>
-                    <SelectTrigger><SelectValue /></SelectTrigger>
-                    <SelectContent>
+                    <SelectTrigger className="bg-gray-50 border-gray-200 rounded-xl h-12">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent className="bg-white border-gray-200">
                       {["General", "Products", "Delivery", "Subscription", "Payment", "Support"].map(cat => (
                         <SelectItem key={cat} value={cat}>{cat}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <Label>Display Order</Label>
-                  <Input type="number" value={formData.displayOrder} onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })} />
+                <div className="space-y-2">
+                  <Label className="text-sm font-bold text-gray-700">Display Order</Label>
+                  <Input 
+                    type="number" 
+                    className="bg-gray-50 border-gray-200 focus:bg-white focus:border-green-500 transition-all rounded-xl h-12"
+                    value={formData.displayOrder} 
+                    onChange={(e) => setFormData({ ...formData, displayOrder: parseInt(e.target.value) || 0 })} 
+                  />
                 </div>
               </div>
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl">
                 <Switch checked={formData.isActive} onCheckedChange={(c) => setFormData({ ...formData, isActive: c })} />
-                <Label>Active</Label>
+                <Label className="font-bold text-gray-700 cursor-pointer">Active</Label>
               </div>
-              <div className="flex justify-end gap-2">
-                <Button type="button" variant="outline" onClick={resetForm}>Cancel</Button>
-                <Button type="submit" className="bg-green-600 hover:bg-green-700">{editingFaq ? "Update" : "Create"}</Button>
+              <div className="flex justify-end gap-3 pt-4">
+                <Button type="button" variant="outline" onClick={resetForm} className="rounded-xl px-6 h-12">Cancel</Button>
+                <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white rounded-xl px-8 h-12 font-bold shadow-lg shadow-green-200 transition-all active:scale-95">
+                  {editingFaq ? "Update FAQ" : "Create FAQ"}
+                </Button>
               </div>
             </form>
           </DialogContent>
@@ -774,13 +976,42 @@ function FaqsSection() {
                   </div>
                   <div className="flex gap-1 ml-4">
                     <Button variant="ghost" size="sm" onClick={() => handleEdit(faq)}><Pencil className="w-4 h-4" /></Button>
-                    <Button variant="ghost" size="sm" className="text-red-600" onClick={() => confirm("Delete?") && deleteMutation.mutate(faq.id)}><Trash2 className="w-4 h-4" /></Button>
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      className="text-red-600" 
+                      onClick={() => {
+                        setItemToDelete(faq.id);
+                        setIsDeleteDialogOpen(true);
+                      }}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
                   </div>
                 </div>
               </div>
             ))}
           </div>
         )}
+
+        <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+          <AlertDialogContent className="bg-white border-2 border-red-100 shadow-2xl rounded-3xl p-8">
+            <AlertDialogHeader className="items-center text-center space-y-4">
+              <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-2">
+                <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+              </div>
+              <AlertDialogTitle className="text-3xl font-black text-gray-900">Delete FAQ?</AlertDialogTitle>
+              <AlertDialogDescription className="text-gray-500 text-lg font-medium">This action cannot be undone.</AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter className="mt-8 gap-4 sm:justify-center">
+              <AlertDialogCancel className="h-14 px-8 rounded-2xl border-2 border-gray-100 hover:bg-gray-50 font-bold text-gray-600 transition-all">Cancel</AlertDialogCancel>
+              <AlertDialogAction 
+                onClick={() => { if (itemToDelete) { deleteMutation.mutate(itemToDelete); setItemToDelete(null); } }}
+                className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-lg transition-all"
+              >Confirm Delete</AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </CardContent>
     </Card>
   );
@@ -883,6 +1114,8 @@ function FooterSection() {
     address: "",
     copyrightText: "",
     isActive: true,
+    socialLinks: { facebook: "", instagram: "", twitter: "" },
+    footerLinks: [] as any[],
   });
   const [isInitialized, setIsInitialized] = useState(false);
   const queryClient = useQueryClient();
@@ -907,6 +1140,8 @@ function FooterSection() {
       address: settings.address || "",
       copyrightText: settings.copyrightText || "",
       isActive: settings.isActive ?? true,
+      socialLinks: (typeof settings.socialLinks === 'string' ? JSON.parse(settings.socialLinks) : settings.socialLinks) || { facebook: "", instagram: "", twitter: "" },
+      footerLinks: (typeof settings.footerLinks === 'string' ? JSON.parse(settings.footerLinks) : settings.footerLinks) || [],
     });
     setIsInitialized(true);
   }
@@ -928,9 +1163,63 @@ function FooterSection() {
     },
   });
 
+  const addSocial = () => {
+    setFormData({
+      ...formData,
+      socialLinks: [...formData.socialLinks, { platform: "facebook", url: "" }]
+    });
+  };
+
+  const updateSocial = (idx: number, field: string, value: string) => {
+    const newSocials = [...formData.socialLinks];
+    newSocials[idx] = { ...newSocials[idx], [field]: value };
+    setFormData({ ...formData, socialLinks: newSocials });
+  };
+
+  const removeSocial = (idx: number) => {
+    const newSocials = formData.socialLinks.filter((_, i) => i !== idx);
+    setFormData({ ...formData, socialLinks: newSocials });
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     updateMutation.mutate(formData);
+  };
+
+  const addSection = () => {
+    setFormData({
+      ...formData,
+      footerLinks: [...formData.footerLinks, { title: "New Section", links: [] }]
+    });
+  };
+
+  const updateSectionTitle = (idx: number, title: string) => {
+    const newLinks = [...formData.footerLinks];
+    newLinks[idx].title = title;
+    setFormData({ ...formData, footerLinks: newLinks });
+  };
+
+  const removeSection = (idx: number) => {
+    const newLinks = formData.footerLinks.filter((_, i) => i !== idx);
+    setFormData({ ...formData, footerLinks: newLinks });
+  };
+
+  const addLink = (sectionIdx: number) => {
+    const newLinks = [...formData.footerLinks];
+    newLinks[sectionIdx].links = [...newLinks[sectionIdx].links, { label: "New Link", url: "/" }];
+    setFormData({ ...formData, footerLinks: newLinks });
+  };
+
+  const updateLink = (sectionIdx: number, linkIdx: number, field: string, value: string) => {
+    const newLinks = [...formData.footerLinks];
+    newLinks[sectionIdx].links[linkIdx] = { ...newLinks[sectionIdx].links[linkIdx], [field]: value };
+    setFormData({ ...formData, footerLinks: newLinks });
+  };
+
+  const removeLink = (sectionIdx: number, linkIdx: number) => {
+    const newLinks = [...formData.footerLinks];
+    newLinks[sectionIdx].links = newLinks[sectionIdx].links.filter((_: any, i: number) => i !== linkIdx);
+    setFormData({ ...formData, footerLinks: newLinks });
   };
 
   if (isLoading) return <p className="text-gray-500 mt-4">Loading...</p>;
@@ -939,47 +1228,169 @@ function FooterSection() {
     <Card className="mt-4">
       <CardHeader>
         <CardTitle className="flex items-center gap-2"><Globe className="w-5 h-5" /> Footer Settings</CardTitle>
-        <CardDescription>Configure footer content and contact information</CardDescription>
+        <CardDescription>Configure footer content, social links, and section menus</CardDescription>
       </CardHeader>
       <CardContent>
-        <form onSubmit={handleSubmit} className="space-y-4 max-w-xl">
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Company Name</Label>
-              <Input value={formData.companyName} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} />
+        <form onSubmit={handleSubmit} className="space-y-8">
+          <div className="space-y-4 max-w-xl">
+            <h3 className="font-semibold text-lg border-b pb-2">Basic Information</h3>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Company Name</Label>
+                <Input value={formData.companyName} onChange={(e) => setFormData({ ...formData, companyName: e.target.value })} />
+              </div>
+              <div>
+                <Label>Tagline</Label>
+                <Input value={formData.tagline} onChange={(e) => setFormData({ ...formData, tagline: e.target.value })} />
+              </div>
             </div>
             <div>
-              <Label>Tagline</Label>
-              <Input value={formData.tagline} onChange={(e) => setFormData({ ...formData, tagline: e.target.value })} />
+              <Label>Description</Label>
+              <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2} />
             </div>
-          </div>
-          <div>
-            <Label>Description</Label>
-            <Textarea value={formData.description} onChange={(e) => setFormData({ ...formData, description: e.target.value })} rows={2} />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Phone</Label>
+                <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+              </div>
+              <div>
+                <Label>Email</Label>
+                <Input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+              </div>
+            </div>
             <div>
-              <Label>Phone</Label>
-              <Input value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+              <Label>Address</Label>
+              <Textarea value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} rows={2} />
             </div>
             <div>
-              <Label>Email</Label>
-              <Input value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+              <Label>Copyright Text</Label>
+              <Input value={formData.copyrightText} onChange={(e) => setFormData({ ...formData, copyrightText: e.target.value })} />
             </div>
           </div>
-          <div>
-            <Label>Address</Label>
-            <Textarea value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} rows={2} />
+
+          <div className="space-y-4 max-w-2xl">
+            <div className="flex items-center justify-between border-b pb-2">
+              <h3 className="font-semibold text-lg">Social Links</h3>
+              <Button type="button" variant="outline" size="sm" onClick={addSocial}>
+                <Plus className="w-4 h-4 mr-2" /> Add Social
+              </Button>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {Array.isArray(formData.socialLinks) && formData.socialLinks.map((social, idx) => (
+                <div key={idx} className="p-3 border rounded-lg bg-gray-50 space-y-3 relative">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="absolute top-1 right-1 h-7 w-7 text-red-500 p-0"
+                    onClick={() => removeSocial(idx)}
+                  >
+                    <Trash2 className="w-3 h-3" />
+                  </Button>
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-[10px] uppercase font-bold text-gray-500">Platform</Label>
+                      <select 
+                        className="w-full h-8 text-xs border rounded px-2 bg-white"
+                        value={social.platform}
+                        onChange={(e) => updateSocial(idx, 'platform', e.target.value)}
+                      >
+                        <option value="facebook">Facebook</option>
+                        <option value="instagram">Instagram</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="twitter">Twitter (X)</option>
+                        <option value="website">Website</option>
+                      </select>
+                    </div>
+                    <div>
+                      <Label className="text-[10px] uppercase font-bold text-gray-500">URL / Link</Label>
+                      <Input 
+                        placeholder="Link" 
+                        value={social.url} 
+                        onChange={(e) => updateSocial(idx, 'url', e.target.value)} 
+                        className="h-8 text-xs"
+                      />
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div>
-            <Label>Copyright Text</Label>
-            <Input value={formData.copyrightText} onChange={(e) => setFormData({ ...formData, copyrightText: e.target.value })} />
+
+          <div className="space-y-4">
+            <div className="flex items-center justify-between border-b pb-2">
+              <h3 className="font-semibold text-lg">Footer Link Sections</h3>
+              <Button type="button" variant="outline" size="sm" onClick={addSection}>
+                <Plus className="w-4 h-4 mr-2" /> Add Section
+              </Button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {formData.footerLinks.map((section, sIdx) => (
+                <div key={sIdx} className="p-4 border rounded-lg bg-gray-50 space-y-4 relative">
+                  <Button 
+                    type="button" 
+                    variant="ghost" 
+                    size="sm" 
+                    className="absolute top-2 right-2 text-red-500 hover:text-red-700"
+                    onClick={() => removeSection(sIdx)}
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                  
+                  <div>
+                    <Label className="text-xs uppercase font-bold text-gray-500">Section Title</Label>
+                    <Input 
+                      value={section.title} 
+                      onChange={(e) => updateSectionTitle(sIdx, e.target.value)} 
+                      className="bg-white font-bold"
+                    />
+                  </div>
+
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-xs font-bold text-gray-500">Links</Label>
+                      <Button type="button" variant="ghost" size="xs" className="h-6 px-2 text-green-600" onClick={() => addLink(sIdx)}>
+                        <Plus className="w-3 h-3 mr-1" /> Add Link
+                      </Button>
+                    </div>
+                    
+                    {section.links.map((link: any, lIdx: number) => (
+                      <div key={lIdx} className="bg-white p-2 border rounded shadow-sm space-y-2">
+                        <div className="flex items-center gap-2">
+                          <Input 
+                            placeholder="Label" 
+                            value={link.label} 
+                            onChange={(e) => updateLink(sIdx, lIdx, 'label', e.target.value)} 
+                            className="h-8 text-sm"
+                          />
+                          <Button type="button" variant="ghost" size="sm" className="h-8 w-8 text-gray-400 p-0" onClick={() => removeLink(sIdx, lIdx)}>
+                            <Trash2 className="w-3 h-3" />
+                          </Button>
+                        </div>
+                        <Input 
+                          placeholder="URL (e.g. /shop)" 
+                          value={link.url || link.href} 
+                          onChange={(e) => updateLink(sIdx, lIdx, 'url', e.target.value)} 
+                          className="h-8 text-xs font-mono"
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
-          <div className="flex items-center gap-2">
-            <Switch checked={formData.isActive} onCheckedChange={(c) => setFormData({ ...formData, isActive: c })} />
-            <Label>Show Footer</Label>
+
+          <div className="flex items-center gap-4 pt-4 border-t">
+            <div className="flex items-center gap-2">
+              <Switch checked={formData.isActive} onCheckedChange={(c) => setFormData({ ...formData, isActive: c })} />
+              <Label>Show Footer Section on Website</Label>
+            </div>
+            <Button type="submit" className="bg-green-600 hover:bg-green-700 ml-auto px-8" disabled={updateMutation.isPending}>
+              {updateMutation.isPending ? "Saving..." : "Save All Footer Changes"}
+            </Button>
           </div>
-          <Button type="submit" className="bg-green-600 hover:bg-green-700">Save Changes</Button>
         </form>
       </CardContent>
     </Card>

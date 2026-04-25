@@ -3,10 +3,12 @@ import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import MainPageLayout from "@/components/layout/main-page-layout";
-import { ShoppingCart } from "lucide-react";
+import { ShoppingCart, ShoppingBag, Package, Calendar, Phone, Star, CreditCard } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 interface User {
   id?: string;
@@ -91,25 +93,15 @@ function FeaturedProductsGrid() {
 
 export default function HomePage() {
   const { user, isLoading } = useAuth() as { user?: User; isLoading: boolean };
+  const { settings } = useSiteSettings();
   const { toast } = useToast();
   const [, setLocation] = useLocation();
   const [activeTab, setActiveTab] = useState<"overview" | "profile">("overview");
   const [editMode, setEditMode] = useState(false);
   const [formData, setFormData] = useState<User>(user || {});
 
-  // Fetch current billing info
-  const { data: billingData } = useQuery({
-    queryKey: ["billing-current"],
-    queryFn: async () => {
-      try {
-        const res = await fetch("/api/billing/current", { credentials: "include" });
-        return res.ok ? res.json() : null;
-      } catch {
-        return null;
-      }
-    },
-    refetchInterval: 60000, // Refetch every 60 seconds
-  });
+  // Fetch current user data is handled by useAuth
+  const queryClient = useQueryClient();
 
   const handleLogout = async () => {
     try {
@@ -175,111 +167,55 @@ export default function HomePage() {
 
   return (
     <MainPageLayout>
-      <div className="w-full bg-gradient-to-br from-green-50 to-blue-50">
-        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+      <div className="w-full bg-gradient-to-br from-green-50 to-blue-50 min-h-screen">
+        <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 mb-16">
           {/* Header */}
           <div className="text-center py-6">
-            <div className="text-6xl font-bold text-green-600 mb-2">🥛</div>
+            <div className="w-24 h-24 mx-auto bg-white rounded-3xl flex items-center justify-center mb-4 shadow-xl p-2 border-2 border-green-50">
+              <img 
+                src={settings.logoUrl || logoImage} 
+                alt={settings.brandName} 
+                className="w-full h-full object-contain"
+              />
+            </div>
             <h1 className="text-3xl font-bold text-gray-900">Welcome Home!</h1>
-            <p className="text-gray-500 mt-1">Divine Naturals Dairy Delivery</p>
+            <p className="text-gray-500 mt-1">{settings.brandName} Dairy Delivery</p>
           </div>
 
-          {/* Billing Alert */}
-          {billingData && billingData.status === "PENDING" && (
-            <div
-              style={{
-                background: "linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)",
-                border: "2px solid #fcd34d",
-                borderRadius: "12px",
-                padding: "16px",
-                marginBottom: "20px",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "space-between",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
-              }}
-            >
-              <div>
-                <p style={{ fontSize: "14px", fontWeight: "600", color: "#ca8a04", margin: "0 0 4px 0" }}>
-                  ⚠️ Bill Due Soon
-                </p>
-                <p style={{ fontSize: "13px", color: "#92400e", margin: 0 }}>
-                  You have a pending bill of ₹{billingData.amount?.toLocaleString()} due by {new Date(billingData.dueDate).toLocaleDateString()}
-                </p>
-              </div>
-              <button
-                onClick={() => setLocation("/billing")}
-                style={{
-                  background: "#ca8a04",
-                  color: "white",
-                  border: "none",
-                  padding: "8px 16px",
-                  borderRadius: "6px",
-                  fontSize: "12px",
-                  fontWeight: "600",
-                  cursor: "pointer",
-                  whiteSpace: "nowrap",
-                }}
-              >
-                Pay Now →
-              </button>
-            </div>
-          )}
-
-          {/* Billing Paid Alert */}
-          {billingData && billingData.status === "PAID" && (
-            <div
-              style={{
-                background: "linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)",
-                border: "2px solid #86efac",
-                borderRadius: "12px",
-                padding: "16px",
-                marginBottom: "20px",
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-              }}
-            >
-              <span style={{ fontSize: "18px" }}>✅</span>
-              <p style={{ fontSize: "13px", color: "#15803d", margin: 0, fontWeight: "500" }}>
-                Your {billingData.month} bill is paid! Thank you for your payment.
-              </p>
-            </div>
-          )}
-
           {/* User Profile Card */}
-          <div className="bg-white rounded-2xl shadow-lg p-6 mb-6">
-            <div className="flex items-center gap-4 mb-6">
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 mb-6 overflow-hidden">
+            <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-6 text-center sm:text-left">
               {user?.profileImageUrl ? (
                 <img
                   src={user.profileImageUrl}
                   alt={user.firstName}
-                  className="w-16 h-16 rounded-full object-cover border-2 border-green-600"
+                  className="w-16 h-16 rounded-full object-cover border-2 border-green-600 shrink-0"
                 />
               ) : (
-                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-blue-400 flex items-center justify-center text-white text-2xl font-bold">
+                <div className="w-16 h-16 rounded-full bg-gradient-to-br from-green-400 to-blue-400 flex items-center justify-center text-white text-2xl font-bold shrink-0">
                   {user?.firstName?.charAt(0) || "👤"}
                 </div>
               )}
-              <div className="flex-1">
-                <h2 className="text-xl font-bold text-gray-900">
+              <div className="flex-1 min-w-0">
+                <h2 className="text-xl font-bold text-gray-900 truncate">
                   {user?.firstName} {user?.lastName}
                 </h2>
-                <p className="text-gray-600 text-sm">{user?.email}</p>
+                <p className="text-gray-600 text-sm truncate">{user?.email}</p>
               </div>
               <Button
                 onClick={handleLogout}
-                className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded"
+                variant="destructive"
+                className="w-full sm:w-auto px-6 py-2 rounded text-sm font-bold"
               >
                 Logout
               </Button>
             </div>
 
-            {/* Tabs */}
-            <div className="border-b border-gray-200 mb-6 flex gap-4">
+            {/* Tabs - Scrollable on mobile */}
+            <div className="border-b border-gray-200 mb-6 flex overflow-x-auto no-scrollbar gap-2 sm:gap-4 whitespace-nowrap -mx-4 px-4 sm:mx-0 sm:px-0">
               <button
                 onClick={() => setActiveTab("overview")}
-                className={`px-4 py-2 font-bold ${
+                className={`px-3 sm:px-4 py-2 font-bold text-sm sm:text-base transition-all ${
                   activeTab === "overview"
                     ? "text-green-600 border-b-2 border-green-600"
                     : "text-gray-600"
@@ -289,7 +225,7 @@ export default function HomePage() {
               </button>
               <button
                 onClick={() => setActiveTab("profile")}
-                className={`px-4 py-2 font-bold ${
+                className={`px-3 sm:px-4 py-2 font-bold text-sm sm:text-base transition-all ${
                   activeTab === "profile"
                     ? "text-green-600 border-b-2 border-green-600"
                     : "text-gray-600"
@@ -299,9 +235,10 @@ export default function HomePage() {
               </button>
               <button
                 onClick={() => setLocation("/billing")}
-                className="px-4 py-2 font-bold text-blue-600 hover:text-blue-700 border-b-2 border-transparent hover:border-blue-300"
+                className="px-3 sm:px-4 py-2 font-bold text-sm sm:text-base text-blue-600 hover:text-blue-700 border-b-2 border-transparent hover:border-blue-300 flex items-center gap-2"
               >
-                💳 Billing
+                <CreditCard className="w-4 h-4" />
+                Billing
               </button>
             </div>
 
@@ -452,52 +389,58 @@ export default function HomePage() {
             )}
           </div>
 
-          {/* Featured Products Section */}
-          <div className="mb-8">
-            <h2 className="text-2xl md:text-3xl font-bold text-gray-900 mb-6">Our Popular Products</h2>
-            <FeaturedProductsGrid />
-          </div>
+
 
           {/* Features Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
             <button
               onClick={() => setLocation("/shop")}
-              className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition text-left"
+              className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all text-left group border border-gray-100"
             >
-              <div className="text-3xl mb-2">🛍️</div>
+              <div className="mb-4 p-3 bg-green-50 rounded-xl w-fit group-hover:bg-green-100 transition-colors">
+                <ShoppingBag className="w-8 h-8 text-green-600" />
+              </div>
               <h3 className="font-bold text-lg text-gray-900">Shop Products</h3>
               <p className="text-gray-600 text-sm mt-1">Browse and order dairy products</p>
             </button>
 
             <button
               onClick={() => setLocation("/cart")}
-              className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition text-left"
+              className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all text-left group border border-gray-100"
             >
-              <div className="text-3xl mb-2">🛒</div>
+              <div className="mb-4 p-3 bg-blue-50 rounded-xl w-fit group-hover:bg-blue-100 transition-colors">
+                <ShoppingCart className="w-8 h-8 text-blue-600" />
+              </div>
               <h3 className="font-bold text-lg text-gray-900">Your Cart</h3>
               <p className="text-gray-600 text-sm mt-1">View and manage your shopping cart</p>
             </button>
 
             <button
               onClick={() => setLocation("/orders")}
-              className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition text-left"
+              className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all text-left group border border-gray-100"
             >
-              <div className="text-3xl mb-2">📦</div>
+              <div className="mb-4 p-3 bg-purple-50 rounded-xl w-fit group-hover:bg-purple-100 transition-colors">
+                <Package className="w-8 h-8 text-purple-600" />
+              </div>
               <h3 className="font-bold text-lg text-gray-900">My Orders</h3>
               <p className="text-gray-600 text-sm mt-1">View your order history</p>
             </button>
 
             <button
               onClick={() => setLocation("/subscription")}
-              className="bg-white rounded-lg shadow p-6 hover:shadow-lg transition text-left"
+              className="bg-white rounded-2xl shadow-sm p-6 hover:shadow-md transition-all text-left group border border-gray-100"
             >
-              <div className="text-3xl mb-2">🥛</div>
+              <div className="mb-4 p-3 bg-orange-50 rounded-xl w-fit group-hover:bg-orange-100 transition-colors">
+                <Calendar className="w-8 h-8 text-orange-600" />
+              </div>
               <h3 className="font-bold text-lg text-gray-900">Milk Subscription</h3>
               <p className="text-gray-600 text-sm mt-1">Daily milk delivery to your door</p>
             </button>
 
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="text-3xl mb-2">📞</div>
+            <div className="bg-white rounded-2xl shadow-sm p-6 group border border-gray-100">
+              <div className="mb-4 p-3 bg-red-50 rounded-xl w-fit group-hover:bg-red-100 transition-colors">
+                <Phone className="w-8 h-8 text-red-600" />
+              </div>
               <h3 className="font-bold text-lg text-gray-900">Support</h3>
               <p className="text-gray-600 text-sm mt-1">Call us at 1-800-DAIRY</p>
             </div>

@@ -4,6 +4,17 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/layout/admin-layout";
+import { AlertTriangle } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function SubscriptionsAdmin() {
   const [statusFilter, setStatusFilter] = useState<string>("");
@@ -15,6 +26,8 @@ export default function SubscriptionsAdmin() {
     quantity: "",
     frequency: "daily",
   });
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
@@ -402,9 +415,8 @@ export default function SubscriptionsAdmin() {
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm(`Delete subscription #${sub.id}?`)) {
-                            deleteSubscriptionMutation.mutate(sub.id);
-                          }
+                          setItemToDelete(sub.id);
+                          setIsDeleteDialogOpen(true);
                         }}
                         style={{
                           padding: "0.25rem 0.75rem",
@@ -427,6 +439,25 @@ export default function SubscriptionsAdmin() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white border-2 border-red-100 shadow-2xl rounded-3xl p-8">
+          <AlertDialogHeader className="items-center text-center space-y-4">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-2">
+              <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+            </div>
+            <AlertDialogTitle className="text-3xl font-black text-gray-900">Delete Subscription?</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-500 text-lg font-medium">This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 gap-4 sm:justify-center">
+            <AlertDialogCancel className="h-14 px-8 rounded-2xl border-2 border-gray-100 hover:bg-gray-50 font-bold text-gray-600 transition-all">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => { if (itemToDelete) { deleteSubscriptionMutation.mutate(itemToDelete); setItemToDelete(null); } }}
+              className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-lg transition-all"
+            >Confirm Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

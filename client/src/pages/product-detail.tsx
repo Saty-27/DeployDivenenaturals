@@ -4,6 +4,8 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import MainPageLayout from "@/components/layout/main-page-layout";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 interface Product {
   id: number;
@@ -19,6 +21,7 @@ export default function ProductDetail() {
   const [, params] = useRoute("/product/:id");
   const productId = params?.id;
   const [, setLocation] = useLocation();
+  const { settings } = useSiteSettings();
   const { toast } = useToast();
   const [quantity, setQuantity] = useState(1);
   const queryClient = useQueryClient();
@@ -119,7 +122,13 @@ export default function ProductDetail() {
       <MainPageLayout>
         <div className="flex items-center justify-center min-h-96">
           <div className="text-center">
-            <div className="text-5xl mb-4">🥛</div>
+            <div className="w-20 h-20 mx-auto bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg p-2 border border-green-50">
+              <img 
+                src={settings.logoUrl || logoImage} 
+                alt={settings.brandName} 
+                className="w-full h-full object-contain"
+              />
+            </div>
             <p className="text-gray-600">Loading product...</p>
           </div>
         </div>
@@ -166,7 +175,13 @@ export default function ProductDetail() {
               />
             ) : (
               <div className="text-center">
-                <div className="text-8xl mb-4">🥛</div>
+                <div className="w-24 h-24 mx-auto bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg p-2 border border-green-50 opacity-50">
+                  <img 
+                    src={settings.logoUrl || logoImage} 
+                    alt={settings.brandName} 
+                    className="w-full h-full object-contain grayscale"
+                  />
+                </div>
                 <p className="text-gray-600">No image available</p>
               </div>
             )}

@@ -4,6 +4,8 @@ import { checkRole, requireCustomer, requireVendor, requireDelivery, requireAdmi
 import { insertProductSchema, insertOrderSchema, insertMilkSubscriptionSchema, products } from '@shared/schema';
 import { db } from '../db';
 import { eq } from 'drizzle-orm';
+import path from 'path';
+import fs from 'fs';
 
 const router = Router();
 
@@ -135,14 +137,63 @@ router.get('/auth/user', async (req: any, res) => {
   }
 });
 
-// GET /api/products - Retrieves the full products catalog
-router.get('/products', async (req, res) => {
+// PUT /api/user/profile - Updates the authenticated user's profile
+router.put('/user/profile', async (req: any, res) => {
   try {
-    const products = await storage.getProducts();
-    res.json(products);
+    const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
+    
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const { firstName, lastName, email, phone, address, gender, dob } = req.body;
+    
+    const updatedUser = await storage.updateUser(userId, {
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      gender,
+      dob: dob ? new Date(dob) : undefined
+    });
+
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser.id,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        address: updatedUser.address
+      }
+    });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ message: "Failed to update profile" });
+  }
+});
+
+// GET /api/products - Retrieves the full products catalog
+router.get('/products', async (_req, res) => {
+  try {
+    const allProducts = await storage.getProducts();
+    res.json(allProducts);
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).json({ message: "Failed to fetch products" });
+  }
+});
+
+router.get('/site-settings', async (_req, res) => {
+  try {
+    const settings = await storage.getSiteSettings();
+    res.json(settings || { brandName: "Divine Naturals" });
+  } catch (error) {
+    console.error("Error fetching site settings:", error);
+    res.status(500).json({ message: "Failed to fetch site settings" });
   }
 });
 
@@ -261,7 +312,8 @@ router.post('/orders', requireCustomer, async (req: any, res) => {
 
     const order = await storage.createOrder(orderData);
 
-    // Create order items from cart and reduce stock
+    // Note: Stock reduction now happens when order status is updated to DELIVERED
+    // to avoid double counting and handle cancellations properly.
     for (const item of cartItems) {
       await storage.createOrderItem({
         orderId: order.id,
@@ -270,25 +322,6 @@ router.post('/orders', requireCustomer, async (req: any, res) => {
         price: item.price,
         totalPrice: (parseFloat(item.price) * item.quantity).toFixed(2)
       });
-
-      // STAGE 3: Reduce product stock after order
-      const product = await db.select().from(products).where(eq(products.id, item.productId));
-      if (product.length > 0) {
-        const newStock = Math.max(0, (product[0].stock || 0) - item.quantity);
-        await storage.updateProduct(item.productId, { stock: newStock });
-        
-        // Record stock movement for audit trail
-        await storage.recordStockMovement({
-          productId: item.productId,
-          type: 'OUT',
-          reason: 'ORDER_PLACED',
-          quantity: item.quantity,
-          previousStock: product[0].stock || 0,
-          newStock,
-          adminId: null,
-          notes: `Order #${order.id} placed`
-        });
-      }
     }
 
     // Clear cart
@@ -413,7 +446,7 @@ router.put('/personal-details', requireCustomer, async (req: any, res) => {
 // ============================================================================
 
 // GET /api/vendors/dashboard - Calculates and returns vendor metrics
-router.get('/vendors/dashboard', requireVendor, async (req: any, res) => {
+router.get(['/vendors/dashboard', '/vendor/dashboard', '/vendor/me/dashboard'], requireVendor, async (req: any, res) => {
   try {
     const userId = req.user.claims.sub;
     
@@ -446,7 +479,7 @@ router.get('/vendors/dashboard', requireVendor, async (req: any, res) => {
 });
 
 // POST /api/vendors/inward - Logs milk/product received
-router.post('/vendors/inward', requireVendor, async (req: any, res) => {
+router.post(['/vendors/inward', '/vendor/inward'], requireVendor, async (req: any, res) => {
   try {
     const userId = req.user.claims.sub;
     const { litersArrived, litersDelivered, litersPending, driverInfo } = req.body;
@@ -471,6 +504,11 @@ router.post('/vendors/inward', requireVendor, async (req: any, res) => {
       sentToAdmin: true,
       status: "PENDING"
     });
+
+    // Update vendor requirement and circulated liters
+    if (litersDelivered > 0) {
+      await storage.updateVendorRequirement(vendor.id, litersDelivered);
+    }
 
     res.json({ success: true, inwardEntry });
   } catch (error) {
@@ -741,6 +779,101 @@ router.delete('/admin/categories/:id', requireAdminAccess, async (req, res) => {
 // ADMIN PRODUCT MANAGEMENT
 // ============================================================================
 
+// POST /api/admin/generate-ai-image - Generate product image using AI
+router.post('/admin/generate-ai-image', requireAdminAccess, async (req: any, res) => {
+  try {
+    const { prompt, productName } = req.body;
+    
+    if (!prompt) {
+      return res.status(400).json({ message: "Prompt is required for generation" });
+    }
+
+    console.log(`AI Image generation requested for: ${productName}`);
+    console.log(`Prompt: ${prompt}`);
+
+    // Since we don't have a direct AI API key in this environment, 
+    // we return a high-quality relevant placeholder based on the product name.
+    // In a real production environment, this would call OpenAI DALL-E or similar.
+    
+    const fileName = `ai_${Date.now()}_${productName.toLowerCase().replace(/\s+/g, '_')}.png`;
+    const publicPath = `/images/products/${fileName}`;
+    
+    // For demo purposes, we'll return a premium stock-style placeholder
+    // In the real world, the AI would generate and save the file here.
+    res.json({ 
+      success: true, 
+      url: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=800", // High-quality milk placeholder
+      message: "AI image generated successfully (Demo Mode)" 
+    });
+  } catch (error) {
+    console.error("Error generating AI image:", error);
+    res.status(500).json({ message: "AI generation failed" });
+  }
+});
+
+// POST /api/admin/upload-product-image - Upload product image
+router.post('/admin/upload-product-image', requireAdminAccess, async (req: any, res) => {
+  try {
+    console.log("Upload request received");
+    if (!req.files || !req.files.image) {
+      console.log("No files in request:", req.files);
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    const image = req.files.image;
+    console.log("Received image:", image.name, "Size:", image.size);
+    
+    const sanitizedName = image.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const fileName = `${Date.now()}_${sanitizedName}`;
+    const uploadPath = path.join(process.cwd(), 'public', 'products', fileName);
+    console.log("Uploading to:", uploadPath);
+
+    // Ensure directory exists
+    const dir = path.dirname(uploadPath);
+    if (!fs.existsSync(dir)) {
+      console.log("Creating directory:", dir);
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    await image.mv(uploadPath);
+    console.log("File moved successfully");
+    
+    const imageUrl = `/products/${fileName}`;
+    res.json({ url: imageUrl });
+  } catch (error) {
+    console.error("Error uploading product image:", error);
+    res.status(500).json({ message: "Failed to upload image" });
+  }
+});
+
+// POST /api/admin/upload-banner-image - Upload banner image
+router.post('/admin/upload-banner-image', requireAdminAccess, async (req: any, res) => {
+  try {
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+
+    const image = req.files.image;
+    const sanitizedName = image.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+    const fileName = `${Date.now()}_banner_${sanitizedName}`;
+    const uploadPath = path.join(process.cwd(), 'public', 'banners', fileName);
+
+    // Ensure directory exists
+    const dir = path.dirname(uploadPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+
+    await image.mv(uploadPath);
+    
+    const imageUrl = `/banners/${fileName}`;
+    res.json({ url: imageUrl });
+  } catch (error) {
+    console.error("Error uploading banner image:", error);
+    res.status(500).json({ message: "Failed to upload image" });
+  }
+});
+
 // POST /api/admin/products - Add new product
 router.post('/admin/products', requireAdminAccess, async (req, res) => {
   try {
@@ -918,6 +1051,21 @@ router.get('/admin/vendors', requireAdmin, async (req, res) => {
 });
 
 // GET /api/admin/stats - Get admin dashboard stats
+router.post('/admin/cms/privacy-policy', requireAdminAccess, async (req, res) => {
+  const updated = await storage.updatePrivacyPolicySettings(req.body);
+  res.json(updated);
+});
+
+router.get('/admin/site-settings', requireAdminAccess, async (_req, res) => {
+  const settings = await storage.getSiteSettings();
+  res.json(settings || { brandName: "Divine Naturals" });
+});
+
+router.post('/admin/site-settings', requireAdminAccess, async (req, res) => {
+  const updated = await storage.updateSiteSettings(req.body);
+  res.json(updated);
+});
+
 router.get('/admin/stats', requireAdmin, async (req, res) => {
   try {
     const stats = await storage.getAdminStats();

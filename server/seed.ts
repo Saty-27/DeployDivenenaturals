@@ -1,275 +1,321 @@
 import { db } from "./db";
-import { users, vendors, deliveryPartners, products, milkSubscriptions, aboutUsSettings, contactSettings, termsOfServiceSettings, privacyPolicySettings } from "@shared/schema";
+import { 
+  users, 
+  products, 
+  deliveryPartners,
+  banners, 
+  ethosCards, 
+  statsCounters, 
+  faqs, 
+  newsletterSettings, 
+  footerSettings,
+  aboutUsSettings,
+  contactSettings
+} from "../shared/schema";
 import { eq } from "drizzle-orm";
-import * as bcryptjs from "bcryptjs";
+import bcrypt from "bcryptjs";
+import { nanoid } from "nanoid";
 
 export async function seedDatabase() {
   try {
-    // Check if data already exists
-    const existingUsers = await db.select().from(users).limit(1);
+    console.log("Seeding database...");
+
+    // 1. Create Admin User
+    const adminEmail = "md@divinenaturals.in";
+    const existingUsers = await db.select().from(users).where(eq(users.email, adminEmail));
+    
     if (existingUsers.length > 0) {
-      console.log("Database already seeded, skipping...");
-      return;
-    }
-
-    console.log("Seeding database with mock data...");
-
-    // Hash password for admin users
-    const salt = await bcryptjs.genSalt(10);
-    const adminPasswordHash = await bcryptjs.hash("admin123", salt);
-    const customerPasswordHash = await bcryptjs.hash("customer123", salt);
-
-    // Create mock users for each role (2 per role = 8 total)
-    const mockUsers = [
-      // Customers
-      { id: "user-customer-1", email: "customer1@divine.com", firstName: "Priya", lastName: "Patel", role: "customer", phone: "+91-9876543210", walletBalance: "500.00", passwordHash: customerPasswordHash },
-      { id: "user-customer-2", email: "customer2@divine.com", firstName: "Rahul", lastName: "Mehta", role: "customer", phone: "+91-9876543211", walletBalance: "300.00", passwordHash: customerPasswordHash },
+      console.log("Database already seeded. Updating CMS content only...");
+    } else {
+      const hashedPassword = await bcrypt.hash("DivineNaturals@2025", 10);
       
-      // Vendors
-      { id: "user-vendor-1", email: "vendor1@divine.com", firstName: "Rajesh", lastName: "Kumar", role: "vendor", phone: "+91-9876543212", walletBalance: "0", passwordHash: customerPasswordHash },
-      { id: "user-vendor-2", email: "vendor2@divine.com", firstName: "Amit", lastName: "Shah", role: "vendor", phone: "+91-9876543213", walletBalance: "0", passwordHash: customerPasswordHash },
-      
-      // Delivery Partners
-      { id: "user-delivery-1", email: "delivery1@divine.com", firstName: "Suresh", lastName: "Singh", role: "delivery", phone: "+91-9876543214", walletBalance: "0", passwordHash: customerPasswordHash },
-      { id: "user-delivery-2", email: "delivery2@divine.com", firstName: "Vijay", lastName: "Sharma", role: "delivery", phone: "+91-9876543215", walletBalance: "0", passwordHash: customerPasswordHash },
-      
-      // Admins - WITH PASSWORDS
-      { id: "user-admin-1", email: "admin1@divine.com", firstName: "Admin", lastName: "Super", role: "admin", phone: "+91-9876543216", walletBalance: "0", passwordHash: adminPasswordHash },
-      { id: "user-admin-2", email: "admin2@divine.com", firstName: "Admin", lastName: "Manager", role: "admin", phone: "+91-9876543217", walletBalance: "0", passwordHash: adminPasswordHash }
-    ];
+      // Admin
+      const [adminUser] = await db.insert(users).values({
+        id: nanoid(),
+        email: adminEmail,
+        passwordHash: hashedPassword,
+        role: "admin",
+        firstName: "Kauldeep",
+        lastName: "Rao",
+        phone: "1800-DIVINE"
+      }).returning();
 
-    // Insert users
-    for (const user of mockUsers) {
-      await db.insert(users).values(user);
-    }
-    console.log("✓ Created 8 mock users (2 per role)");
+      // Customer
+      const [customerUser] = await db.insert(users).values({
+        id: nanoid(),
+        email: "customer@example.com",
+        passwordHash: hashedPassword,
+        role: "customer",
+        firstName: "Test",
+        lastName: "Customer",
+        phone: "9876543210",
+        address: "123 Green Lane, Mumbai"
+      }).returning();
 
-    // Create vendor profiles for vendor users
-    await db.insert(vendors).values([
-      {
-        userId: "user-vendor-1",
-        businessName: "Fresh Dairy Co.",
-        licenseNumber: "DL-2018-MH-001",
-        locationName: "Andheri West",
-        vendorType: "VENDOR",
-        dailyCapacity: 2000,
-        requirementToday: 500,
-        circulatedLiters: 425,
-        revenueToday: "21250.00",
-        weeklyEarnings: "148750.00",
-        isVerified: true
-      },
-      {
-        userId: "user-vendor-2",
-        businessName: "Divine Naturals Farm",
-        licenseNumber: "DL-2019-MH-002",
-        locationName: "Santa Cruz",
-        vendorType: "VENDOR",
-        dailyCapacity: 1500,
-        requirementToday: 400,
-        circulatedLiters: 380,
-        revenueToday: "19000.00",
-        weeklyEarnings: "133000.00",
-        isVerified: false
-      }
-    ]);
-    console.log("✓ Created 2 vendor profiles");
+      // Delivery Partner
+      const [partnerUser] = await db.insert(users).values({
+        id: nanoid(),
+        email: "delivery@example.com",
+        passwordHash: hashedPassword,
+        role: "delivery",
+        firstName: "Delivery",
+        lastName: "Hero"
+      }).returning();
 
-    // Create delivery partner profiles
-    await db.insert(deliveryPartners).values([
-      {
-        userId: "user-delivery-1",
-        fullName: "Suresh Singh",
-        phone: "+91-9876543214",
-        vehicleType: "Electric Scooter",
-        licenseNumber: "DL-123456",
-        zone: "Andheri-Santacruz",
-        isAvailable: true,
-        status: "active"
-      },
-      {
-        userId: "user-delivery-2",
-        fullName: "Vijay Sharma",
-        phone: "+91-9876543215",
+      await db.insert(deliveryPartners).values({
+        userId: partnerUser.id,
+        fullName: "Delivery Hero",
+        phone: "9123456789",
         vehicleType: "Bike",
-        licenseNumber: "DL-789012",
-        zone: "Borivali-Malad",
-        isAvailable: true,
         status: "active"
-      }
-    ]);
-    console.log("✓ Created 2 delivery partner profiles");
+      });
 
-    // Get the vendor IDs for products
-    const vendorList = await db.select().from(vendors);
+      console.log("✓ Inserted/Updated Base Data (Users)");
+    }
 
-    // Create mock products (at least 5)
-    const mockProducts = [
+    // ALWAYS update products to sync with latest seed data
+    const baseProducts = [
       {
-        name: "Full Cream Milk",
-        sku: "MILK-FC-001",
-        description: "Rich and creamy full cream milk",
-        category: "MILK",
-        type: "MILK",
-        price: "60.00",
-        unit: "L",
+        name: "Cold Pressed Coconut Oil",
+        description: "Pure, edible grade cold pressed coconut oil. Multi-purpose oil with a fresh coconut aroma and superior quality.",
+        price: "380",
+        unit: "500ml",
         stock: 100,
-        imageUrl: "/images/full_cream_milk_in_bottle.png",
-        isActive: true
+        category: "Oil",
+        type: "DAIRY",
+        imageUrl: "/products/coconut_oil.png",
+        sku: "OIL-COCO-001"
       },
       {
-        name: "Toned Milk",
-        sku: "MILK-TN-002",
-        description: "Healthy toned milk with reduced fat",
-        category: "MILK",
-        type: "MILK",
-        price: "50.00",
-        unit: "L",
+        name: "Cold Pressed Groundnut Oil",
+        description: "Pure and aromatic cold pressed groundnut oil. Extracted using traditional wooden ghani methods to retain nutrients and natural flavor.",
+        price: "280",
+        unit: "1L",
         stock: 150,
-        imageUrl: "/images/toned_milk_in_glass.png",
-        isActive: true
-      },
-      {
-        name: "Fresh Curd",
-        sku: "DAIRY-CURD-001",
-        description: "Thick and creamy fresh curd",
-        category: "DAIRY",
+        category: "Oil",
         type: "DAIRY",
-        price: "40.00",
-        unit: "500g",
-        stock: 80,
-        imageUrl: "/images/fresh_curd_in_ceramic_bowl.png",
-        isActive: true
-      },
-      {
-        name: "Paneer",
-        sku: "DAIRY-PANEER-001",
-        description: "Fresh cottage cheese",
-        category: "DAIRY",
-        type: "DAIRY",
-        price: "120.00",
-        unit: "250g",
-        stock: 50,
-        imageUrl: "/images/fresh_paneer_cheese_cubes.png",
-        isActive: true
+        imageUrl: "/products/groundnut_oil.png",
+        sku: "OIL-GNUT-001"
       },
       {
         name: "Buttermilk",
-        sku: "DAIRY-BM-001",
         description: "Refreshing traditional buttermilk",
-        category: "DAIRY",
-        type: "DAIRY",
-        price: "25.00",
+        price: "25",
         unit: "500ml",
-        stock: 120,
-        imageUrl: "/images/traditional_buttermilk_drink.png",
-        isActive: true
+        stock: 300,
+        category: "Beverages",
+        type: "DAIRY",
+        imageUrl: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800",
+        sku: "DAIRY-BMLK-001"
       }
     ];
 
-    for (const product of mockProducts) {
-      await db.insert(products).values(product);
+    for (const p of baseProducts) {
+      const [existing] = await db.select().from(products).where(eq(products.sku, p.sku));
+      if (existing) {
+        await db.update(products).set(p).where(eq(products.sku, p.sku));
+      } else {
+        await db.insert(products).values(p);
+      }
     }
-    console.log("✓ Created 5 products");
+    console.log("✓ Updated Products from seed data");
 
-    // Create mock subscriptions (3-5 active subscriptions)
-    await db.insert(milkSubscriptions).values([
+    // =========================================================================
+    // REFRESH CMS CONTENT
+    // =========================================================================
+    console.log("Refreshing CMS content with premium assets...");
+
+    // 1. Hero Banners
+    await db.delete(banners); 
+    await db.insert(banners).values([
       {
-        userId: "user-customer-1",
-        quantity: 2,
-        frequency: "daily",
-        deliveryTime: "6:00 AM",
-        startDate: "2025-01-01",
-        isActive: true,
-        pricePerL: "60.00",
-        status: "ACTIVE"
+        title: "Pure. Fresh. From Our Farm to Your Home.",
+        subtitle: "Experience the authentic taste of raw A2 Gir Cow milk, delivered directly to your doorstep every morning.",
+        imageUrl: "/banners/farm_milk_bottles_pastoral_scene.png",
+        imageUrlTablet: "/banners/farm_milk_bottles_pastoral_scene.png",
+        imageUrlMobile: "/banners/farm_milk_bottles_pastoral_scene.png",
+        ctaText: "Start Subscription",
+        ctaLink: "/shop",
+        displayOrder: 1,
+        isActive: true
       },
       {
-        userId: "user-customer-1",
-        quantity: 1,
-        frequency: "daily",
-        deliveryTime: "6:30 AM",
-        startDate: "2025-01-01",
-        isActive: true,
-        pricePerL: "50.00",
-        status: "ACTIVE"
+        title: "Unmatched Delivery. Consistent Quality.",
+        subtitle: "At Divine Naturals, we take pride in our 4:00 AM delivery promise. Freshness that doesn't wait.",
+        imageUrl: "/banners/fresh_milk_pour_splash_banner.png",
+        imageUrlTablet: "/banners/fresh_milk_pour_splash_banner.png",
+        imageUrlMobile: "/banners/fresh_milk_pour_splash_banner.png",
+        ctaText: "View Products",
+        ctaLink: "/shop",
+        displayOrder: 2,
+        isActive: true
       },
       {
-        userId: "user-customer-2",
-        quantity: 1,
-        frequency: "daily",
-        deliveryTime: "7:00 AM",
-        startDate: "2025-01-05",
-        isActive: true,
-        pricePerL: "60.00",
-        status: "ACTIVE"
+        title: "Traditional Goodness, Modern Safety.",
+        subtitle: "We use the traditional Bilona method for Ghee and state-of-the-art testing for every batch of milk.",
+        imageUrl: "/banners/premium_dairy_products_showcase.png",
+        imageUrlTablet: "/banners/premium_dairy_products_showcase.png",
+        imageUrlMobile: "/banners/premium_dairy_products_showcase.png",
+        ctaText: "Learn About Us",
+        ctaLink: "/about",
+        displayOrder: 3,
+        isActive: true
       }
     ]);
-    console.log("✓ Created 3 active subscriptions");
+    console.log("✓ Updated 3 Hero Banners");
 
-    // Seed CMS content
-    await db.insert(aboutUsSettings).values({
-      title: "About Divine Naturals",
-      subtitle: "Pure. Fresh. Daily.",
-      content: "Divine Naturals is a minimalist, eco-friendly dairy delivery platform dedicated to bringing fresh, pure dairy products directly to your doorstep. We believe in supporting local farmers and delivering only the highest quality dairy products.",
-      imageUrl: "/images/full_cream_milk_in_bottle.png",
-      mission: "To provide eco-friendly, fresh dairy products while supporting local farmers and promoting sustainable practices.",
-      vision: "To become the leading dairy delivery platform known for quality, reliability, and environmental consciousness.",
-      values: JSON.stringify([
-        { title: "Farm Fresh", description: "We source directly from trusted local farms" },
-        { title: "Pure & Natural", description: "No additives, preservatives, or artificial ingredients" },
-        { title: "Supporting Farmers", description: "Fair pricing that benefits our farming partners" },
-        { title: "Quality Assured", description: "Every product meets our strict quality standards" }
-      ]),
+    // 2. Ethos Cards
+    await db.delete(ethosCards);
+    await db.insert(ethosCards).values([
+      {
+        title: "Source Transparency",
+        description: "Every bottle of milk can be traced back to the specific farm it came from.",
+        icon: "Shield",
+        displayOrder: 1
+      },
+      {
+        title: "Zero Preservatives",
+        description: "Fresh milk with absolutely no additives, milk powder, or preservatives.",
+        icon: "Zap",
+        displayOrder: 2
+      },
+      {
+        title: "Eco-Friendly Loop",
+        description: "We use sterilized glass bottles and sustainable packaging to protect our planet.",
+        icon: "Recycle",
+        displayOrder: 3
+      },
+      {
+        title: "Smart Subscriptions",
+        description: "Pause, resume, and modify your daily dairy needs through our easy-to-use app.",
+        icon: "Smartphone",
+        displayOrder: 4
+      }
+    ]);
+    console.log("✓ Updated 4 Ethos Cards");
+
+    // 3. Stats Counters
+    await db.delete(statsCounters);
+    await db.insert(statsCounters).values([
+      { label: "Happy Households", value: 12000, suffix: "+", icon: "Users", displayOrder: 1 },
+      { label: "Liters of Milk Daily", value: 5500, suffix: "L", icon: "Milk", displayOrder: 2 },
+      { label: "Partner Farms", value: 45, suffix: "", icon: "Home", displayOrder: 3 },
+      { label: "On-Time Deliveries", value: 99, suffix: ".8%", icon: "Clock", displayOrder: 4 }
+    ]);
+    console.log("✓ Updated 4 Stats Counters");
+
+    // 4. FAQs
+    await db.delete(faqs);
+    await db.insert(faqs).values([
+      {
+        question: "How do subscriptions work?",
+        answer: "You can choose your products, set the quantity and frequency (daily, alternate days, or custom), and we'll deliver them automatically. You can pause or cancel anytime through the app.",
+        category: "Delivery",
+        order: 1,
+        displayOrder: 1
+      },
+      {
+        question: "Is there a minimum delivery amount?",
+        answer: "No, we don't believe in forcing our customers. You can subscribe to even a single half-liter packet or bottle of milk.",
+        category: "Delivery",
+        order: 2,
+        displayOrder: 2
+      },
+      {
+        question: "How is the milk tested for quality?",
+        answer: "We test across 50+ parameters including milk fat, protein, SNF, and the absence of water, urea, or any preservatives in our ISO-certified labs.",
+        category: "Quality",
+        order: 3,
+        displayOrder: 3
+      }
+    ]);
+    console.log("✓ Updated 3 FAQs");
+
+    // 5. Singletons
+    const [existingAbout] = await db.select().from(aboutUsSettings).limit(1);
+    const aboutData = {
+      title: "The Divine Naturals Story",
+      subtitle: "Returning to Root-Level Purity",
+      content: "Founded with a single mission to restore the vanishing purity of farm-fresh milk in our cities, Divine Naturals has grown into a community of conscious consumers and ethical farmers. We leverage technology to bridge the gap between rural farms and urban doorsteps, ensuring that what you drink is as fresh as it was at the farm.",
+      imageUrl: "/images/products/milk.png",
+      mission: "To deliver the purest dairy products while empowering traditional farming communities through technology and fair commerce.",
+      vision: "A world where fresh, organic, and ethically sourced nutrition is accessible to every household daily.",
+      values: [
+        { title: "Radical Transparency", description: "Trace every drop back to the farm" },
+        { title: "Empowering Farmers", description: "Eliminating middlemen and ensuring fair trade" },
+        { title: "Environmental Stewardship", description: "Minimizing waste through sustainable packaging" }
+      ],
       isActive: true
-    }).onConflictDoNothing();
+    };
+    if (existingAbout) {
+      await db.update(aboutUsSettings).set(aboutData).where(eq(aboutUsSettings.id, existingAbout.id));
+    } else {
+      await db.insert(aboutUsSettings).values(aboutData);
+    }
 
-    await db.insert(contactSettings).values({
-      title: "Contact Us",
-      subtitle: "We'd love to hear from you. Get in touch with us today!",
-      phone: "+91-9876543210",
-      email: "support@divinenaturals.com",
-      address: "123 Dairy Lane, Mumbai, Maharashtra 400001, India",
-      businessHours: "Mon-Sat: 6:00 AM - 10:00 PM, Sun: 7:00 AM - 8:00 PM",
-      socialLinks: JSON.stringify({
-        facebook: "https://facebook.com/divinenaturals",
-        instagram: "https://instagram.com/divinenaturals",
-        twitter: "https://twitter.com/divinenaturals"
-      }),
-      mapEmbedUrl: "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3769.823529!2d72.82!3d19.09!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3be7c9c5c5c5c5c5%3A0x5c5c5c5c5c5c5c5c!2sMumbai%2C%20Maharashtra!5e0!3m2!1sen!2sin!4v1234567890",
+    const [existingContact] = await db.select().from(contactSettings).limit(1);
+    const contactData = {
+      title: "Get in Touch",
+      subtitle: "Our customer success team is here for you 24/7.",
+      phone: "+91 91234 56789",
+      email: "hello@divinenaturals.com",
+      address: "Divine Naturals Hub, Sector 44, Gurgaon, Haryana 122003",
+      businessHours: "Delivery: 4:00 AM - 7:30 AM | Support: 9:00 AM - 9:00 PM",
+      socialLinks: [
+        { platform: "facebook", url: "https://facebook.com/divinenaturals" },
+        { platform: "instagram", url: "https://instagram.com/divinenaturals" },
+        { platform: "whatsapp", url: "https://wa.me/919123456789" }
+      ],
       isActive: true
-    }).onConflictDoNothing();
+    };
+    if (existingContact) {
+      await db.update(contactSettings).set(contactData).where(eq(contactSettings.id, existingContact.id));
+    } else {
+      await db.insert(contactSettings).values(contactData);
+    }
 
-    await db.insert(termsOfServiceSettings).values({
-      title: "Terms of Service",
-      content: "Please read these terms carefully. By using Divine Naturals, you agree to all terms and conditions listed below.",
-      sections: JSON.stringify([
-        { title: "Service Description", content: "Divine Naturals provides dairy product delivery services to customers in selected areas." },
-        { title: "User Responsibilities", content: "Users must provide accurate information and maintain account security." },
-        { title: "Delivery Terms", content: "Deliveries are made during specified time slots. Delays may occur due to unforeseen circumstances." },
-        { title: "Payment", content: "Payment is due upon delivery unless otherwise agreed. We accept cash, UPI, card, and net banking." },
-        { title: "Returns & Refunds", content: "Defective products may be returned within 24 hours of delivery for replacement or refund." },
-        { title: "Liability", content: "Divine Naturals is not liable for damages during delivery or mishandling by customers." }
-      ]),
+    const [existingNewsletter] = await db.select().from(newsletterSettings).limit(1);
+    const newsletterData = {
+      title: "Join the Freshness Revolution",
+      subtitle: "Get nutrition tips, farm stories, and exclusive offers delivered to your inbox.",
+      ctaText: "Subscribe",
+      placeholderText: "Enter your email address",
       isActive: true
-    }).onConflictDoNothing();
+    };
+    if (existingNewsletter) {
+      await db.update(newsletterSettings).set(newsletterData).where(eq(newsletterSettings.id, existingNewsletter.id));
+    } else {
+      await db.insert(newsletterSettings).values(newsletterData);
+    }
 
-    await db.insert(privacyPolicySettings).values({
-      title: "Privacy Policy",
-      content: "Your privacy is important to us. This policy explains how we collect, use, and protect your personal information.",
-      sections: JSON.stringify([
-        { title: "Data Collection", content: "We collect name, phone, email, and address information to provide delivery services." },
-        { title: "Data Usage", content: "Your data is used only for order processing, delivery, and customer support." },
-        { title: "Data Security", content: "We use industry-standard security measures to protect your personal information." },
-        { title: "Third-Party Sharing", content: "We do not share your data with third parties without your consent." },
-        { title: "Cookies", content: "We use cookies to improve your browsing experience and remember your preferences." },
-        { title: "Data Retention", content: "We retain your data for as long as necessary to provide services and comply with law." }
-      ]),
+    const [existingFooter] = await db.select().from(footerSettings).limit(1);
+    const footerData = {
+      companyName: "Divine Naturals Dairy Pvt Ltd",
+      tagline: "Pure. Fresh. Daily.",
+      description: "Dedicated to bringing the authentic taste and nutrition of the farm to the modern table through sustainable and ethical practices.",
+      phone: "+91 91234 56789",
+      email: "hello@divinenaturals.com",
+      address: "Sector 44, Gurgaon, Haryana 122003",
+      socialLinks: [
+        { platform: "facebook", url: "https://facebook.com/divinenaturals" },
+        { platform: "instagram", url: "https://instagram.com/divinenaturals" },
+        { platform: "whatsapp", url: "https://wa.me/919123456789" }
+      ],
+      footerLinks: [
+        { title: "Products", links: [{ label: "Milk", url: "/shop" }, { label: "Curd", url: "/shop" }, { label: "Ghee", url: "/shop" }] },
+        { title: "Company", links: [{ label: "About Us", url: "/about" }, { label: "Contact", url: "/contact" }, { label: "Privacy", url: "/privacy" }] }
+      ],
+      copyrightText: "© 2025 Divine Naturals. All rights reserved.",
       isActive: true
-    }).onConflictDoNothing();
+    };
+    if (existingFooter) {
+      await db.update(footerSettings).set(footerData).where(eq(footerSettings.id, existingFooter.id));
+    } else {
+      await db.insert(footerSettings).values(footerData);
+    }
 
-    console.log("✓ Created CMS content for About Us, Contact, Terms of Service, and Privacy Policy");
-    console.log("✅ Database seeding completed successfully!");
+    console.log("✓ Enriched CMS content");
+    console.log("✅ Database seeding/update completed successfully!");
   } catch (error) {
     console.error("Error seeding database:", error);
     throw error;

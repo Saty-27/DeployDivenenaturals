@@ -22,15 +22,25 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Plus, Pencil, Trash2, Image, Monitor, Tablet, Smartphone, GripVertical } from "lucide-react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Plus, Pencil, Trash2, Image, Monitor, Tablet, Smartphone, GripVertical, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/layout/admin-layout";
 
 interface Banner {
   id: number;
-  title: string;
+  title: string | null;
   subtitle: string | null;
-  imageUrl: string;
+  imageUrl: string | null;
   imageUrlTablet: string | null;
   imageUrlMobile: string | null;
   ctaText: string | null;
@@ -38,6 +48,7 @@ interface Banner {
   badgeText: string | null;
   displayOrder: number;
   isActive: boolean;
+  showOverlay: boolean;
   startDate: string | null;
   endDate: string | null;
   createdAt: string;
@@ -54,6 +65,7 @@ interface BannerFormData {
   badgeText: string;
   displayOrder: number;
   isActive: boolean;
+  showOverlay: boolean;
 }
 
 const defaultFormData: BannerFormData = {
@@ -67,10 +79,13 @@ const defaultFormData: BannerFormData = {
   badgeText: "",
   displayOrder: 0,
   isActive: true,
+  showOverlay: false,
 };
 
 export default function AdminBanners() {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [bannerToDelete, setBannerToDelete] = useState<number | null>(null);
   const [editingBanner, setEditingBanner] = useState<Banner | null>(null);
   const [formData, setFormData] = useState<BannerFormData>(defaultFormData);
   const [previewTab, setPreviewTab] = useState<"desktop" | "tablet" | "mobile">("desktop");
@@ -175,9 +190,9 @@ export default function AdminBanners() {
   const handleEdit = (banner: Banner) => {
     setEditingBanner(banner);
     setFormData({
-      title: banner.title,
+      title: banner.title || "",
       subtitle: banner.subtitle || "",
-      imageUrl: banner.imageUrl,
+      imageUrl: banner.imageUrl || "",
       imageUrlTablet: banner.imageUrlTablet || "",
       imageUrlMobile: banner.imageUrlMobile || "",
       ctaText: banner.ctaText || "",
@@ -185,6 +200,7 @@ export default function AdminBanners() {
       badgeText: banner.badgeText || "",
       displayOrder: banner.displayOrder,
       isActive: banner.isActive,
+      showOverlay: banner.showOverlay ?? true,
     });
     setIsDialogOpen(true);
   };
@@ -199,15 +215,20 @@ export default function AdminBanners() {
   };
 
   const availableDesktopImages = [
-    { url: "/banners/fresh_milk_pour_splash_banner.png", name: "Fresh Milk Pour" },
-    { url: "/banners/farm_milk_bottles_pastoral_scene.png", name: "Farm Pastoral" },
-    { url: "/banners/premium_dairy_products_showcase.png", name: "Premium Products" },
+    { url: "/images/banners/fresh_milk_pour_splash_banner.png", name: "Fresh Milk Pour" },
+    { url: "/images/banners/farm_milk_bottles_pastoral_scene.png", name: "Farm Pastoral" },
+    { url: "/images/banners/premium_dairy_products_showcase.png", name: "Premium Products" },
   ];
 
   const getPreviewImage = () => {
     if (previewTab === "mobile" && formData.imageUrlMobile) return formData.imageUrlMobile;
     if (previewTab === "tablet" && formData.imageUrlTablet) return formData.imageUrlTablet;
     return formData.imageUrl;
+  };
+
+  const confirmDelete = (id: number) => {
+    setBannerToDelete(id);
+    setIsDeleteDialogOpen(true);
   };
 
   return (
@@ -232,12 +253,11 @@ export default function AdminBanners() {
             <form onSubmit={handleSubmit} className="space-y-4 bg-white">
               <div className="grid grid-cols-2 gap-4">
                 <div className="col-span-2">
-                  <Label>Title *</Label>
+                  <Label>Title</Label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
                     placeholder="Enter banner title"
-                    required
                   />
                 </div>
                 
@@ -292,43 +312,141 @@ export default function AdminBanners() {
                     <div className={`space-y-2 p-3 rounded-lg border-2 transition-colors ${previewTab === "desktop" ? "border-green-500 bg-green-50" : "border-gray-200"}`}>
                       <div className="flex items-center gap-2">
                         <Monitor className="w-4 h-4 text-gray-600" />
-                        <Label className="text-sm font-medium">Desktop Image *</Label>
+                        <Label className="text-sm font-medium">Desktop Image</Label>
                       </div>
-                      <Input
-                        value={formData.imageUrl}
-                        onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
-                        placeholder="/banners/desktop.png"
-                        required
-                        className="text-xs"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={formData.imageUrl}
+                          onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                          placeholder="/banners/desktop.png"
+                          className="text-xs"
+                        />
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 500 * 1024) {
+                                toast({ title: "❌ File too large", description: "Image must be less than 500KB", variant: "destructive" });
+                                return;
+                              }
+                              const formDataUpload = new FormData();
+                              formDataUpload.append("image", file);
+                              try {
+                                toast({ title: "⏳ Uploading...", description: "Please wait" });
+                                const res = await fetch("/api/admin/upload-banner-image", {
+                                  method: "POST",
+                                  body: formDataUpload,
+                                });
+                                if (!res.ok) throw new Error("Upload failed");
+                                const data = await res.json();
+                                setFormData((prev) => ({ ...prev, imageUrl: data.url }));
+                                toast({ title: "✅ Uploaded!", description: "Image uploaded successfully" });
+                              } catch (err) {
+                                toast({ title: "❌ Upload failed", variant: "destructive" });
+                              }
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full z-10"
+                          />
+                          <Button type="button" size="sm" className="bg-blue-600 text-xs px-2 h-8">📁</Button>
+                        </div>
+                      </div>
                       <p className="text-[10px] text-gray-500">1920x700px recommended</p>
                     </div>
-
+ 
                     <div className={`space-y-2 p-3 rounded-lg border-2 transition-colors ${previewTab === "tablet" ? "border-green-500 bg-green-50" : "border-gray-200"}`}>
                       <div className="flex items-center gap-2">
                         <Tablet className="w-4 h-4 text-gray-600" />
                         <Label className="text-sm font-medium">Tablet Image</Label>
                       </div>
-                      <Input
-                        value={formData.imageUrlTablet}
-                        onChange={(e) => setFormData({ ...formData, imageUrlTablet: e.target.value })}
-                        placeholder="/banners/tablet.png"
-                        className="text-xs"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={formData.imageUrlTablet}
+                          onChange={(e) => setFormData({ ...formData, imageUrlTablet: e.target.value })}
+                          placeholder="/banners/tablet.png"
+                          className="text-xs"
+                        />
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 500 * 1024) {
+                                toast({ title: "❌ File too large", description: "Image must be less than 500KB", variant: "destructive" });
+                                return;
+                              }
+                              const formDataUpload = new FormData();
+                              formDataUpload.append("image", file);
+                              try {
+                                toast({ title: "⏳ Uploading...", description: "Please wait" });
+                                const res = await fetch("/api/admin/upload-banner-image", {
+                                  method: "POST",
+                                  body: formDataUpload,
+                                });
+                                if (!res.ok) throw new Error("Upload failed");
+                                const data = await res.json();
+                                setFormData((prev) => ({ ...prev, imageUrlTablet: data.url }));
+                                toast({ title: "✅ Uploaded!", description: "Image uploaded successfully" });
+                              } catch (err) {
+                                toast({ title: "❌ Upload failed", variant: "destructive" });
+                              }
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full z-10"
+                          />
+                          <Button type="button" size="sm" className="bg-blue-600 text-xs px-2 h-8">📁</Button>
+                        </div>
+                      </div>
                       <p className="text-[10px] text-gray-500">1024x600px recommended</p>
                     </div>
-
+ 
                     <div className={`space-y-2 p-3 rounded-lg border-2 transition-colors ${previewTab === "mobile" ? "border-green-500 bg-green-50" : "border-gray-200"}`}>
                       <div className="flex items-center gap-2">
                         <Smartphone className="w-4 h-4 text-gray-600" />
                         <Label className="text-sm font-medium">Mobile Image</Label>
                       </div>
-                      <Input
-                        value={formData.imageUrlMobile}
-                        onChange={(e) => setFormData({ ...formData, imageUrlMobile: e.target.value })}
-                        placeholder="/banners/mobile.png"
-                        className="text-xs"
-                      />
+                      <div className="flex gap-2">
+                        <Input
+                          value={formData.imageUrlMobile}
+                          onChange={(e) => setFormData({ ...formData, imageUrlMobile: e.target.value })}
+                          placeholder="/banners/mobile.png"
+                          className="text-xs"
+                        />
+                        <div className="relative">
+                          <input
+                            type="file"
+                            accept="image/*"
+                            onChange={async (e) => {
+                              const file = e.target.files?.[0];
+                              if (!file) return;
+                              if (file.size > 500 * 1024) {
+                                toast({ title: "❌ File too large", description: "Image must be less than 500KB", variant: "destructive" });
+                                return;
+                              }
+                              const formDataUpload = new FormData();
+                              formDataUpload.append("image", file);
+                              try {
+                                toast({ title: "⏳ Uploading...", description: "Please wait" });
+                                const res = await fetch("/api/admin/upload-banner-image", {
+                                  method: "POST",
+                                  body: formDataUpload,
+                                });
+                                if (!res.ok) throw new Error("Upload failed");
+                                const data = await res.json();
+                                setFormData((prev) => ({ ...prev, imageUrlMobile: data.url }));
+                                toast({ title: "✅ Uploaded!", description: "Image uploaded successfully" });
+                              } catch (err) {
+                                toast({ title: "❌ Upload failed", variant: "destructive" });
+                              }
+                            }}
+                            className="absolute inset-0 opacity-0 cursor-pointer w-full z-10"
+                          />
+                          <Button type="button" size="sm" className="bg-blue-600 text-xs px-2 h-8">📁</Button>
+                        </div>
+                      </div>
                       <p className="text-[10px] text-gray-500">640x400px recommended</p>
                     </div>
                   </div>
@@ -348,23 +466,60 @@ export default function AdminBanners() {
                   </div>
 
                   {getPreviewImage() && (
-                    <div className="rounded-lg overflow-hidden border bg-gray-100">
-                      <div className="bg-gray-200 px-3 py-1.5 text-xs text-gray-600 flex items-center gap-2">
-                        {previewTab === "desktop" && <Monitor className="w-3.5 h-3.5" />}
-                        {previewTab === "tablet" && <Tablet className="w-3.5 h-3.5" />}
-                        {previewTab === "mobile" && <Smartphone className="w-3.5 h-3.5" />}
-                        Preview: {previewTab.charAt(0).toUpperCase() + previewTab.slice(1)}
+                    <div className="relative rounded-2xl overflow-hidden border-2 border-green-100 shadow-inner bg-gray-900 group">
+                      <div className="absolute top-0 left-0 right-0 z-30 bg-black/40 backdrop-blur-md px-4 py-2 text-[10px] text-white flex items-center justify-between">
+                        <div className="flex items-center gap-2">
+                          {previewTab === "desktop" && <Monitor className="w-3 h-3" />}
+                          {previewTab === "tablet" && <Tablet className="w-3 h-3" />}
+                          {previewTab === "mobile" && <Smartphone className="w-3 h-3" />}
+                          <span className="font-bold tracking-widest uppercase">Live Preview: {previewTab}</span>
+                        </div>
                         {previewTab !== "desktop" && !getPreviewImage().includes(previewTab) && (
-                          <span className="text-amber-600 ml-2">(using desktop fallback)</span>
+                          <span className="text-orange-300 font-bold">Fallback Active</span>
                         )}
                       </div>
-                      <img 
-                        src={getPreviewImage()} 
-                        alt="Preview" 
-                        className={`w-full object-cover ${
-                          previewTab === "mobile" ? "h-32" : previewTab === "tablet" ? "h-36" : "h-40"
-                        }`}
-                      />
+                      
+                      {/* Actual Mock Banner Preview */}
+                      <div className="relative w-full aspect-video sm:aspect-[21/9] bg-black overflow-hidden">
+                        {/* Blurred Background Layer for seamless fitting in preview */}
+                        <img
+                          src={getPreviewImage()}
+                          className="absolute inset-0 w-full h-full object-cover blur-2xl opacity-40 scale-110"
+                          alt=""
+                        />
+                        
+                        <img 
+                          src={getPreviewImage()} 
+                          alt="Preview" 
+                          className="relative w-full h-full object-contain z-20"
+                        />
+                        {formData.showOverlay && (
+                          <div className="absolute inset-0 z-10">
+                            <div className="absolute inset-0 bg-gradient-to-r from-black/50 via-transparent to-transparent opacity-80" />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent opacity-60" />
+                          </div>
+                        )}
+                        
+                        {/* Overlay Content Preview */}
+                        <div className="absolute inset-0 z-20 flex items-center justify-start p-6 sm:p-10 text-left">
+                          <div className="max-w-[70%]">
+                            {formData.badgeText && (
+                              <span className="inline-block px-2 py-0.5 bg-green-500 text-white text-[8px] font-bold rounded-full mb-2 uppercase tracking-wider">
+                                {formData.badgeText}
+                              </span>
+                            )}
+                            <h2 className="text-lg sm:text-2xl font-black text-white leading-tight mb-2 drop-shadow-md">
+                              {formData.title || "Your Headline Here"}
+                            </h2>
+                            <p className="text-[10px] sm:text-sm text-white/90 line-clamp-2 mb-4 drop-shadow-sm">
+                              {formData.subtitle || "Your description text will appear here."}
+                            </p>
+                            <Button size="sm" className="h-7 text-[10px] px-4 bg-green-500 hover:bg-green-600 rounded-full font-bold shadow-lg">
+                              {formData.ctaText || "Shop Now"}
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
@@ -412,6 +567,14 @@ export default function AdminBanners() {
                     onCheckedChange={(checked) => setFormData({ ...formData, isActive: checked })}
                   />
                   <Label>Active</Label>
+                </div>
+
+                <div className="col-span-2 flex items-center gap-2">
+                  <Switch
+                    checked={formData.showOverlay}
+                    onCheckedChange={(checked) => setFormData({ ...formData, showOverlay: checked })}
+                  />
+                  <Label>Dark Overlay (For better text readability)</Label>
                 </div>
               </div>
 
@@ -552,12 +715,8 @@ export default function AdminBanners() {
                         <Button
                           variant="ghost"
                           size="sm"
-                          className="text-red-600 hover:text-red-700"
-                          onClick={() => {
-                            if (confirm("Are you sure you want to delete this banner?")) {
-                              deleteMutation.mutate(banner.id);
-                            }
-                          }}
+                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          onClick={() => confirmDelete(banner.id)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -570,6 +729,39 @@ export default function AdminBanners() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white border-2 border-red-100 shadow-2xl rounded-3xl p-8">
+          <AlertDialogHeader className="items-center text-center space-y-4">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-2">
+              <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+            </div>
+            <AlertDialogTitle className="text-3xl font-black text-gray-900">
+              Delete Banner?
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-500 text-lg font-medium max-w-xs mx-auto">
+              This action cannot be undone. This banner will be permanently removed from your website.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 gap-4 sm:justify-center">
+            <AlertDialogCancel className="h-14 px-8 rounded-2xl border-2 border-gray-100 hover:bg-gray-50 font-bold text-gray-600 transition-all">
+              Cancel
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => {
+                if (bannerToDelete) {
+                  deleteMutation.mutate(bannerToDelete);
+                  setBannerToDelete(null);
+                }
+              }}
+              className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-lg shadow-red-200 transition-all active:scale-95"
+            >
+              Confirm Delete
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
     </AdminLayout>
   );

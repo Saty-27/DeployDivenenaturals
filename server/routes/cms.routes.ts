@@ -2,31 +2,11 @@ import { Router } from "express";
 import { db } from "../db";
 import { aboutUsSettings, contactSettings, termsOfServiceSettings, privacyPolicySettings } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import { requireAdminAccess } from "../middleware/auth";
+import path from 'path';
+import fs from 'fs';
 
 const router = Router();
-
-// Middleware to check if user is admin
-const isAdmin = async (req: any, res: any, next: any) => {
-  try {
-    if (req.session?.isAdminLoggedIn === true) return next();
-    
-    const userId = req.session?.userId;
-    if (!userId) return res.status(401).json({ message: "Not authenticated" });
-    
-    if (req.session?.userRole === "admin") return next();
-    
-    const { users } = await import("@shared/schema");
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-    if (user?.role === "admin") {
-      req.session.userRole = "admin";
-      return next();
-    }
-    
-    return res.status(403).json({ message: "Admin access required" });
-  } catch (error) {
-    return res.status(500).json({ message: "Error checking permissions" });
-  }
-};
 
 // ============================================================================
 // ABOUT US
@@ -43,7 +23,7 @@ router.get("/about-us/public", async (req, res) => {
 });
 
 // Admin: Get About Us
-router.get("/about-us", isAdmin, async (req, res) => {
+router.get("/about-us", requireAdminAccess, async (req, res) => {
   try {
     const [data] = await db.select().from(aboutUsSettings);
     res.json(data || {});
@@ -53,15 +33,31 @@ router.get("/about-us", isAdmin, async (req, res) => {
 });
 
 // Admin: Update About Us
-router.put("/about-us", isAdmin, async (req, res) => {
+router.put("/about-us", requireAdminAccess, async (req, res) => {
   try {
-    const { title, subtitle, content, imageUrl, mission, vision, values, isActive } = req.body;
+    const { 
+      heroTitle, heroSubtitle, heroImageUrl, heroCtaText, heroCtaLink,
+      storyHeading, storyDescription, storyImageUrl,
+      valuesTitle, values,
+      processTitle, processSteps,
+      ctaHeading, ctaSubheading, ctaButtonText, ctaButtonLink,
+      isActive 
+    } = req.body;
+
     const [data] = await db.update(aboutUsSettings)
-      .set({ title, subtitle, content, imageUrl, mission, vision, values, isActive, updatedAt: new Date() })
+      .set({ 
+        heroTitle, heroSubtitle, heroImageUrl, heroCtaText, heroCtaLink,
+        storyHeading, storyDescription, storyImageUrl,
+        valuesTitle, values,
+        processTitle, processSteps,
+        ctaHeading, ctaSubheading, ctaButtonText, ctaButtonLink,
+        isActive, updatedAt: new Date() 
+      })
       .where(eq(aboutUsSettings.id, 1))
       .returning();
     res.json(data);
   } catch (error) {
+    console.error("Update About Us error:", error);
     res.status(500).json({ message: "Failed to update about us" });
   }
 });
@@ -81,7 +77,7 @@ router.get("/contact/public", async (req, res) => {
 });
 
 // Admin: Get Contact
-router.get("/contact", isAdmin, async (req, res) => {
+router.get("/contact", requireAdminAccess, async (req, res) => {
   try {
     const [data] = await db.select().from(contactSettings);
     res.json(data || {});
@@ -91,15 +87,22 @@ router.get("/contact", isAdmin, async (req, res) => {
 });
 
 // Admin: Update Contact
-router.put("/contact", isAdmin, async (req, res) => {
+router.put("/contact", requireAdminAccess, async (req, res) => {
   try {
-    const { title, subtitle, phone, email, address, businessHours, socialLinks, mapEmbedUrl, isActive } = req.body;
+    const { 
+      heroTitle, heroSubtitle, heroImageUrl, 
+      phone, email, address, businessHours, socialLinks, mapEmbedUrl, isActive 
+    } = req.body;
     const [data] = await db.update(contactSettings)
-      .set({ title, subtitle, phone, email, address, businessHours, socialLinks, mapEmbedUrl, isActive, updatedAt: new Date() })
+      .set({ 
+        heroTitle, heroSubtitle, heroImageUrl,
+        phone, email, address, businessHours, socialLinks, mapEmbedUrl, isActive, updatedAt: new Date() 
+      })
       .where(eq(contactSettings.id, 1))
       .returning();
     res.json(data);
   } catch (error) {
+    console.error("Update Contact error:", error);
     res.status(500).json({ message: "Failed to update contact info" });
   }
 });
@@ -119,7 +122,7 @@ router.get("/terms-of-service/public", async (req, res) => {
 });
 
 // Admin: Get Terms of Service
-router.get("/terms-of-service", isAdmin, async (req, res) => {
+router.get("/terms-of-service", requireAdminAccess, async (req, res) => {
   try {
     const [data] = await db.select().from(termsOfServiceSettings);
     res.json(data || {});
@@ -129,7 +132,7 @@ router.get("/terms-of-service", isAdmin, async (req, res) => {
 });
 
 // Admin: Update Terms of Service
-router.put("/terms-of-service", isAdmin, async (req, res) => {
+router.put("/terms-of-service", requireAdminAccess, async (req, res) => {
   try {
     const { title, content, sections, isActive } = req.body;
     const [data] = await db.update(termsOfServiceSettings)
@@ -157,7 +160,7 @@ router.get("/privacy-policy/public", async (req, res) => {
 });
 
 // Admin: Get Privacy Policy
-router.get("/privacy-policy", isAdmin, async (req, res) => {
+router.get("/privacy-policy", requireAdminAccess, async (req, res) => {
   try {
     const [data] = await db.select().from(privacyPolicySettings);
     res.json(data || {});
@@ -167,7 +170,7 @@ router.get("/privacy-policy", isAdmin, async (req, res) => {
 });
 
 // Admin: Update Privacy Policy
-router.put("/privacy-policy", isAdmin, async (req, res) => {
+router.put("/privacy-policy", requireAdminAccess, async (req, res) => {
   try {
     const { title, content, sections, isActive } = req.body;
     const [data] = await db.update(privacyPolicySettings)

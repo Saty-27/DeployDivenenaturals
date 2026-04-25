@@ -1,5 +1,7 @@
 import type { Express } from "express";
 import { createServer, type Server } from "http";
+import path from "path";
+import fs from "fs";
 import { storage } from "./storage";
 import { setupAuth, isAuthenticated } from "./replitAuth";
 import { setupAuthRoutes } from "./routes/auth.routes";
@@ -16,6 +18,7 @@ import billingRoutes from "./routes/billing.routes";
 import adminBillingRoutes from "./routes/admin-billing.routes";
 import rbacRoutes from "./routes/rbac.routes";
 import bannersRoutes from "./routes/banners.routes";
+import { requireAdminAccess } from "./middleware/auth";
 import homepageRoutes from "./routes/homepage.routes";
 import cmsRoutes from "./routes/cms.routes";
 import { setupContactSubmissionsRoutes } from "./routes/contact-submissions.routes";
@@ -38,7 +41,53 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.use('/api/cart', cartRoutes);
   app.use('/api/addresses', addressRoutes);
   app.use('/api/orders', orderRoutes);
-  app.use('/api/admin/orders', adminOrdersRoutes);
+  app.get('/api/admin/orders', requireAdminAccess, async (req: any, res) => {
+    try {
+      const { orders } = await import('@shared/schema');
+      const { db } = await import('./db');
+      const status = req.query.status as string;
+      let allOrders = await db.select().from(orders);
+      if (status) allOrders = allOrders.filter((o: any) => o.status === status);
+      res.json(allOrders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+
+  app.post('/api/admin/orders/:id/update-status', requireAdminAccess, async (req: any, res) => {
+    try {
+      const { orders } = await import('@shared/schema');
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      const orderId = parseInt(req.params.id);
+      const { status, paymentStatus } = req.body;
+      
+      const updated = await storage.updateOrderStatus(orderId, status);
+      
+      if (paymentStatus) {
+        await storage.updateOrderPayment(orderId, { paymentStatus });
+      }
+
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order" });
+    }
+  });
+
+  app.delete('/api/admin/orders/:id', requireAdminAccess, async (req: any, res) => {
+    try {
+      const { orders, orderItems } = await import('@shared/schema');
+      const { db } = await import('./db');
+      const { eq } = await import('drizzle-orm');
+      const orderId = parseInt(req.params.id);
+      await db.delete(orderItems).where(eq(orderItems.orderId, orderId));
+      const deleted = await db.delete(orders).where(eq(orders.id, orderId)).returning();
+      if (!deleted.length) return res.status(404).json({ message: "Order not found" });
+      res.json({ success: true, message: "Order deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete order" });
+    }
+  });
   app.use('/api/admin/customers', adminCustomersRoutes);
   app.use('/api/admin/billing', adminBillingRoutes);
   app.use('/api/support', supportRoutes);

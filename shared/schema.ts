@@ -72,6 +72,7 @@ export const products = pgTable("products", {
   isNew: boolean("is_new").default(false), // Flag for "Newly Launched" section
   isFeatured: boolean("is_featured").default(false), // Flag for featured products
   launchedAt: timestamp("launched_at"), // When product was launched (for sorting new products)
+  redirectUrl: varchar("redirect_url"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 
@@ -440,9 +441,9 @@ export const billsRelations = relations(bills, ({ one }) => ({
 // Homepage Banners - Admin managed hero carousel
 export const banners = pgTable("banners", {
   id: serial("id").primaryKey(),
-  title: varchar("title").notNull(),
+  title: varchar("title"),
   subtitle: text("subtitle"),
-  imageUrl: varchar("image_url").notNull(), // Desktop image (default/fallback)
+  imageUrl: varchar("image_url"), // Desktop image (default/fallback)
   imageUrlTablet: varchar("image_url_tablet"), // Tablet image (768px-1024px)
   imageUrlMobile: varchar("image_url_mobile"), // Mobile image (<768px)
   ctaText: varchar("cta_text"), // "Shop Now", "Order Today", etc.
@@ -450,6 +451,7 @@ export const banners = pgTable("banners", {
   badgeText: varchar("badge_text"), // "25% OFF", "New", "Best Seller"
   displayOrder: integer("display_order").default(0),
   isActive: boolean("is_active").default(true),
+  showOverlay: boolean("show_overlay").default(false),
   startDate: timestamp("start_date"),
   endDate: timestamp("end_date"),
   createdAt: timestamp("created_at").defaultNow(),
@@ -554,13 +556,27 @@ export const footerSettings = pgTable("footer_settings", {
 // About Us Settings
 export const aboutUsSettings = pgTable("about_us_settings", {
   id: serial("id").primaryKey(),
-  title: varchar("title").default("About Divine Naturals"),
-  subtitle: text("subtitle"),
-  content: text("content"),
-  imageUrl: varchar("image_url"),
-  mission: text("mission"),
-  vision: text("vision"),
-  values: jsonb("values"), // Array of { title, description }
+  // Section 1: Hero
+  heroTitle: varchar("hero_title").default("Our Story"),
+  heroSubtitle: text("hero_subtitle"),
+  heroImageUrl: varchar("hero_image_url"),
+  heroCtaText: varchar("hero_cta_text"),
+  heroCtaLink: varchar("hero_cta_link"),
+  // Section 2: Story
+  storyHeading: varchar("story_heading"),
+  storyDescription: text("story_description"), // Rich text
+  storyImageUrl: varchar("story_image_url"),
+  // Section 3: Values
+  valuesTitle: varchar("values_title").default("Our Core Values"),
+  values: jsonb("values"), // Array of { icon, title, description }
+  // Section 4: Process
+  processTitle: varchar("process_title").default("How It Works"),
+  processSteps: jsonb("process_steps"), // Array of { icon, title, description }
+  // Section 5: CTA
+  ctaHeading: varchar("cta_heading"),
+  ctaSubheading: text("cta_subheading"),
+  ctaButtonText: varchar("cta_button_text"),
+  ctaButtonLink: varchar("cta_button_link"),
   isActive: boolean("is_active").default(true),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -568,14 +584,17 @@ export const aboutUsSettings = pgTable("about_us_settings", {
 // Contact Settings
 export const contactSettings = pgTable("contact_settings", {
   id: serial("id").primaryKey(),
-  title: varchar("title").default("Contact Us"),
-  subtitle: text("subtitle"),
+  // Section 1: Hero
+  heroTitle: varchar("hero_title").default("Contact Us"),
+  heroSubtitle: text("hero_subtitle"),
+  heroImageUrl: varchar("hero_image_url"),
+  // Section 2: Info
   phone: varchar("phone"),
   email: varchar("email"),
   address: text("address"),
   businessHours: text("business_hours"),
   socialLinks: jsonb("social_links"),
-  mapEmbedUrl: varchar("map_embed_url"),
+  mapEmbedUrl: text("map_embed_url"), // Use text for long iframe links
   isActive: boolean("is_active").default(true),
   updatedAt: timestamp("updated_at").defaultNow(),
 });
@@ -602,11 +621,23 @@ export const privacyPolicySettings = pgTable("privacy_policy_settings", {
   updatedAt: timestamp("updated_at").defaultNow(),
 });
 
+// Site Settings - Singleton table for global branding
+export const siteSettings = pgTable("site_settings", {
+  id: serial("id").primaryKey(),
+  brandName: varchar("brand_name").notNull().default("Divine Naturals"),
+  logoUrl: varchar("logo_url"),
+  faviconUrl: varchar("favicon_url"),
+  primaryColor: varchar("primary_color").default("#16A34A"),
+  secondaryColor: varchar("secondary_color").default("#FFF9F2"),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 // Contact Form Submissions
 export const contactSubmissions = pgTable("contact_submissions", {
   id: serial("id").primaryKey(),
   name: varchar("name").notNull(),
   email: varchar("email").notNull(),
+  phone: varchar("phone"),
   message: text("message").notNull(),
   status: varchar("status").default("new"), // new, read, replied
   createdAt: timestamp("created_at").defaultNow(),
@@ -624,3 +655,4 @@ export const insertProductSchema = createInsertSchema(products);
 export const insertBannerSchema = createInsertSchema(banners);
 export const insertHomepageSectionSchema = createInsertSchema(homepageSections);
 export const insertContactSubmissionSchema = createInsertSchema(contactSubmissions);
+export const insertSiteSettingsSchema = createInsertSchema(siteSettings);

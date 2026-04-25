@@ -2,11 +2,14 @@ import { Router } from "express";
 import { db } from "../db";
 import { orders, orderItems, products, users } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import { requireAdminAccess } from "../middleware/auth";
 
 const router = Router();
 
+console.log("🛠️ Admin Orders Routes file loaded!");
+
 // Admin: Get all orders with filtering
-router.get("/", async (req: any, res) => {
+router.get("/", requireAdminAccess, async (req: any, res) => {
   try {
 
     const status = req.query.status as string;
@@ -24,7 +27,7 @@ router.get("/", async (req: any, res) => {
 });
 
 // Admin: Get order details with items
-router.get("/:id", async (req: any, res) => {
+router.get("/:id", requireAdminAccess, async (req: any, res) => {
   try {
 
     const orderId = parseInt(req.params.id);
@@ -53,35 +56,46 @@ router.get("/:id", async (req: any, res) => {
 });
 
 // Admin: Update order status
-router.patch("/:id/status", async (req: any, res) => {
+router.post("/:id/update-status", requireAdminAccess, async (req: any, res) => {
   try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
-
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
-
     const orderId = parseInt(req.params.id);
     const { status, paymentStatus } = req.body;
 
-    const updated = await db
-      .update(orders)
-      .set({
-        status: status || undefined,
-        paymentStatus: paymentStatus || undefined,
-      })
-      .where(eq(orders.id, orderId))
-      .returning();
+    const updated = await storage.updateOrderStatus(orderId, status);
 
-    if (!updated.length) {
-      return res.status(404).json({ message: "Order not found" });
+    if (paymentStatus) {
+      await storage.updateOrderPayment(orderId, { paymentStatus });
     }
 
-    res.json(updated[0]);
+    res.json(updated);
   } catch (error) {
     console.error("Error updating order:", error);
     res.status(500).json({ message: "Failed to update order" });
+  }
+});
+
+// Admin: Delete order
+router.delete("/:id", requireAdminAccess, async (req: any, res) => {
+  try {
+    const orderId = parseInt(req.params.id);
+    if (isNaN(orderId)) {
+      return res.status(400).json({ message: "Invalid order ID" });
+    }
+
+    // Delete order items first (foreign key constraint)
+    await db.delete(orderItems).where(eq(orderItems.orderId, orderId));
+    
+    // Delete the order
+    const deleted = await db.delete(orders).where(eq(orders.id, orderId)).returning();
+
+    if (!deleted.length) {
+      return res.status(404).json({ message: "Order not found" });
+    }
+
+    res.json({ success: true, message: "Order deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting order:", error);
+    res.status(500).json({ message: "Failed to delete order" });
   }
 });
 

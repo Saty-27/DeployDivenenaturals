@@ -20,18 +20,20 @@ import {
   LogOut,
   Image,
   Layout,
-  FileText
+  FileText,
+  Palette
 } from "lucide-react";
 import { Link, useLocation } from "wouter";
 import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 const adminTabs = [
   { id: "dashboard", label: "Dashboard Overview", icon: LayoutDashboard, path: "/admin" },
   { id: "banners", label: "Banner Management", icon: Image, path: "/admin/banners" },
   { id: "homepage", label: "Homepage CMS", icon: Layout, path: "/admin/homepage" },
-  { id: "cms", label: "Pages & Content", icon: FileText, path: "/admin/cms" },
   { id: "customers", label: "Customers", icon: Users, path: "/admin/customers" },
+  { id: "pages", label: "Pages Management", icon: FileText, path: "/admin/pages" },
   { id: "contact-messages", label: "Contact Messages", icon: MessageSquare, path: "/admin/contact-submissions" },
   { id: "orders", label: "Orders", icon: Package, path: "/admin/orders" },
   { id: "subscriptions", label: "Subscriptions", icon: Milk, path: "/admin/subscriptions" },
@@ -41,6 +43,7 @@ const adminTabs = [
   { id: "stock-history", label: "Stock History", icon: BarChart3, path: "/admin/stock-history" },
   { id: "vendors", label: "Vendors", icon: Store, path: "/admin/vendors" },
   { id: "delivery", label: "Delivery Partners", icon: Truck, path: "/admin/delivery" },
+  { id: "brand", label: "Brand Identity", icon: Palette, path: "/admin/brand" },
 ];
 
 interface AdminLayoutProps {
@@ -51,6 +54,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location, setLocation] = useLocation();
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const { logout } = useAdminAuth();
+  const { settings } = useSiteSettings();
 
   const currentTab = adminTabs.find(tab => tab.path === location) || adminTabs[0];
 
@@ -75,8 +79,8 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
           {/* Divine Naturals Tree Icon for Mobile */}
           <div className="w-5 h-5 bg-white rounded-lg flex items-center justify-center shadow-md relative overflow-hidden flex-shrink-0 p-0.5">
             <img 
-              src={logoImage} 
-              alt="Divine Naturals Tree Logo" 
+              src={settings.logoUrl || logoImage} 
+              alt={settings.brandName} 
               className="w-full h-full object-contain"
             />
           </div>
@@ -109,14 +113,14 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               {/* Divine Naturals Tree Icon */}
               <div className="w-8 h-8 bg-white rounded-xl flex items-center justify-center shadow-lg relative overflow-hidden p-1">
                 <img 
-                  src={logoImage} 
-                  alt="Divine Naturals Tree Logo" 
+                  src={settings.logoUrl || logoImage} 
+                  alt={settings.brandName} 
                   className="w-full h-full object-contain"
                 />
               </div>
               <div>
                 <h1 className="text-xl font-bold text-foreground">
-                  Divine Naturals
+                  {settings.brandName}
                 </h1>
                 <p className="text-sm text-muted-foreground">Admin Dashboard</p>
               </div>

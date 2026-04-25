@@ -1,8 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Plus, Edit, Trash2, X, Upload } from "lucide-react";
+import { Plus, Edit, Trash2, X, Upload, AlertTriangle } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import AdminLayout from "@/components/layout/admin-layout";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function CategoriesAdmin() {
   const [showForm, setShowForm] = useState(false);
@@ -10,9 +20,11 @@ export default function CategoriesAdmin() {
   const [formData, setFormData] = useState({
     name: "",
     description: "",
-    image: "",
+    icon: "",
     active: true,
   });
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const [uploading, setUploading] = useState(false);
   const queryClient = useQueryClient();
   const { toast } = useToast();
@@ -37,7 +49,7 @@ export default function CategoriesAdmin() {
     const reader = new FileReader();
     reader.onload = (event) => {
       const base64 = event.target?.result as string;
-      setFormData({ ...formData, image: base64 });
+      setFormData({ ...formData, icon: base64 });
       setUploading(false);
       toast({ title: "✅ Image uploaded!" });
     };
@@ -112,7 +124,7 @@ export default function CategoriesAdmin() {
     setFormData({
       name: cat.name || "",
       description: cat.description || "",
-      image: cat.image || "",
+      icon: cat.icon || "",
       active: cat.active !== false,
     });
     setEditingId(cat.id);
@@ -124,7 +136,7 @@ export default function CategoriesAdmin() {
       toast({ title: "⚠️ Enter category name", variant: "destructive" });
       return;
     }
-    if (!formData.image.trim()) {
+    if (!formData.icon.trim()) {
       toast({ title: "⚠️ Add category image", variant: "destructive" });
       return;
     }
@@ -209,8 +221,8 @@ export default function CategoriesAdmin() {
                 <input
                   type="url"
                   placeholder="https://..."
-                  value={formData.image}
-                  onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                  value={formData.icon}
+                  onChange={(e) => setFormData({ ...formData, icon: e.target.value })}
                   style={{ width: "100%", padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.5rem", boxSizing: "border-box", marginBottom: "0.5rem" }}
                 />
               </div>
@@ -232,12 +244,12 @@ export default function CategoriesAdmin() {
                 </label>
               </div>
 
-              {formData.image && (
+              {formData.icon && (
                 <div>
                   <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "600", marginBottom: "0.5rem" }}>
                     Preview
                   </label>
-                  <img src={formData.image} alt="Preview" style={{ maxHeight: "150px", maxWidth: "100%", borderRadius: "0.5rem" }} />
+                  <img src={formData.icon} alt="Preview" style={{ maxHeight: "150px", maxWidth: "100%", borderRadius: "0.5rem" }} />
                 </div>
               )}
 
@@ -300,8 +312,8 @@ export default function CategoriesAdmin() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(250px, 1fr))", gap: "1rem" }}>
               {categories.map((cat: any) => (
                 <div key={cat.id} style={{ border: "2px solid #e5e7eb", borderRadius: "0.5rem", overflow: "hidden", background: "white" }}>
-                  {cat.image && (
-                    <img src={cat.image} alt={cat.name} style={{ width: "100%", height: "150px", objectFit: "cover" }} />
+                  {cat.icon && (
+                    <img src={cat.icon} alt={cat.name} style={{ width: "100%", height: "150px", objectFit: "cover" }} />
                   )}
                   <div style={{ padding: "1rem" }}>
                     <h4 style={{ fontSize: "1rem", fontWeight: "bold", color: "#111827", margin: "0 0 0.5rem 0" }}>{cat.name}</h4>
@@ -313,7 +325,14 @@ export default function CategoriesAdmin() {
                       <button onClick={() => handleEdit(cat)} disabled={isProcessing} style={{ flex: 1, padding: "0.5rem", background: "#dbeafe", color: "#1e40af", border: "none", borderRadius: "0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600" }}>
                         <Edit size={14} style={{ display: "inline" }} /> Edit
                       </button>
-                      <button onClick={() => { if (confirm("Delete?")) deleteMutation.mutate(cat.id); }} disabled={isProcessing} style={{ flex: 1, padding: "0.5rem", background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600" }}>
+                      <button 
+                        onClick={() => {
+                          setItemToDelete(cat.id);
+                          setIsDeleteDialogOpen(true);
+                        }} 
+                        disabled={isProcessing} 
+                        style={{ flex: 1, padding: "0.5rem", background: "#fee2e2", color: "#991b1b", border: "none", borderRadius: "0.5rem", cursor: "pointer", fontSize: "0.75rem", fontWeight: "600" }}
+                      >
                         <Trash2 size={14} style={{ display: "inline" }} /> Delete
                       </button>
                     </div>
@@ -324,6 +343,25 @@ export default function CategoriesAdmin() {
           )}
         </div>
       </div>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white border-2 border-red-100 shadow-2xl rounded-3xl p-8">
+          <AlertDialogHeader className="items-center text-center space-y-4">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-2">
+              <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+            </div>
+            <AlertDialogTitle className="text-3xl font-black text-gray-900">Delete Category?</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-500 text-lg font-medium">This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 gap-4 sm:justify-center">
+            <AlertDialogCancel className="h-14 px-8 rounded-2xl border-2 border-gray-100 hover:bg-gray-50 font-bold text-gray-600 transition-all">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => { if (itemToDelete) { deleteMutation.mutate(itemToDelete); setItemToDelete(null); } }}
+              className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-lg transition-all"
+            >Confirm Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </AdminLayout>
   );
 }

@@ -200,11 +200,12 @@ export function setupAuthRoutes(app: Express) {
           .json({ message: "Username and password are required" });
       }
 
-      // Check admin credentials
-      const adminUsername = "DivineNaturalMDKauldeepRao";
-      const adminPassword = "DivineNaturals@2025";
+      // Check admin credentials from environment or defaults
+      const adminUsername = process.env.ADMIN_USERNAME || "DivineNaturalsMDKauldeepRao";
+      const adminPassword = process.env.ADMIN_PASSWORD || "DivineNaturals@2025";
 
       if (username !== adminUsername || password !== adminPassword) {
+        console.log("❌ Admin login failed: Invalid credentials for", username);
         return res.status(401).json({ message: "Invalid admin credentials" });
       }
 
@@ -240,6 +241,12 @@ export function setupAuthRoutes(app: Express) {
 
   // GET current admin session
   app.get("/api/admin/current-admin", (req: any, res: Response) => {
+    console.log("🔍 Checking admin session:", {
+      sessionId: req.sessionID,
+      isAdminLoggedIn: req.session?.isAdminLoggedIn,
+      username: req.session?.adminUsername
+    });
+
     if (!req.session?.isAdminLoggedIn) {
       return res.status(401).json({ message: "Not authenticated as admin" });
     }

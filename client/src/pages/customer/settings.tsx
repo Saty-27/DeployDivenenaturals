@@ -35,14 +35,32 @@ export default function Settings() {
   const [showPassword, setShowPassword] = useState(false);
   const [deleteConfirm, setDeleteConfirm] = useState("");
 
-  // Mock settings data
+  const { data: user, isLoading } = useQuery({
+    queryKey: ["/api/auth/user"],
+    queryFn: async () => {
+      const res = await fetch("/api/auth/user", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to fetch user");
+      const data = await res.json();
+      setFormData({
+        firstName: data.firstName || "",
+        lastName: data.lastName || "",
+        email: data.email || "",
+        phone: data.phone || "",
+        address: data.address || "",
+      });
+      return data;
+    },
+  });
+
+  const [formData, setFormData] = useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    address: "",
+  });
+
   const [settings, setSettings] = useState({
-    // Profile Settings
-    firstName: "Rajesh",
-    lastName: "Kumar",
-    email: "rajesh@example.com",
-    phone: "+91 98765 43210",
-    
     // App Preferences
     theme: "light",
     language: "english",
@@ -73,17 +91,46 @@ export default function Settings() {
     ]
   });
 
+  const updateProfileMutation = useMutation({
+    mutationFn: async (data: any) => {
+      const res = await fetch("/api/user/profile", {
+        method: "PUT",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) {
+        const error = await res.json();
+        throw new Error(error.message || "Failed to update profile");
+      }
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      toast({
+        title: "✅ Profile updated",
+        description: "Your information has been saved successfully",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "❌ Update failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    },
+  });
+
   const updateSettingsMutation = useMutation({
     mutationFn: async (newSettings: any) => {
-      // Mock API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Mock API call for app preferences
+      await new Promise(resolve => setTimeout(resolve, 500));
       return newSettings;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/user/settings"] });
       toast({
         title: "Settings updated",
-        description: "Your preferences have been saved successfully",
+        description: "Your preferences have been saved",
       });
     },
   });
@@ -115,6 +162,14 @@ export default function Settings() {
       });
     },
   });
+
+  const handleProfileChange = (key: string, value: any) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const handleProfileSave = () => {
+    updateProfileMutation.mutate(formData);
+  };
 
   const handleSettingChange = (key: string, value: any) => {
     const newSettings = { ...settings, [key]: value };
@@ -201,15 +256,17 @@ export default function Settings() {
               <div>
                 <label className="block text-sm font-semibold mb-2">First Name</label>
                 <Input
-                  value={settings.firstName}
-                  onChange={(e) => handleSettingChange("firstName", e.target.value)}
+                  value={formData.firstName}
+                  onChange={(e) => handleProfileChange("firstName", e.target.value)}
+                  placeholder="Your first name"
                 />
               </div>
               <div>
                 <label className="block text-sm font-semibold mb-2">Last Name</label>
                 <Input
-                  value={settings.lastName}
-                  onChange={(e) => handleSettingChange("lastName", e.target.value)}
+                  value={formData.lastName}
+                  onChange={(e) => handleProfileChange("lastName", e.target.value)}
+                  placeholder="Your last name"
                 />
               </div>
             </div>
@@ -217,16 +274,29 @@ export default function Settings() {
               <label className="block text-sm font-semibold mb-2">Email Address</label>
               <Input
                 type="email"
-                value={settings.email}
-                onChange={(e) => handleSettingChange("email", e.target.value)}
+                value={formData.email}
+                onChange={(e) => handleProfileChange("email", e.target.value)}
+                placeholder="email@example.com"
               />
             </div>
-            <div>
-              <label className="block text-sm font-semibold mb-2">Phone Number</label>
-              <Input
-                value={settings.phone}
-                onChange={(e) => handleSettingChange("phone", e.target.value)}
-              />
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-semibold mb-2">Phone Number</label>
+                <Input
+                  value={formData.phone}
+                  onChange={(e) => handleProfileChange("phone", e.target.value)}
+                  placeholder="10-digit phone"
+                />
+              </div>
+              <div className="flex items-end">
+                <Button 
+                  onClick={handleProfileSave}
+                  disabled={updateProfileMutation.isPending}
+                  className="w-full eco-button h-10 font-bold"
+                >
+                  {updateProfileMutation.isPending ? "💾 Saving..." : "💾 Save Profile"}
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>

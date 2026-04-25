@@ -1,6 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, PackageX } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import MainPageLayout from "@/components/layout/main-page-layout";
 
 interface OrderItem {
@@ -71,7 +72,6 @@ export default function OrdersPage() {
       <MainPageLayout>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "400px" }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📦</div>
             <p style={{ color: "#6b7280" }}>Loading orders...</p>
           </div>
         </div>
@@ -81,206 +81,150 @@ export default function OrdersPage() {
 
   return (
     <MainPageLayout>
-      <div>
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-16">
           {/* Header */}
-          <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
+          <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-8 text-center sm:text-left">
             <button
               onClick={() => setLocation("/home")}
-              style={{
-                background: "white",
-                border: "none",
-                borderRadius: "0.5rem",
-                padding: "0.5rem",
-                cursor: "pointer",
-                boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-              }}
+              className="bg-white border-none rounded-lg p-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow shrink-0"
             >
               <ArrowLeft size={20} />
             </button>
-            <div>
-              <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#111827", margin: 0 }}>📦 My Orders</h1>
-              <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>Track your orders</p>
+            <div className="min-w-0">
+              <h1 className="text-2xl sm:text-3xl font-black text-gray-900 m-0 truncate">My Orders</h1>
+              <p className="text-gray-500 text-sm m-0">Track your recent purchases</p>
             </div>
           </div>
 
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-          <div style={{ background: "white", borderRadius: "0.5rem", padding: "1rem", boxShadow: "0 1px 2px rgba(0,0,0,0.1)", borderLeft: "4px solid #3b82f6" }}>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>Total Orders</p>
-            <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#3b82f6", margin: "0.5rem 0 0 0" }}>{orders.length}</p>
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-blue-500">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black m-0">Total Orders</p>
+            <p className="text-2xl font-black text-blue-600 mt-2 m-0">{orders.length}</p>
           </div>
-          <div style={{ background: "white", borderRadius: "0.5rem", padding: "1rem", boxShadow: "0 1px 2px rgba(0,0,0,0.1)", borderLeft: "4px solid #10b981" }}>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>Delivered</p>
-            <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#10b981", margin: "0.5rem 0 0 0" }}>{delivered}</p>
+          <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-green-500">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black m-0">Delivered</p>
+            <p className="text-2xl font-black text-green-600 mt-2 m-0">{delivered}</p>
           </div>
-          <div style={{ background: "white", borderRadius: "0.5rem", padding: "1rem", boxShadow: "0 1px 2px rgba(0,0,0,0.1)", borderLeft: "4px solid #f59e0b" }}>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>Total Spent</p>
-            <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#f59e0b", margin: "0.5rem 0 0 0" }}>₹{totalSpent.toLocaleString()}</p>
+          <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-orange-500">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black m-0">Total Spent</p>
+            <p className="text-2xl font-black text-orange-600 mt-2 m-0">₹{totalSpent.toLocaleString()}</p>
           </div>
         </div>
 
         {/* Orders List */}
         {orders.length === 0 ? (
-          <div style={{ background: "white", borderRadius: "0.5rem", padding: "3rem", textAlign: "center", boxShadow: "0 1px 2px rgba(0,0,0,0.1)" }}>
-            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📭</div>
-            <p style={{ color: "#6b7280", marginBottom: "1rem" }}>No orders yet</p>
-            <button
-              onClick={() => setLocation("/shop")}
-              style={{
-                padding: "0.5rem 1.5rem",
-                background: "#16a34a",
-                color: "white",
-                border: "none",
-                borderRadius: "0.5rem",
-                cursor: "pointer",
-                fontWeight: "600",
-              }}
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 sm:p-20 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="p-6 bg-gray-50 rounded-full">
+                <PackageX size={64} className="text-gray-300" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No orders yet</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto">
+              When you start shopping, your orders will appear here. Track your fresh dairy deliveries in real-time.
+            </p>
+            <Button 
+              onClick={() => setLocation("/shop")} 
+              className="bg-green-600 hover:bg-green-700 text-white px-10 py-6 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
             >
               Start Shopping
-            </button>
+            </Button>
           </div>
         ) : (
-          <div style={{ display: "grid", gap: "1rem" }}>
+          <div className="grid grid-cols-1 gap-6">
             {orders.map((order, idx) => {
               const statusColor = getStatusColor(order.status);
               const paymentColor = getPaymentColor(order.paymentStatus);
 
               return (
-                <div key={idx} style={{ background: "white", borderRadius: "0.5rem", padding: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
+                <div key={idx} className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
                   {/* Order Header */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem", paddingBottom: "1rem", borderBottom: "1px solid #e5e7eb" }}>
-                    <div>
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Order ID</p>
-                      <p style={{ fontSize: "1.25rem", fontFamily: "monospace", fontWeight: "bold", color: "#3b82f6", margin: "0.5rem 0 0 0" }}>
-                        #{order.id}
-                      </p>
+                  <div className="flex flex-wrap items-center justify-between gap-4 pb-6 mb-6 border-b border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="p-3 bg-blue-50 rounded-xl">
+                        <PackageX className="w-6 h-6 text-blue-600" />
+                      </div>
+                      <div>
+                        <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-1">Order ID</p>
+                        <p className="text-lg font-black text-blue-600 font-mono">#{order.id}</p>
+                      </div>
                     </div>
-
-                    <div>
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Amount</p>
-                      <p style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#16a34a", margin: "0.5rem 0 0 0" }}>
-                        ₹{parseFloat(order.totalAmount || "0").toLocaleString()}
-                      </p>
+                    <div className="text-right">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-1">Total Amount</p>
+                      <p className="text-2xl font-black text-green-600">₹{parseFloat(order.totalAmount || "0").toLocaleString()}</p>
                     </div>
                   </div>
 
-                  {/* Status & Payment */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
-                    <div>
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Status</p>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          marginTop: "0.5rem",
-                          padding: "0.35rem 0.75rem",
-                          fontSize: "0.75rem",
-                          fontWeight: "600",
-                          borderRadius: "0.25rem",
-                          background: statusColor.bg,
-                          color: statusColor.text,
-                        }}
+                  {/* Status Badges */}
+                  <div className="grid grid-cols-2 xs:grid-cols-4 gap-4 mb-8">
+                    <div className="flex flex-col gap-2">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black">Status</p>
+                      <span 
+                        className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold w-fit"
+                        style={{ background: statusColor.bg, color: statusColor.text }}
                       >
                         {order.status.replace(/_/g, " ")}
                       </span>
                     </div>
-
-                    <div>
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Payment</p>
-                      <span
-                        style={{
-                          display: "inline-block",
-                          marginTop: "0.5rem",
-                          padding: "0.35rem 0.75rem",
-                          fontSize: "0.75rem",
-                          fontWeight: "600",
-                          borderRadius: "0.25rem",
-                          background: paymentColor.bg,
-                          color: paymentColor.text,
-                        }}
+                    <div className="flex flex-col gap-2">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black">Payment</p>
+                      <span 
+                        className="inline-flex items-center justify-center px-3 py-1 rounded-full text-xs font-bold w-fit"
+                        style={{ background: paymentColor.bg, color: paymentColor.text }}
                       >
                         {order.paymentStatus.toUpperCase()}
                       </span>
                     </div>
-                  </div>
-
-                  {/* Details */}
-                  <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem", paddingTop: "1rem", borderTop: "1px solid #e5e7eb" }}>
-                    <div>
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Ordered</p>
-                      <p style={{ fontSize: "0.875rem", color: "#111827", margin: "0.25rem 0 0 0" }}>
-                        {new Date(order.createdAt).toLocaleDateString()}
-                      </p>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black">Date</p>
+                      <p className="text-sm font-bold text-gray-900">{new Date(order.createdAt).toLocaleDateString()}</p>
                     </div>
-
-                    <div>
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Delivery Date</p>
-                      <p style={{ fontSize: "0.875rem", color: "#111827", margin: "0.25rem 0 0 0" }}>
-                        {order.deliveryDate ? new Date(order.deliveryDate).toLocaleDateString() : "Not scheduled"}
-                      </p>
+                    <div className="flex flex-col gap-2">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black">Method</p>
+                      <p className="text-sm font-bold text-gray-900 truncate">{order.paymentMethod || "COD"}</p>
                     </div>
                   </div>
 
-                  {/* Payment Method & Address */}
-                  <div style={{ display: "grid", gap: "1rem", marginBottom: "1rem", paddingTop: "1rem", borderTop: "1px solid #e5e7eb" }}>
-                    <div>
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Payment Method</p>
-                      <p style={{ fontSize: "0.875rem", color: "#111827", margin: "0.25rem 0 0 0" }}>
-                        {order.paymentMethod || "Not specified"}
-                      </p>
-                    </div>
-
-                    <div>
-                      <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Delivery Address</p>
-                      <p style={{ fontSize: "0.875rem", color: "#111827", margin: "0.25rem 0 0 0", lineHeight: "1.4" }}>
-                        {order.deliveryAddress || "Not specified"}
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Items */}
+                  {/* Items Summary */}
                   {order.items && order.items.length > 0 && (
-                    <div style={{ paddingTop: "1rem", borderTop: "1px solid #e5e7eb" }}>
-                      <p style={{ fontSize: "0.875rem", fontWeight: "600", color: "#111827", margin: "0 0 0.75rem 0" }}>
-                        Items ({order.items.length})
-                      </p>
-                      <div style={{ display: "grid", gap: "0.5rem" }}>
+                    <div className="bg-gray-50 rounded-xl p-4">
+                      <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-3">Items ({order.items.length})</p>
+                      <div className="space-y-2">
                         {order.items.map((item, itemIdx) => (
-                          <div key={itemIdx} style={{ display: "flex", justifyContent: "space-between", fontSize: "0.875rem", padding: "0.5rem", background: "#f9fafb", borderRadius: "0.25rem" }}>
-                            <span>
+                          <div key={itemIdx} className="flex justify-between items-center text-sm">
+                            <span className="text-gray-700 font-medium">
                               {item.product?.name || `Product ${item.productId}`} × {item.quantity}
                             </span>
-                            <span style={{ fontWeight: "600", color: "#16a34a" }}>₹{parseFloat(item.price || "0").toLocaleString()}</span>
+                            <span className="text-green-600 font-bold">₹{parseFloat(item.price || "0").toLocaleString()}</span>
                           </div>
                         ))}
                       </div>
                     </div>
                   )}
+
+                  {/* Address */}
+                  <div className="mt-6 pt-6 border-t border-gray-100">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-2">Delivery Address</p>
+                    <p className="text-sm text-gray-600 leading-relaxed">{order.deliveryAddress || "Not specified"}</p>
+                  </div>
                 </div>
               );
             })}
           </div>
         )}
 
-        {/* Footer Button */}
+        {/* Footer Action */}
         {orders.length > 0 && (
-          <div style={{ marginTop: "2rem", display: "flex", gap: "1rem" }}>
-            <button
+          <div className="mt-12 flex justify-center">
+            <Button
               onClick={() => setLocation("/shop")}
-              style={{
-                flex: 1,
-                padding: "0.75rem",
-                background: "#16a34a",
-                color: "white",
-                border: "none",
-                borderRadius: "0.5rem",
-                cursor: "pointer",
-                fontWeight: "600",
-              }}
+              className="w-full sm:w-auto px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
             >
-              ➕ Order More
-              </button>
-            </div>
-          )}
+              Order More Fresh Products
+            </Button>
+          </div>
+        )}
       </div>
     </MainPageLayout>
   );

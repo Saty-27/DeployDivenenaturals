@@ -3,6 +3,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 interface ProtectedRouteProps {
@@ -12,6 +13,7 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ component: Component, requiredRole }: ProtectedRouteProps) {
   const { isAuthenticated, isLoading, user } = useAuth();
+  const { settings } = useSiteSettings();
   const { toast } = useToast();
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   const [loginPhone, setLoginPhone] = useState("");
@@ -114,12 +116,12 @@ export function ProtectedRoute({ component: Component, requiredRole }: Protected
           <div className="text-center mb-8">
             <div className="w-16 h-16 mx-auto bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg p-2">
               <img 
-                src={logoImage} 
-                alt="Divine Naturals Logo" 
+                src={settings.logoUrl || logoImage} 
+                alt={settings.brandName} 
                 className="w-full h-full object-contain"
               />
             </div>
-            <h1 className="text-3xl font-bold eco-text mb-2">Divine Naturals</h1>
+            <h1 className="text-3xl font-bold eco-text mb-2">{settings.brandName}</h1>
             <p className="eco-text-muted">Pure. Fresh. Daily.</p>
           </div>
 

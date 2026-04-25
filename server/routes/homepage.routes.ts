@@ -2,40 +2,9 @@ import { Router } from "express";
 import { db } from "../db";
 import { ethosCards, productDeals, statsCounters, faqs, newsletterSettings, footerSettings, products } from "@shared/schema";
 import { eq, asc, desc, and, lte, gte, isNull, or } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth";
+import { requireAdminAccess } from "../middleware/auth";
 
 const router = Router();
-
-// Middleware to check if user is admin - checks both session.userRole and database, or admin session
-const isAdmin = async (req: any, res: any, next: any) => {
-  try {
-    // Check if admin session exists
-    if (req.session?.isAdminLoggedIn === true) {
-      return next();
-    }
-    
-    const userId = req.session?.userId;
-    if (!userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
-    if (req.session?.userRole === "admin") {
-      return next();
-    }
-    
-    const { users } = await import("@shared/schema");
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-    if (user?.role === "admin") {
-      req.session.userRole = "admin";
-      return next();
-    }
-    
-    return res.status(403).json({ message: "Admin access required" });
-  } catch (error) {
-    console.error("Error checking admin status:", error);
-    return res.status(500).json({ message: "Error checking permissions" });
-  }
-};
 
 // ============================================================================
 // ETHOS CARDS
@@ -57,7 +26,7 @@ router.get("/ethos/public", async (req, res) => {
 });
 
 // Admin: Get all ethos cards
-router.get("/ethos", isAdmin, async (req, res) => {
+router.get("/ethos", requireAdminAccess, async (req, res) => {
   try {
     const cards = await db
       .select()
@@ -71,7 +40,7 @@ router.get("/ethos", isAdmin, async (req, res) => {
 });
 
 // Admin: Create ethos card
-router.post("/ethos", isAdmin, async (req, res) => {
+router.post("/ethos", requireAdminAccess, async (req, res) => {
   try {
     const { title, description, icon, displayOrder, isActive } = req.body;
     const [card] = await db.insert(ethosCards).values({
@@ -89,7 +58,7 @@ router.post("/ethos", isAdmin, async (req, res) => {
 });
 
 // Admin: Update ethos card
-router.put("/ethos/:id", isAdmin, async (req, res) => {
+router.put("/ethos/:id", requireAdminAccess, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { title, description, icon, displayOrder, isActive } = req.body;
@@ -106,7 +75,7 @@ router.put("/ethos/:id", isAdmin, async (req, res) => {
 });
 
 // Admin: Delete ethos card
-router.delete("/ethos/:id", isAdmin, async (req, res) => {
+router.delete("/ethos/:id", requireAdminAccess, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const [card] = await db.delete(ethosCards).where(eq(ethosCards.id, id)).returning();
@@ -138,7 +107,7 @@ router.get("/stats/public", async (req, res) => {
 });
 
 // Admin: Get all stats counters
-router.get("/stats", isAdmin, async (req, res) => {
+router.get("/stats", requireAdminAccess, async (req, res) => {
   try {
     const counters = await db
       .select()
@@ -152,7 +121,7 @@ router.get("/stats", isAdmin, async (req, res) => {
 });
 
 // Admin: Create stats counter
-router.post("/stats", isAdmin, async (req, res) => {
+router.post("/stats", requireAdminAccess, async (req, res) => {
   try {
     const { label, value, suffix, icon, displayOrder, isActive } = req.body;
     const [counter] = await db.insert(statsCounters).values({
@@ -171,7 +140,7 @@ router.post("/stats", isAdmin, async (req, res) => {
 });
 
 // Admin: Update stats counter
-router.put("/stats/:id", isAdmin, async (req, res) => {
+router.put("/stats/:id", requireAdminAccess, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { label, value, suffix, icon, displayOrder, isActive } = req.body;
@@ -188,7 +157,7 @@ router.put("/stats/:id", isAdmin, async (req, res) => {
 });
 
 // Admin: Delete stats counter
-router.delete("/stats/:id", isAdmin, async (req, res) => {
+router.delete("/stats/:id", requireAdminAccess, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const [counter] = await db.delete(statsCounters).where(eq(statsCounters.id, id)).returning();
@@ -220,7 +189,7 @@ router.get("/faqs/public", async (req, res) => {
 });
 
 // Admin: Get all FAQs
-router.get("/faqs", isAdmin, async (req, res) => {
+router.get("/faqs", requireAdminAccess, async (req, res) => {
   try {
     const faqList = await db
       .select()
@@ -234,7 +203,7 @@ router.get("/faqs", isAdmin, async (req, res) => {
 });
 
 // Admin: Create FAQ
-router.post("/faqs", isAdmin, async (req, res) => {
+router.post("/faqs", requireAdminAccess, async (req, res) => {
   try {
     const { question, answer, category, displayOrder, isActive } = req.body;
     const [faq] = await db.insert(faqs).values({
@@ -252,7 +221,7 @@ router.post("/faqs", isAdmin, async (req, res) => {
 });
 
 // Admin: Update FAQ
-router.put("/faqs/:id", isAdmin, async (req, res) => {
+router.put("/faqs/:id", requireAdminAccess, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { question, answer, category, displayOrder, isActive } = req.body;
@@ -269,7 +238,7 @@ router.put("/faqs/:id", isAdmin, async (req, res) => {
 });
 
 // Admin: Delete FAQ
-router.delete("/faqs/:id", isAdmin, async (req, res) => {
+router.delete("/faqs/:id", requireAdminAccess, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const [faq] = await db.delete(faqs).where(eq(faqs.id, id)).returning();
@@ -318,7 +287,7 @@ router.get("/deals/public", async (req, res) => {
 });
 
 // Admin: Get all deals
-router.get("/deals", isAdmin, async (req, res) => {
+router.get("/deals", requireAdminAccess, async (req, res) => {
   try {
     const deals = await db
       .select({
@@ -344,7 +313,7 @@ router.get("/deals", isAdmin, async (req, res) => {
 });
 
 // Admin: Create deal
-router.post("/deals", isAdmin, async (req, res) => {
+router.post("/deals", requireAdminAccess, async (req, res) => {
   try {
     const { productId, dealType, dealValue, badgeText, priority, startsAt, endsAt, isActive } = req.body;
     const [deal] = await db.insert(productDeals).values({
@@ -365,7 +334,7 @@ router.post("/deals", isAdmin, async (req, res) => {
 });
 
 // Admin: Update deal
-router.put("/deals/:id", isAdmin, async (req, res) => {
+router.put("/deals/:id", requireAdminAccess, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const { productId, dealType, dealValue, badgeText, priority, startsAt, endsAt, isActive } = req.body;
@@ -392,7 +361,7 @@ router.put("/deals/:id", isAdmin, async (req, res) => {
 });
 
 // Admin: Delete deal
-router.delete("/deals/:id", isAdmin, async (req, res) => {
+router.delete("/deals/:id", requireAdminAccess, async (req, res) => {
   try {
     const id = parseInt(req.params.id);
     const [deal] = await db.delete(productDeals).where(eq(productDeals.id, id)).returning();
@@ -444,7 +413,7 @@ router.get("/newsletter/public", async (req, res) => {
 });
 
 // Admin: Get newsletter settings
-router.get("/newsletter", isAdmin, async (req, res) => {
+router.get("/newsletter", requireAdminAccess, async (req, res) => {
   try {
     const [settings] = await db.select().from(newsletterSettings).limit(1);
     res.json(settings || null);
@@ -455,7 +424,7 @@ router.get("/newsletter", isAdmin, async (req, res) => {
 });
 
 // Admin: Update newsletter settings
-router.put("/newsletter", isAdmin, async (req, res) => {
+router.put("/newsletter", requireAdminAccess, async (req, res) => {
   try {
     const { title, subtitle, ctaText, placeholderText, isActive } = req.body;
     
@@ -500,7 +469,7 @@ router.get("/footer/public", async (req, res) => {
 });
 
 // Admin: Get footer settings
-router.get("/footer", isAdmin, async (req, res) => {
+router.get("/footer", requireAdminAccess, async (req, res) => {
   try {
     const [settings] = await db.select().from(footerSettings).limit(1);
     res.json(settings || null);
@@ -511,7 +480,7 @@ router.get("/footer", isAdmin, async (req, res) => {
 });
 
 // Admin: Update footer settings
-router.put("/footer", isAdmin, async (req, res) => {
+router.put("/footer", requireAdminAccess, async (req, res) => {
   try {
     const { companyName, tagline, description, phone, email, address, socialLinks, footerLinks, copyrightText, isActive } = req.body;
     

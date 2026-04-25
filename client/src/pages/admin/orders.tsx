@@ -1,13 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
+import { useLocation } from "wouter";
 import { Filter } from "lucide-react";
 import AdminLayout from "@/components/layout/admin-layout";
 import { useToast } from "@/hooks/use-toast";
 
 export default function OrdersAdmin() {
+  const [location] = useLocation();
   const [statusFilter, setStatusFilter] = useState<string>("");
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // Modal states
+  const [confirmDelete, setConfirmDelete] = useState<number | null>(null);
+  const [confirmCancel, setConfirmCancel] = useState<number | null>(null);
 
   const { data: orders = [], isLoading, refetch } = useQuery({
     queryKey: ["admin-orders", statusFilter],
@@ -24,8 +30,8 @@ export default function OrdersAdmin() {
 
   const updateOrderMutation = useMutation({
     mutationFn: async ({ orderId, status, paymentStatus }: any) => {
-      const res = await fetch(`/api/admin/orders/${orderId}/status`, {
-        method: "PATCH",
+      const res = await fetch(`/api/admin/orders/${orderId}/update-status`, {
+        method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status, paymentStatus }),
@@ -36,6 +42,25 @@ export default function OrdersAdmin() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
       toast({ title: "✅ Order updated!" });
+      refetch();
+    },
+    onError: (error: any) => {
+      toast({ title: `❌ ${error.message}`, variant: "destructive" });
+    },
+  });
+
+  const deleteOrderMutation = useMutation({
+    mutationFn: async (orderId: number) => {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "DELETE",
+        credentials: "include",
+      });
+      if (!res.ok) throw new Error("Failed to delete order");
+      return res.json();
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["admin-orders"] });
+      toast({ title: "🗑️ Order deleted successfully" });
       refetch();
     },
     onError: (error: any) => {
@@ -199,14 +224,16 @@ export default function OrdersAdmin() {
                         💳 Pay
                       </button>
                       <button
-                        onClick={() => {
-                          if (confirm(`Cancel order #${order.id}?`)) {
-                            updateOrderMutation.mutate({ orderId: order.id, status: "CANCELLED" });
-                          }
-                        }}
+                        onClick={() => setConfirmCancel(order.id)}
                         style={{ padding: "0.25rem 0.5rem", background: "#ef4444", color: "white", border: "none", borderRadius: "0.25rem", cursor: "pointer", fontWeight: "600" }}
                       >
                         ✕ Cancel
+                      </button>
+                      <button
+                        onClick={() => setConfirmDelete(order.id)}
+                        style={{ padding: "0.25rem 0.5rem", background: "#7f1d1d", color: "white", border: "none", borderRadius: "0.25rem", cursor: "pointer", fontWeight: "600" }}
+                      >
+                        🗑 Delete
                       </button>
                     </td>
                   </tr>
@@ -215,7 +242,100 @@ export default function OrdersAdmin() {
             </table>
           )}
         </div>
+
+        {/* Modals */}
+        {confirmCancel && (
+          <Modal
+            title="Cancel Order"
+            message={`Are you sure you want to cancel order #${confirmCancel}?`}
+            confirmText="Yes, Cancel"
+            confirmColor="#ef4444"
+            onConfirm={() => {
+              updateOrderMutation.mutate({ orderId: confirmCancel, status: "CANCELLED" });
+              setConfirmCancel(null);
+            }}
+            onCancel={() => setConfirmCancel(null)}
+          />
+        )}
+
+        {confirmDelete && (
+          <Modal
+            title="Delete Order"
+            message={`Are you sure you want to permanently DELETE order #${confirmDelete}? This action cannot be undone.`}
+            confirmText="Delete Forever"
+            confirmColor="#7f1d1d"
+            onConfirm={() => {
+              deleteOrderMutation.mutate(confirmDelete);
+              setConfirmDelete(null);
+            }}
+            onCancel={() => setConfirmDelete(null)}
+          />
+        )}
       </div>
     </AdminLayout>
+  );
+}
+
+// Simple Modal Component
+function Modal({ title, message, onConfirm, onCancel, confirmText = "Confirm", cancelText = "Cancel", confirmColor = "#ef4444" }: any) {
+  return (
+    <div style={{
+      fixed: "fixed",
+      position: "fixed",
+      top: 0,
+      left: 0,
+      width: "100vw",
+      height: "100vh",
+      background: "rgba(0,0,0,0.5)",
+      display: "flex",
+      alignItems: "center",
+      justifyContent: "center",
+      zIndex: 1000,
+      padding: "1rem"
+    }}>
+      <div style={{
+        background: "white",
+        padding: "2rem",
+        borderRadius: "0.75rem",
+        maxWidth: "400px",
+        width: "100%",
+        boxShadow: "0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)"
+      }}>
+        <h3 style={{ fontSize: "1.25rem", fontWeight: "bold", marginBottom: "1rem", color: "#111827" }}>{title}</h3>
+        <p style={{ color: "#4b5563", marginBottom: "2rem", lineHeight: "1.5" }}>{message}</p>
+        <div style={{ display: "flex", gap: "0.75rem", justifyContent: "flex-end" }}>
+          <button
+            onClick={onCancel}
+            style={{
+              padding: "0.625rem 1.25rem",
+              background: "#f3f4f6",
+              color: "#374151",
+              border: "none",
+              borderRadius: "0.5rem",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "0.875rem"
+            }}
+          >
+            {cancelText}
+          </button>
+          <button
+            onClick={onConfirm}
+            style={{
+              padding: "0.625rem 1.25rem",
+              background: confirmColor,
+              color: "white",
+              border: "none",
+              borderRadius: "0.5rem",
+              cursor: "pointer",
+              fontWeight: "600",
+              fontSize: "0.875rem"
+            }}
+          >
+            {confirmText}
+          </button>
+        </div>
+      </div>
+    </div>
   );
 }

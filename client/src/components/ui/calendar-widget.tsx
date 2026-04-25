@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import Calendar from 'react-calendar';
-import { Clock, MapPin, User, Plus } from 'lucide-react';
+import ReactCalendar from 'react-calendar';
+import { Clock, MapPin, User, Plus, Calendar } from 'lucide-react';
 import 'react-calendar/dist/Calendar.css';
 
 interface Event {
@@ -35,11 +35,14 @@ const eventTypeColors = {
 };
 
 const eventTypeIcons = {
-  delivery: '🚛',
-  meeting: '👥', 
-  maintenance: '🔧',
-  order: '📦',
+  delivery: <Truck className="w-4 h-4" />,
+  meeting: <Users className="w-4 h-4" />, 
+  maintenance: <Wrench className="w-4 h-4" />,
+  order: <Package className="w-4 h-4" />,
 };
+
+// Import missed truck/users/wrench/package icons
+import { Truck, Users, Wrench, Package } from 'lucide-react';
 
 export function CalendarWidget() {
   const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -53,7 +56,7 @@ export function CalendarWidget() {
       if (dayEvents && dayEvents.length > 0) {
         return (
           <div className="flex justify-center mt-1">
-            <div className="w-2 h-2 bg-blue-600 rounded-full"></div>
+            <div className="w-1.5 h-1.5 bg-blue-600 rounded-full"></div>
           </div>
         );
       }
@@ -70,9 +73,9 @@ export function CalendarWidget() {
         </button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Calendar */}
-        <div className="space-y-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 ring-1 ring-gray-100 p-1 rounded-xl">
+        {/* Calendar Section */}
+        <div className="bg-gray-50/50 p-4 rounded-xl">
           <div className="calendar-container">
             <style>{`
               .react-calendar {
@@ -90,12 +93,14 @@ export function CalendarWidget() {
                 transition: all 0.2s;
               }
               .react-calendar__tile:hover {
-                background-color: rgb(239 246 255);
+                background-color: white;
                 color: rgb(59 130 246);
+                box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
               }
               .react-calendar__tile--active {
                 background-color: rgb(59 130 246) !important;
                 color: white !important;
+                box-shadow: 0 10px 15px -3px rgb(59 130 246 / 0.3);
               }
               .react-calendar__tile--now {
                 background-color: rgb(254 240 138);
@@ -112,7 +117,8 @@ export function CalendarWidget() {
                 transition: all 0.2s;
               }
               .react-calendar__navigation button:hover {
-                background-color: rgb(243 244 246);
+                background-color: white;
+                box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1);
               }
               .react-calendar__month-view__weekdays {
                 text-align: center;
@@ -125,7 +131,7 @@ export function CalendarWidget() {
                 padding: 0.5rem;
               }
             `}</style>
-            <Calendar
+            <ReactCalendar
               onChange={(value) => setSelectedDate(value as Date)}
               value={selectedDate}
               tileContent={tileContent}
@@ -134,41 +140,48 @@ export function CalendarWidget() {
           </div>
         </div>
 
-        {/* Events List */}
-        <div className="space-y-4">
-          <h4 className="font-medium text-gray-900">
-            Events for {selectedDate.toLocaleDateString('en-US', { 
-              weekday: 'long', 
-              month: 'long', 
-              day: 'numeric' 
-            })}
-          </h4>
+        {/* Selected Day View */}
+        <div className="flex flex-col">
+          <div className="flex items-center justify-between mb-4 pb-2 border-b border-gray-100">
+            <h4 className="font-bold text-gray-900">
+              {selectedDate.toLocaleDateString('en-US', { 
+                weekday: 'short', 
+                month: 'short', 
+                day: 'numeric' 
+              })}
+            </h4>
+            <span className="text-xs font-semibold text-blue-600 bg-blue-50 px-2 py-1 rounded-full uppercase tracking-wider">
+              {eventsForDate.length} Events
+            </span>
+          </div>
           
-          <div className="space-y-3 max-h-80 overflow-y-auto">
+          <div className="space-y-3 flex-1 overflow-y-auto pr-1">
             {eventsForDate.length > 0 ? (
               eventsForDate.map((event) => (
                 <div
                   key={event.id}
-                  className={`p-4 rounded-xl border ${eventTypeColors[event.type]} transition-colors hover:shadow-md`}
+                  className={`p-4 rounded-xl border-l-4 border shadow-sm ${eventTypeColors[event.type]} animation-fade-in`}
                   data-testid={`event-${event.id}`}
                 >
                   <div className="flex items-start space-x-3">
-                    <span className="text-lg">{eventTypeIcons[event.type]}</span>
-                    <div className="flex-1 min-w-0">
-                      <h5 className="font-medium text-sm truncate">{event.title}</h5>
-                      <div className="flex items-center space-x-4 mt-2 text-xs opacity-80">
-                        <div className="flex items-center space-x-1">
+                    <div className="p-2 bg-white rounded-lg shadow-sm">
+                      {eventTypeIcons[event.type]}
+                    </div>
+                    <div className="flex-1 min-w-0 pt-0.5">
+                      <h5 className="font-bold text-sm tracking-tight">{event.title}</h5>
+                      <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-2 text-[10px] sm:text-xs">
+                        <div className="flex items-center space-x-1 font-medium italic">
                           <Clock className="w-3 h-3" />
                           <span>{event.time}</span>
                         </div>
                         {event.location && (
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-1 opacity-70">
                             <MapPin className="w-3 h-3" />
                             <span className="truncate">{event.location}</span>
                           </div>
                         )}
                         {event.attendee && (
-                          <div className="flex items-center space-x-1">
+                          <div className="flex items-center space-x-1 opacity-70">
                             <User className="w-3 h-3" />
                             <span className="truncate">{event.attendee}</span>
                           </div>
@@ -179,9 +192,12 @@ export function CalendarWidget() {
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Calendar className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                <p className="text-sm">No events scheduled for this day</p>
+              <div className="flex flex-col items-center justify-center h-48 bg-gray-50/50 rounded-xl border border-dashed border-gray-200">
+                <div className="w-12 h-12 bg-white rounded-2xl shadow-sm flex items-center justify-center mb-3">
+                  <Calendar className="w-6 h-6 text-gray-300" />
+                </div>
+                <p className="text-sm font-medium text-gray-400">Clear Schedule</p>
+                <p className="text-[10px] text-gray-400 mt-1 uppercase tracking-widest font-bold">Nothing planned</p>
               </div>
             )}
           </div>

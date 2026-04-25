@@ -40,6 +40,7 @@ export interface IStorage {
   // User operations - mandatory for Replit Auth
   getUser(id: string): Promise<User | undefined>;
   upsertUser(user: UpsertUser): Promise<User>;
+  updateUser(id: string, user: Partial<User>): Promise<User>;
   
   // Category operations
   getCategories(): Promise<Category[]>;
@@ -58,6 +59,9 @@ export interface IStorage {
   getOrderById(id: number): Promise<Order | undefined>;
   createOrder(order: InsertOrder): Promise<Order>;
   updateOrderStatus(id: number, status: string): Promise<Order>;
+  decrementProductStock(productId: number, quantity: number): Promise<void>;
+  updateVendorRequirement(vendorId: number, liters: number): Promise<void>;
+  recordStockMovement(movement: any): Promise<void>;
   getOrdersForDelivery(deliveryPartnerId: number): Promise<Order[]>;
   
   // Order items operations
@@ -109,7 +113,36 @@ export interface IStorage {
   // Subscription management - get all subscriptions
   getAllSubscriptions(): Promise<(MilkSubscription & { user?: User })[]>;
 
-  // Stock movement operations
+  // Banner operations
+  getBanners(): Promise<any[]>;
+  getActiveBanners(): Promise<any[]>;
+  createBanner(banner: any): Promise<any>;
+  updateBanner(id: number, banner: any): Promise<any>;
+  deleteBanner(id: number): Promise<void>;
+
+  // Homepage CMS operations
+  getEthosCards(): Promise<any[]>;
+  getActiveEthosCards(): Promise<any[]>;
+  getStatsCounters(): Promise<any[]>;
+  getActiveStatsCounters(): Promise<any[]>;
+  getFAQs(): Promise<any[]>;
+  getActiveFAQs(): Promise<any[]>;
+  getNewsletterSettings(): Promise<any | null>;
+  getFooterSettings(): Promise<any | null>;
+  updateNewsletterSettings(settings: any): Promise<any>;
+  updateFooterSettings(settings: any): Promise<any>;
+
+  // CMS Settings operations
+  getAboutUsSettings(): Promise<any | null>;
+  getContactSettings(): Promise<any | null>;
+  getTermsOfServiceSettings(): Promise<any | null>;
+  getPrivacyPolicySettings(): Promise<any | null>;
+  updateAboutUsSettings(settings: any): Promise<any>;
+  updateContactSettings(settings: any): Promise<any>;
+  updateTermsOfServiceSettings(settings: any): Promise<any>;
+  updatePrivacyPolicySettings(settings: any): Promise<any>;
+  getSiteSettings(): Promise<any | null>;
+  updateSiteSettings(settings: any): Promise<any>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -131,6 +164,22 @@ export class DatabaseStorage implements IStorage {
         },
       })
       .returning();
+    return user;
+  }
+
+  async updateUser(id: string, userData: Partial<User>): Promise<User> {
+    const [user] = await db
+      .update(users)
+      .set({
+        ...userData,
+        updatedAt: new Date(),
+      })
+      .where(eq(users.id, id))
+      .returning();
+      
+    if (!user) {
+      throw new Error("User not found");
+    }
     return user;
   }
 
@@ -225,11 +274,68 @@ export class DatabaseStorage implements IStorage {
   }
 
   async updateOrderStatus(id: number, status: string): Promise<Order> {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
+    
     const [updatedOrder] = await db.update(orders)
       .set({ status })
       .where(eq(orders.id, id))
       .returning();
+
+    // If status changed to DELIVERED, decrement stock for each item
+    // We check if it wasn't already delivered to avoid double counting
+    if (status.toUpperCase() === 'DELIVERED' && order && order.status.toUpperCase() !== 'DELIVERED') {
+      const items = await this.getOrderItemsByOrder(id);
+      for (const item of items) {
+        await this.decrementProductStock(item.productId, item.quantity);
+        
+        // Record movement
+        await this.recordStockMovement({
+          productId: item.productId,
+          type: 'OUT',
+          reason: 'ORDER_DELIVERED',
+          quantity: item.quantity,
+          previousStock: 0, // Would need more queries to get exact
+          newStock: 0,
+          notes: `Order #${id} delivered`
+        });
+      }
+    }
+    
     return updatedOrder;
+  }
+
+  async decrementProductStock(productId: number, quantity: number): Promise<void> {
+    const [product] = await db.select().from(products).where(eq(products.id, productId));
+    if (product) {
+      const newStock = Math.max(0, (product.stock || 0) - quantity);
+      await db.update(products)
+        .set({ stock: newStock })
+        .where(eq(products.id, productId));
+    }
+  }
+
+  async updateVendorRequirement(vendorId: number, liters: number): Promise<void> {
+    const [vendor] = await db.select().from(vendors).where(eq(vendors.id, vendorId));
+    if (vendor) {
+      const currentCirculated = vendor.circulatedLiters || 0;
+      const currentRequirement = vendor.requirementToday || 0;
+      
+      const newCirculated = currentCirculated + liters;
+      const newRequirement = Math.max(0, currentRequirement - liters);
+      
+      await db.update(vendors)
+        .set({ 
+          circulatedLiters: newCirculated,
+          requirementToday: newRequirement
+        })
+        .where(eq(vendors.id, vendorId));
+    }
+  }
+
+  async recordStockMovement(movement: any): Promise<void> {
+    // For now, log to console as the table doesn't exist in schema
+    // In a real app, this would insert into a stock_movements table
+    console.log("📦 Stock Movement Recorded:", movement);
   }
 
   async getOrdersForDelivery(deliveryPartnerId: number): Promise<Order[]> {
@@ -542,7 +648,201 @@ export class DatabaseStorage implements IStorage {
     };
   }
 
-  // Stock movement functions removed - table not in schema
+  // Banner operations
+  async getBanners(): Promise<any[]> {
+    const { banners } = await import("@shared/schema");
+    return await db.select().from(banners).orderBy(asc(banners.displayOrder));
+  }
+
+  async getActiveBanners(): Promise<any[]> {
+    const { banners } = await import("@shared/schema");
+    const now = new Date();
+    return await db.select().from(banners).where(
+      and(
+        eq(banners.isActive, true),
+        or(isNull(banners.startDate), lte(banners.startDate, now)),
+        or(isNull(banners.endDate), gte(banners.endDate, now))
+      )
+    ).orderBy(asc(banners.displayOrder));
+  }
+
+  async createBanner(bannerData: any): Promise<any> {
+    const { banners } = await import("@shared/schema");
+    const [banner] = await db.insert(banners).values(bannerData).returning();
+    return banner;
+  }
+
+  async updateBanner(id: number, bannerData: any): Promise<any> {
+    const { banners } = await import("@shared/schema");
+    const [banner] = await db.update(banners)
+      .set({ ...bannerData, updatedAt: new Date() })
+      .where(eq(banners.id, id))
+      .returning();
+    return banner;
+  }
+
+  async deleteBanner(id: number): Promise<void> {
+    const { banners } = await import("@shared/schema");
+    await db.delete(banners).where(eq(banners.id, id));
+  }
+
+  // Homepage CMS operations
+  async getEthosCards(): Promise<any[]> {
+    const { ethosCards } = await import("@shared/schema");
+    return await db.select().from(ethosCards).orderBy(asc(ethosCards.displayOrder));
+  }
+
+  async getActiveEthosCards(): Promise<any[]> {
+    const { ethosCards } = await import("@shared/schema");
+    return await db.select().from(ethosCards).where(eq(ethosCards.isActive, true)).orderBy(asc(ethosCards.displayOrder));
+  }
+
+  async getStatsCounters(): Promise<any[]> {
+    const { statsCounters } = await import("@shared/schema");
+    return await db.select().from(statsCounters).orderBy(asc(statsCounters.displayOrder));
+  }
+
+  async getActiveStatsCounters(): Promise<any[]> {
+    const { statsCounters } = await import("@shared/schema");
+    return await db.select().from(statsCounters).where(eq(statsCounters.isActive, true)).orderBy(asc(statsCounters.displayOrder));
+  }
+
+  async getFAQs(): Promise<any[]> {
+    const { faqs } = await import("@shared/schema");
+    return await db.select().from(faqs).orderBy(asc(faqs.displayOrder));
+  }
+
+  async getActiveFAQs(): Promise<any[]> {
+    const { faqs } = await import("@shared/schema");
+    return await db.select().from(faqs).where(eq(faqs.isActive, true)).orderBy(asc(faqs.displayOrder));
+  }
+
+  async getNewsletterSettings(): Promise<any | null> {
+    const { newsletterSettings } = await import("@shared/schema");
+    const [settings] = await db.select().from(newsletterSettings).limit(1);
+    return settings || null;
+  }
+
+  async getFooterSettings(): Promise<any | null> {
+    const { footerSettings } = await import("@shared/schema");
+    const [settings] = await db.select().from(footerSettings).limit(1);
+    return settings || null;
+  }
+
+  async updateNewsletterSettings(settingsData: any): Promise<any> {
+    const { newsletterSettings } = await import("@shared/schema");
+    const existing = await this.getNewsletterSettings();
+    if (existing) {
+      const [updated] = await db.update(newsletterSettings).set({ ...settingsData, updatedAt: new Date() }).where(eq(newsletterSettings.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(newsletterSettings).values(settingsData).returning();
+      return created;
+    }
+  }
+
+  async updateFooterSettings(settingsData: any): Promise<any> {
+    const { footerSettings } = await import("@shared/schema");
+    const existing = await this.getFooterSettings();
+    if (existing) {
+      const [updated] = await db.update(footerSettings).set({ ...settingsData, updatedAt: new Date() }).where(eq(footerSettings.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(footerSettings).values(settingsData).returning();
+      return created;
+    }
+  }
+
+  // CMS Settings operations
+  async getAboutUsSettings(): Promise<any | null> {
+    const { aboutUsSettings } = await import("@shared/schema");
+    const [settings] = await db.select().from(aboutUsSettings).limit(1);
+    return settings || null;
+  }
+
+  async getContactSettings(): Promise<any | null> {
+    const { contactSettings } = await import("@shared/schema");
+    const [settings] = await db.select().from(contactSettings).limit(1);
+    return settings || null;
+  }
+
+  async getTermsOfServiceSettings(): Promise<any | null> {
+    const { termsOfServiceSettings } = await import("@shared/schema");
+    const [settings] = await db.select().from(termsOfServiceSettings).limit(1);
+    return settings || null;
+  }
+
+  async getPrivacyPolicySettings(): Promise<any | null> {
+    const { privacyPolicySettings } = await import("@shared/schema");
+    const [settings] = await db.select().from(privacyPolicySettings).limit(1);
+    return settings || null;
+  }
+
+  async updateAboutUsSettings(settingsData: any): Promise<any> {
+    const { aboutUsSettings } = await import("@shared/schema");
+    const existing = await this.getAboutUsSettings();
+    if (existing) {
+      const [updated] = await db.update(aboutUsSettings).set({ ...settingsData, updatedAt: new Date() }).where(eq(aboutUsSettings.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(aboutUsSettings).values(settingsData).returning();
+      return created;
+    }
+  }
+
+  async updateContactSettings(settingsData: any): Promise<any> {
+    const { contactSettings } = await import("@shared/schema");
+    const existing = await this.getContactSettings();
+    if (existing) {
+      const [updated] = await db.update(contactSettings).set({ ...settingsData, updatedAt: new Date() }).where(eq(contactSettings.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(contactSettings).values(settingsData).returning();
+      return created;
+    }
+  }
+
+  async updateTermsOfServiceSettings(settingsData: any): Promise<any> {
+    const { termsOfServiceSettings } = await import("@shared/schema");
+    const existing = await this.getTermsOfServiceSettings();
+    if (existing) {
+      const [updated] = await db.update(termsOfServiceSettings).set({ ...settingsData, updatedAt: new Date() }).where(eq(termsOfServiceSettings.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(termsOfServiceSettings).values(settingsData).returning();
+      return created;
+    }
+  }
+
+  async updatePrivacyPolicySettings(settingsData: any): Promise<any> {
+    const { privacyPolicySettings } = await import("@shared/schema");
+    const existing = await this.getPrivacyPolicySettings();
+    if (existing) {
+      const [updated] = await db.update(privacyPolicySettings).set({ ...settingsData, updatedAt: new Date() }).where(eq(privacyPolicySettings.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(privacyPolicySettings).values(settingsData).returning();
+      return created;
+    }
+  }
+
+  async getSiteSettings(): Promise<any | null> {
+    const { siteSettings } = await import("@shared/schema");
+    const [settings] = await db.select().from(siteSettings).limit(1);
+    return settings || null;
+  }
+
+  async updateSiteSettings(settingsData: any): Promise<any> {
+    const { siteSettings } = await import("@shared/schema");
+    const existing = await this.getSiteSettings();
+    if (existing) {
+      const [updated] = await db.update(siteSettings).set({ ...settingsData, updatedAt: new Date() }).where(eq(siteSettings.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(siteSettings).values(settingsData).returning();
+      return created;
+    }
+  }
 }
 
 

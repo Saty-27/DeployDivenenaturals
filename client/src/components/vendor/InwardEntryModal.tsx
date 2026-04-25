@@ -27,6 +27,8 @@ import {
 import { apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { z } from "zod";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 // Validation schema according to prompt requirements
 const inwardEntrySchema = z.object({
@@ -51,6 +53,7 @@ interface InwardEntryModalProps {
 export default function InwardEntryModal({ trigger }: InwardEntryModalProps) {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { settings } = useSiteSettings();
   const [isOpen, setIsOpen] = useState(false);
   
   // Form state
@@ -262,10 +265,17 @@ export default function InwardEntryModal({ trigger }: InwardEntryModalProps) {
             <div className="absolute top-0 left-0 right-0 h-2 bg-gradient-to-r from-blue-500 to-cyan-500"></div>
             <CardHeader className="pb-4">
               <CardTitle className="text-xl font-black text-[hsl(var(--eco-secondary))] flex items-center">
-                🥛 Milk Quantities
+                <div className="w-8 h-8 mr-2 bg-white rounded-lg flex items-center justify-center p-1 shadow-sm border border-green-50">
+                  <img 
+                    src={settings.logoUrl || logoImage} 
+                    alt={settings.brandName} 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                {settings.brandName} Quantities
                 <Info className="w-5 h-5 ml-2 eco-icon-primary" />
               </CardTitle>
-              <p className="text-[hsl(var(--eco-text-muted))] font-medium">Enter the exact milk quantities for accurate tracking</p>
+              <p className="text-[hsl(var(--eco-text-muted))] font-medium">Enter the exact quantities for accurate tracking</p>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -1,4 +1,4 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation, useSearch } from "wouter";
@@ -7,6 +7,8 @@ import SiteHeader from "@/components/landing/site-header";
 import SiteFooter from "@/components/landing/site-footer";
 import { Card, CardContent } from "@/components/ui/card";
 import { Filter, Grid, List, X } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 interface Category {
   id: number;
@@ -23,11 +25,13 @@ interface Product {
   stock: number;
   imageUrl?: string;
   unit?: string;
+  redirectUrl?: string;
 }
 
 export default function ShopPage() {
   const [, setLocation] = useLocation();
   const searchString = useSearch();
+  const { settings } = useSiteSettings();
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
@@ -83,36 +87,61 @@ export default function ShopPage() {
     return matchesCategory && matchesSearch;
   });
 
-  const handleAddToCart = async (e: React.MouseEvent, productId: number) => {
-    e.stopPropagation();
-    try {
+  const queryClient = useQueryClient();
+  const addToCartMutation = useMutation({
+    mutationFn: async (productId: number) => {
       const res = await fetch("/api/cart/items", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ productId, quantity: 1 }),
       });
-
-      if (res.ok) {
-        toast({
-          title: "Added to cart!",
-          description: "Product added successfully",
-        });
-      } else {
+      if (!res.ok) {
         const error = await res.json();
-        toast({
-          title: "Error",
-          description: error.message || "Failed to add to cart",
-          variant: "destructive",
-        });
+        throw new Error(error.message || "Failed to add to cart");
       }
-    } catch (error) {
+      return res.json();
+    },
+    onMutate: async (productId) => {
+      await queryClient.cancelQueries({ queryKey: ["cart"] });
+      const previousCart = queryClient.getQueryData(["cart"]);
+      const product = products.find((p: Product) => p.id === productId);
+
+      queryClient.setQueryData(["cart"], (old: any) => {
+        const newItem = { 
+          id: Math.random(), 
+          productId, 
+          quantity: 1, 
+          product: product ? { name: product.name, price: product.price, description: product.description } : undefined 
+        };
+        return Array.isArray(old) ? [...old, newItem] : [newItem];
+      });
+
+      toast({
+        title: "Added to cart!",
+        description: `${product?.name || "Product"} added successfully`,
+      });
+
+      return { previousCart };
+    },
+    onError: (err: any, _, context: any) => {
+      if (context?.previousCart) {
+        queryClient.setQueryData(["cart"], context.previousCart);
+      }
       toast({
         title: "Error",
-        description: "Failed to add to cart",
+        description: err.message || "Failed to add to cart",
         variant: "destructive",
       });
-    }
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["cart"] });
+    },
+  });
+
+  const handleAddToCart = (e: React.MouseEvent, productId: number) => {
+    e.stopPropagation();
+    addToCartMutation.mutate(productId);
   };
 
   const isLoading = categoriesLoading || productsLoading;
@@ -223,7 +252,13 @@ export default function ShopPage() {
               {isLoading ? (
                 <div className="flex items-center justify-center h-64">
                   <div className="text-center">
-                    <div className="text-5xl mb-4">🥛</div>
+                    <div className="w-20 h-20 mx-auto bg-white rounded-2xl flex items-center justify-center mb-4 shadow-lg p-2 border border-green-50">
+                      <img 
+                        src={settings.logoUrl || logoImage} 
+                        alt={settings.brandName} 
+                        className="w-full h-full object-contain"
+                      />
+                    </div>
                     <p className="text-gray-600">Loading products...</p>
                   </div>
                 </div>
@@ -241,7 +276,13 @@ export default function ShopPage() {
                       <Card
                         key={product.id}
                         className="group overflow-hidden border-0 shadow-md hover:shadow-xl transition-all duration-300 cursor-pointer"
-                        onClick={() => setLocation(`/product/${product.id}`)}
+                        onClick={() => {
+                          if (product.redirectUrl) {
+                            window.open(product.redirectUrl, "_blank");
+                          } else {
+                            setLocation(`/product/${product.id}`);
+                          }
+                        }}
                       >
                         <CardContent className="p-0">
                           <div className="relative">
@@ -252,8 +293,12 @@ export default function ShopPage() {
                                 className="w-full h-48 object-cover group-hover:scale-105 transition-transform duration-300"
                               />
                             ) : (
-                              <div className="w-full h-48 bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-5xl">
-                                🥛
+                              <div className="w-full h-48 bg-white flex items-center justify-center p-8 opacity-50">
+                                <img 
+                                  src={settings.logoUrl || logoImage} 
+                                  alt={settings.brandName} 
+                                  className="w-full h-full object-contain grayscale"
+                                />
                               </div>
                             )}
                             {product.stock <= 5 && product.stock > 0 && (
@@ -301,7 +346,13 @@ export default function ShopPage() {
                       <Card
                         key={product.id}
                         className="overflow-hidden border-0 shadow-md hover:shadow-lg transition-shadow cursor-pointer"
-                        onClick={() => setLocation(`/product/${product.id}`)}
+                        onClick={() => {
+                          if (product.redirectUrl) {
+                            window.open(product.redirectUrl, "_blank");
+                          } else {
+                            setLocation(`/product/${product.id}`);
+                          }
+                        }}
                       >
                         <CardContent className="p-0">
                           <div className="flex">
@@ -313,8 +364,12 @@ export default function ShopPage() {
                                   className="w-full h-full object-cover"
                                 />
                               ) : (
-                                <div className="w-full h-full bg-gradient-to-br from-green-100 to-green-200 flex items-center justify-center text-3xl">
-                                  🥛
+                                <div className="w-full h-full bg-white flex items-center justify-center p-4 opacity-50">
+                                  <img 
+                                    src={settings.logoUrl || logoImage} 
+                                    alt={settings.brandName} 
+                                    className="w-full h-full object-contain grayscale"
+                                  />
                                 </div>
                               )}
                             </div>
@@ -350,12 +405,11 @@ export default function ShopPage() {
                   ))}
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <div className="text-5xl mb-4">📦</div>
-                  <p className="text-gray-600 text-lg">
+                <div className="text-center py-20">
+                  <p className="text-gray-400 text-lg">
                     {selectedCategory
-                      ? "No products in this category"
-                      : "No products available"}
+                      ? "No products in this category yet"
+                      : "No products available at the moment"}
                   </p>
                 </div>
               )}

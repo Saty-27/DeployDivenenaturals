@@ -1,75 +1,82 @@
 var __defProp = Object.defineProperty;
+var __getOwnPropNames = Object.getOwnPropertyNames;
+var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require : typeof Proxy !== "undefined" ? new Proxy(x, {
+  get: (a, b) => (typeof require !== "undefined" ? require : a)[b]
+}) : x)(function(x) {
+  if (typeof require !== "undefined") return require.apply(this, arguments);
+  throw Error('Dynamic require of "' + x + '" is not supported');
+});
+var __esm = (fn, res) => function __init() {
+  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+};
 var __export = (target, all) => {
   for (var name in all)
     __defProp(target, name, { get: all[name], enumerable: true });
 };
 
-// server/index.ts
-import express2 from "express";
-import fileUpload from "express-fileupload";
-
-// server/routes.ts
-import { createServer } from "http";
-
 // shared/schema.ts
 var schema_exports = {};
 __export(schema_exports, {
+  aboutUsSettings: () => aboutUsSettings,
   addresses: () => addresses,
   addressesRelations: () => addressesRelations,
   admins: () => admins,
   adminsRelations: () => adminsRelations,
-  alerts: () => alerts,
+  banners: () => banners,
+  bills: () => bills,
+  billsRelations: () => billsRelations,
   cart: () => cart,
   cartItems: () => cartItems,
   cartItemsRelations: () => cartItemsRelations,
   cartRelations: () => cartRelations,
   categories: () => categories,
-  coupons: () => coupons,
-  dailyVendorPerformance: () => dailyVendorPerformance,
+  contactSettings: () => contactSettings,
+  contactSubmissions: () => contactSubmissions,
   delegationLogs: () => delegationLogs,
+  deliveryAssignments: () => deliveryAssignments,
   deliveryPartners: () => deliveryPartners,
   deliveryPartnersRelations: () => deliveryPartnersRelations,
   drivers: () => drivers,
   driversRelations: () => driversRelations,
-  faqs: () => faqs,
+  ethosCards: () => ethosCards,
+  faqs: () => faqs2,
+  footerSettings: () => footerSettings,
+  homepageSections: () => homepageSections,
   insertAddressSchema: () => insertAddressSchema,
+  insertBannerSchema: () => insertBannerSchema,
+  insertContactSubmissionSchema: () => insertContactSubmissionSchema,
+  insertHomepageSectionSchema: () => insertHomepageSectionSchema,
   insertMilkSubscriptionSchema: () => insertMilkSubscriptionSchema,
   insertOrderSchema: () => insertOrderSchema,
   insertProductSchema: () => insertProductSchema,
+  insertSiteSettingsSchema: () => insertSiteSettingsSchema,
   insertSubscriptionSchema: () => insertSubscriptionSchema,
   insertSupportTicketSchema: () => insertSupportTicketSchema,
   insertTicketMessageSchema: () => insertTicketMessageSchema,
-  inwardLogs: () => inwardLogs,
-  marketingStaff: () => marketingStaff,
   milkSubscriptions: () => milkSubscriptions,
-  milkSubscriptionsRelations: () => milkSubscriptionsRelations,
+  newsletterSettings: () => newsletterSettings,
   notifications: () => notifications,
-  offers: () => offers,
   orderItems: () => orderItems,
   orderItemsRelations: () => orderItemsRelations,
-  orderRatings: () => orderRatings,
   orders: () => orders,
   ordersRelations: () => ordersRelations,
+  privacyPolicySettings: () => privacyPolicySettings,
+  productDeals: () => productDeals,
   productVendors: () => productVendors,
   productVendorsRelations: () => productVendorsRelations,
   products: () => products,
-  productsRelations: () => productsRelations,
-  referrals: () => referrals,
-  rewardPoints: () => rewardPoints,
   sessions: () => sessions,
-  stockMovements: () => stockMovements,
+  siteSettings: () => siteSettings,
+  statsCounters: () => statsCounters,
   subscriptionDeliveries: () => subscriptionDeliveries,
   subscriptionDeliveriesRelations: () => subscriptionDeliveriesRelations,
+  subscriptionsRelations: () => subscriptionsRelations,
   supportTickets: () => supportTickets,
+  termsOfServiceSettings: () => termsOfServiceSettings,
   ticketMessages: () => ticketMessages,
   users: () => users2,
-  usersRelations: () => usersRelations,
-  vendorDeliveryAssignments: () => vendorDeliveryAssignments,
-  vendorRequirements: () => vendorRequirements,
-  vendorSupply: () => vendorSupply,
   vendors: () => vendors,
-  vendorsRelations: () => vendorsRelations,
-  walletTransactions: () => walletTransactions
+  vendorsRelations: () => vendorsRelations
 });
 import {
   pgTable,
@@ -86,644 +93,1047 @@ import {
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { relations } from "drizzle-orm";
-var sessions = pgTable(
-  "sessions",
-  {
-    sid: varchar("sid").primaryKey(),
-    sess: jsonb("sess").notNull(),
-    expire: timestamp("expire").notNull()
-  },
-  (table) => [index("IDX_session_expire").on(table.expire)]
-);
-var users2 = pgTable("users", {
-  id: varchar("id").primaryKey().notNull(),
-  email: varchar("email").unique(),
-  passwordHash: varchar("password_hash"),
-  // For simple email/password auth
-  firstName: varchar("first_name"),
-  lastName: varchar("last_name"),
-  profileImageUrl: varchar("profile_image_url"),
-  phone: varchar("phone"),
-  address: text("address"),
-  gender: varchar("gender"),
-  // male, female, other
-  dob: date("dob"),
-  // date of birth for STAGE 1
-  role: varchar("role").notNull().default("customer"),
-  // customer, admin, vendor, delivery, marketing_staff
-  isActive: boolean("is_active").default(true),
-  walletBalance: decimal("wallet_balance", { precision: 10, scale: 2 }).default("0"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow()
+var sessions, users2, categories, products, vendors, deliveryPartners, deliveryAssignments, drivers, admins, delegationLogs, orders, orderItems, milkSubscriptions, subscriptionDeliveries, cart, cartItems, addresses, supportTickets, ticketMessages, productVendors, notifications, bills, subscriptionsRelations, subscriptionDeliveriesRelations, ordersRelations, orderItemsRelations, vendorsRelations, deliveryPartnersRelations, driversRelations, adminsRelations, cartRelations, cartItemsRelations, addressesRelations, productVendorsRelations, billsRelations, banners, homepageSections, ethosCards, productDeals, statsCounters, faqs2, newsletterSettings, footerSettings, aboutUsSettings, contactSettings, termsOfServiceSettings, privacyPolicySettings, siteSettings, contactSubmissions, insertAddressSchema, insertOrderSchema, insertSubscriptionSchema, insertMilkSubscriptionSchema, insertSupportTicketSchema, insertTicketMessageSchema, insertProductSchema, insertBannerSchema, insertHomepageSectionSchema, insertContactSubmissionSchema, insertSiteSettingsSchema;
+var init_schema = __esm({
+  "shared/schema.ts"() {
+    "use strict";
+    sessions = pgTable(
+      "sessions",
+      {
+        sid: varchar("sid").primaryKey(),
+        sess: jsonb("sess").notNull(),
+        expire: timestamp("expire").notNull()
+      },
+      (table) => [index("IDX_session_expire").on(table.expire)]
+    );
+    users2 = pgTable("users", {
+      id: varchar("id").primaryKey().notNull(),
+      email: varchar("email").unique(),
+      passwordHash: varchar("password_hash"),
+      // For simple email/password auth
+      firstName: varchar("first_name"),
+      lastName: varchar("last_name"),
+      profileImageUrl: varchar("profile_image_url"),
+      phone: varchar("phone"),
+      address: text("address"),
+      gender: varchar("gender"),
+      // male, female, other
+      dob: date("dob"),
+      // date of birth for STAGE 1
+      role: varchar("role").notNull().default("customer"),
+      // customer, admin, vendor, delivery, marketing_staff
+      isActive: boolean("is_active").default(true),
+      walletBalance: decimal("wallet_balance", { precision: 10, scale: 2 }).default("0"),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    categories = pgTable("categories", {
+      id: serial("id").primaryKey(),
+      name: varchar("name").notNull().unique(),
+      description: text("description"),
+      icon: varchar("icon"),
+      // emoji or icon name - kept for compatibility, can store image URLs too
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    products = pgTable("products", {
+      id: serial("id").primaryKey(),
+      name: varchar("name").notNull(),
+      sku: varchar("sku").unique(),
+      description: text("description"),
+      category: varchar("category").notNull(),
+      // References categories.name
+      type: varchar("type").notNull(),
+      // MILK, DAIRY
+      price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+      unit: varchar("unit").notNull(),
+      // L, kg, g, piece
+      stock: integer("stock").default(0),
+      expiryDate: date("expiry_date"),
+      imageUrl: varchar("image_url"),
+      isActive: boolean("is_active").default(true),
+      isNew: boolean("is_new").default(false),
+      // Flag for "Newly Launched" section
+      isFeatured: boolean("is_featured").default(false),
+      // Flag for featured products
+      launchedAt: timestamp("launched_at"),
+      // When product was launched (for sorting new products)
+      redirectUrl: varchar("redirect_url"),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    vendors = pgTable("vendors", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id),
+      businessName: varchar("business_name").notNull(),
+      licenseNumber: varchar("license_number"),
+      locationName: varchar("location_name").notNull(),
+      // Borivali, Santa Cruz, Andheri etc.
+      vendorType: varchar("vendor_type").notNull().default("SUB_VENDOR"),
+      // HEAD_VENDOR, VENDOR, SUB_VENDOR
+      headVendorId: integer("head_vendor_id"),
+      // self-reference, will add constraint later
+      parentVendorId: integer("parent_vendor_id"),
+      // self-reference, will add constraint later
+      dailyCapacity: integer("daily_capacity"),
+      // in liters
+      currentQuota: integer("current_quota").default(0),
+      requirementToday: integer("requirement_today").default(0),
+      requirementTomorrowForecast: integer("requirement_tomorrow_forecast").default(0),
+      circulatedLiters: integer("circulated_liters").default(0),
+      revenueToday: decimal("revenue_today", { precision: 10, scale: 2 }).default("0"),
+      revenueTotal: decimal("revenue_total", { precision: 10, scale: 2 }).default("0"),
+      paymentsPending: decimal("payments_pending", { precision: 10, scale: 2 }).default("0"),
+      weeklyEarnings: decimal("weekly_earnings", { precision: 10, scale: 2 }).default("0"),
+      monthlyEarnings: decimal("monthly_earnings", { precision: 10, scale: 2 }).default("0"),
+      zone: varchar("zone"),
+      isVerified: boolean("is_verified").default(false),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    deliveryPartners = pgTable("delivery_partners", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id),
+      fullName: varchar("full_name").notNull(),
+      email: varchar("email"),
+      phone: varchar("phone").notNull().unique(),
+      username: varchar("username").unique(),
+      passwordHash: varchar("password_hash"),
+      initialPassword: varchar("initial_password"),
+      // Plain password for display only (admin use)
+      aadhaarNumber: varchar("aadhaar_number"),
+      panNumber: varchar("pan_number"),
+      dob: date("dob"),
+      vehicleType: varchar("vehicle_type"),
+      licenseNumber: varchar("license_number"),
+      address: text("address"),
+      zone: varchar("zone"),
+      status: varchar("status").default("active"),
+      // active, blocked, suspended, pending_verification
+      isVerified: boolean("is_verified").default(false),
+      isAvailable: boolean("is_available").default(true),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    deliveryAssignments = pgTable("delivery_assignments", {
+      id: serial("id").primaryKey(),
+      orderId: integer("order_id").references(() => orders.id),
+      subscriptionId: integer("subscription_id").references(() => milkSubscriptions.id),
+      partnerId: integer("partner_id").references(() => deliveryPartners.id),
+      assignmentDate: date("assignment_date"),
+      status: varchar("status").default("pending"),
+      // pending, out_for_delivery, delivered, failed
+      codAmount: decimal("cod_amount", { precision: 10, scale: 2 }).default("0"),
+      collectionStatus: varchar("collection_status").default("pending"),
+      // pending, received, not_received
+      collectedCash: decimal("collected_cash", { precision: 10, scale: 2 }).default("0"),
+      failedReason: varchar("failed_reason"),
+      failedPhoto: text("failed_photo"),
+      timeStarted: timestamp("time_started"),
+      timeDelivered: timestamp("time_delivered"),
+      customerInstructions: text("customer_instructions"),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    drivers = pgTable("drivers", {
+      id: serial("id").primaryKey(),
+      name: varchar("name").notNull(),
+      age: integer("age").notNull(),
+      phone: varchar("phone").notNull(),
+      aadharUrl: varchar("aadhar_url"),
+      // optional KYC document
+      panUrl: varchar("pan_url"),
+      // optional KYC document
+      vendorId: integer("vendor_id").references(() => vendors.id).notNull(),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    admins = pgTable("admins", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id).notNull(),
+      name: varchar("name").notNull(),
+      phone: varchar("phone").notNull(),
+      role: varchar("role").notNull(),
+      // SUPER, HEAD, SUB
+      locationScope: jsonb("location_scope"),
+      // array of location strings
+      permissions: jsonb("permissions").notNull(),
+      // permission flags object
+      createdByUserId: varchar("created_by_user_id").references(() => users2.id),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    delegationLogs = pgTable("delegation_logs", {
+      id: serial("id").primaryKey(),
+      fromVendorId: integer("from_vendor_id").references(() => vendors.id).notNull(),
+      toVendorId: integer("to_vendor_id").references(() => vendors.id).notNull(),
+      orderIds: jsonb("order_ids").notNull(),
+      // array of order IDs
+      delegatedByAdminId: integer("delegated_by_admin_id").references(() => admins.id).notNull(),
+      reason: text("reason").notNull(),
+      timestamp: timestamp("timestamp").defaultNow()
+    });
+    orders = pgTable("orders", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id),
+      vendorId: integer("vendor_id").references(() => vendors.id),
+      deliveryPartnerId: integer("delivery_partner_id").references(() => deliveryPartners.id),
+      totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
+      liters: integer("liters").default(0),
+      // total milk liters in order
+      status: varchar("status").notNull().default("PLACED"),
+      // PLACED, PREPARING, OUT, DELIVERED, FAILED
+      deliverySlot: varchar("delivery_slot"),
+      // morning, evening etc.
+      deliveryDate: date("delivery_date").notNull(),
+      deliveryTime: varchar("delivery_time"),
+      deliveryAddress: text("delivery_address").notNull(),
+      paymentStatus: varchar("payment_status").default("pending"),
+      // pending, paid, failed
+      paymentMethod: varchar("payment_method").default("cash_on_delivery"),
+      // cash_on_delivery, online, wallet, upi
+      paymentDate: timestamp("payment_date"),
+      // when payment was received
+      delegationLogId: integer("delegation_log_id").references(() => delegationLogs.id),
+      notes: text("notes"),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    orderItems = pgTable("order_items", {
+      id: serial("id").primaryKey(),
+      orderId: integer("order_id").references(() => orders.id),
+      productId: integer("product_id").references(() => products.id),
+      quantity: integer("quantity").notNull(),
+      price: decimal("price", { precision: 10, scale: 2 }).notNull(),
+      totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull()
+    });
+    milkSubscriptions = pgTable("milk_subscriptions", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id),
+      productId: integer("product_id").references(() => products.id),
+      quantity: integer("quantity").notNull(),
+      frequency: varchar("frequency").notNull(),
+      // daily, weekly, alternate
+      deliveryTime: varchar("delivery_time"),
+      startDate: date("start_date"),
+      endDate: date("end_date"),
+      pricePerL: decimal("price_per_l", { precision: 10, scale: 2 }),
+      status: varchar("status").notNull().default("ACTIVE"),
+      // ACTIVE, PAUSED, CANCELLED
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    subscriptionDeliveries = pgTable("subscription_deliveries", {
+      id: serial("id").primaryKey(),
+      subscriptionId: integer("subscription_id").references(() => milkSubscriptions.id),
+      userId: varchar("user_id").references(() => users2.id),
+      deliveryDate: date("delivery_date"),
+      quantity: integer("quantity"),
+      status: varchar("status").default("pending"),
+      // pending, delivered, missed, cancelled
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    cart = pgTable("cart", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id).unique(),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    cartItems = pgTable("cart_items", {
+      id: serial("id").primaryKey(),
+      cartId: integer("cart_id").references(() => cart.id),
+      productId: integer("product_id").references(() => products.id),
+      quantity: integer("quantity"),
+      price: decimal("price", { precision: 10, scale: 2 }),
+      addedAt: timestamp("added_at").defaultNow()
+    });
+    addresses = pgTable("addresses", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id),
+      type: varchar("type").notNull(),
+      // home, work, other
+      address: text("address").notNull(),
+      landmark: varchar("landmark"),
+      city: varchar("city"),
+      state: varchar("state"),
+      pincode: varchar("pincode"),
+      phone: varchar("phone"),
+      isDefault: boolean("is_default").default(false),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    supportTickets = pgTable("support_tickets", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id),
+      subject: varchar("subject").notNull(),
+      description: text("description").notNull(),
+      status: varchar("status").default("open"),
+      // open, in_progress, resolved, closed
+      priority: varchar("priority").default("normal"),
+      // low, normal, high
+      category: varchar("category"),
+      // billing, delivery, product, general
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    ticketMessages = pgTable("ticket_messages", {
+      id: serial("id").primaryKey(),
+      ticketId: integer("ticket_id").references(() => supportTickets.id),
+      userId: varchar("user_id").references(() => users2.id),
+      message: text("message").notNull(),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    productVendors = pgTable("product_vendors", {
+      id: serial("id").primaryKey(),
+      productId: integer("product_id").references(() => products.id),
+      vendorId: integer("vendor_id").references(() => vendors.id),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    notifications = pgTable("notifications", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id),
+      type: varchar("type").notNull(),
+      // order, subscription, billing, etc
+      title: varchar("title").notNull(),
+      message: text("message").notNull(),
+      isRead: boolean("is_read").default(false),
+      createdAt: timestamp("created_at").defaultNow()
+    });
+    bills = pgTable("bills", {
+      id: serial("id").primaryKey(),
+      userId: varchar("user_id").references(() => users2.id).notNull(),
+      month: integer("month").notNull(),
+      // 1-12
+      year: integer("year").notNull(),
+      // 2025
+      items: jsonb("items").notNull(),
+      // Array of billing items
+      subscriptionTotal: decimal("subscription_total", { precision: 10, scale: 2 }).default("0"),
+      ordersTotal: decimal("orders_total", { precision: 10, scale: 2 }).default("0"),
+      previousPending: decimal("previous_pending", { precision: 10, scale: 2 }).default("0"),
+      penalty: decimal("penalty", { precision: 10, scale: 2 }).default("0"),
+      discount: decimal("discount", { precision: 10, scale: 2 }).default("0"),
+      finalAmount: decimal("final_amount", { precision: 10, scale: 2 }).notNull(),
+      dueDate: date("due_date").notNull(),
+      status: varchar("status").notNull().default("unpaid"),
+      // unpaid, paid, overdue
+      paymentDate: timestamp("payment_date"),
+      paymentMethod: varchar("payment_method"),
+      notes: text("notes"),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    subscriptionsRelations = relations(milkSubscriptions, ({ many, one }) => ({
+      deliveries: many(subscriptionDeliveries),
+      user: one(users2, {
+        fields: [milkSubscriptions.userId],
+        references: [users2.id]
+      }),
+      product: one(products, {
+        fields: [milkSubscriptions.productId],
+        references: [products.id]
+      })
+    }));
+    subscriptionDeliveriesRelations = relations(subscriptionDeliveries, ({ one }) => ({
+      subscription: one(milkSubscriptions, {
+        fields: [subscriptionDeliveries.subscriptionId],
+        references: [milkSubscriptions.id]
+      }),
+      user: one(users2, {
+        fields: [subscriptionDeliveries.userId],
+        references: [users2.id]
+      })
+    }));
+    ordersRelations = relations(orders, ({ many, one }) => ({
+      items: many(orderItems),
+      user: one(users2, {
+        fields: [orders.userId],
+        references: [users2.id]
+      })
+    }));
+    orderItemsRelations = relations(orderItems, ({ one }) => ({
+      order: one(orders, {
+        fields: [orderItems.orderId],
+        references: [orders.id]
+      }),
+      product: one(products, {
+        fields: [orderItems.productId],
+        references: [products.id]
+      })
+    }));
+    vendorsRelations = relations(vendors, ({ many, one }) => ({
+      orders: many(orders),
+      productVendors: many(productVendors),
+      subscriptions: many(milkSubscriptions)
+    }));
+    deliveryPartnersRelations = relations(deliveryPartners, ({ one }) => ({
+      user: one(users2, {
+        fields: [deliveryPartners.userId],
+        references: [users2.id]
+      })
+    }));
+    driversRelations = relations(drivers, ({ one }) => ({
+      vendor: one(vendors, {
+        fields: [drivers.vendorId],
+        references: [vendors.id]
+      })
+    }));
+    adminsRelations = relations(admins, ({ one }) => ({
+      user: one(users2, {
+        fields: [admins.userId],
+        references: [users2.id]
+      })
+    }));
+    cartRelations = relations(cart, ({ many }) => ({
+      items: many(cartItems)
+    }));
+    cartItemsRelations = relations(cartItems, ({ one }) => ({
+      cart: one(cart, {
+        fields: [cartItems.cartId],
+        references: [cart.id]
+      }),
+      product: one(products, {
+        fields: [cartItems.productId],
+        references: [products.id]
+      })
+    }));
+    addressesRelations = relations(addresses, ({ one }) => ({
+      user: one(users2, {
+        fields: [addresses.userId],
+        references: [users2.id]
+      })
+    }));
+    productVendorsRelations = relations(productVendors, ({ one }) => ({
+      product: one(products, {
+        fields: [productVendors.productId],
+        references: [products.id]
+      }),
+      vendor: one(vendors, {
+        fields: [productVendors.vendorId],
+        references: [vendors.id]
+      })
+    }));
+    billsRelations = relations(bills, ({ one }) => ({
+      user: one(users2, {
+        fields: [bills.userId],
+        references: [users2.id]
+      })
+    }));
+    banners = pgTable("banners", {
+      id: serial("id").primaryKey(),
+      title: varchar("title"),
+      subtitle: text("subtitle"),
+      imageUrl: varchar("image_url"),
+      // Desktop image (default/fallback)
+      imageUrlTablet: varchar("image_url_tablet"),
+      // Tablet image (768px-1024px)
+      imageUrlMobile: varchar("image_url_mobile"),
+      // Mobile image (<768px)
+      ctaText: varchar("cta_text"),
+      // "Shop Now", "Order Today", etc.
+      ctaLink: varchar("cta_link"),
+      // Link to navigate on CTA click
+      badgeText: varchar("badge_text"),
+      // "25% OFF", "New", "Best Seller"
+      displayOrder: integer("display_order").default(0),
+      isActive: boolean("is_active").default(true),
+      showOverlay: boolean("show_overlay").default(false),
+      startDate: timestamp("start_date"),
+      endDate: timestamp("end_date"),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    homepageSections = pgTable("homepage_sections", {
+      id: serial("id").primaryKey(),
+      sectionType: varchar("section_type").notNull(),
+      // hero_stats, ethos, deals, new_launches, stats, faq, newsletter
+      title: varchar("title"),
+      subtitle: text("subtitle"),
+      content: jsonb("content"),
+      // Flexible JSON for section-specific data
+      displayOrder: integer("display_order").default(0),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    ethosCards = pgTable("ethos_cards", {
+      id: serial("id").primaryKey(),
+      title: varchar("title").notNull(),
+      description: text("description").notNull(),
+      icon: varchar("icon").notNull(),
+      // Icon name like "Leaf", "Heart", "Users", "Recycle"
+      displayOrder: integer("display_order").default(0),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    productDeals = pgTable("product_deals", {
+      id: serial("id").primaryKey(),
+      productId: integer("product_id").references(() => products.id).notNull(),
+      dealType: varchar("deal_type").notNull().default("PERCENT"),
+      // PERCENT or FIXED
+      dealValue: decimal("deal_value", { precision: 10, scale: 2 }).notNull(),
+      // e.g., 25 for 25% or 50 for ₹50 off
+      badgeText: varchar("badge_text"),
+      // "25% OFF", "New", etc.
+      priority: integer("priority").default(0),
+      startsAt: timestamp("starts_at"),
+      endsAt: timestamp("ends_at"),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    statsCounters = pgTable("stats_counters", {
+      id: serial("id").primaryKey(),
+      label: varchar("label").notNull(),
+      // "Happy Customers", "Products", etc.
+      value: integer("value").notNull(),
+      // The number
+      suffix: varchar("suffix"),
+      // "+", "K", etc.
+      icon: varchar("icon"),
+      // Icon name
+      displayOrder: integer("display_order").default(0),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    faqs2 = pgTable("faqs", {
+      id: serial("id").primaryKey(),
+      category: varchar("category").notNull().default("General"),
+      question: varchar("question").notNull(),
+      answer: text("answer").notNull(),
+      order: integer("order").default(0),
+      displayOrder: integer("display_order").default(0),
+      isActive: boolean("is_active").default(true),
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    newsletterSettings = pgTable("newsletter_settings", {
+      id: serial("id").primaryKey(),
+      title: varchar("title").notNull().default("Join Our Newsletter"),
+      subtitle: text("subtitle"),
+      ctaText: varchar("cta_text").default("Subscribe"),
+      placeholderText: varchar("placeholder_text").default("Enter your email address"),
+      isActive: boolean("is_active").default(true),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    footerSettings = pgTable("footer_settings", {
+      id: serial("id").primaryKey(),
+      companyName: varchar("company_name").default("Divine Naturals"),
+      tagline: varchar("tagline").default("Pure. Fresh. Daily."),
+      description: text("description"),
+      phone: varchar("phone"),
+      email: varchar("email"),
+      address: text("address"),
+      socialLinks: jsonb("social_links"),
+      // { facebook: "url", instagram: "url", twitter: "url" }
+      footerLinks: jsonb("footer_links"),
+      // { shop: [...], account: [...], company: [...] }
+      copyrightText: varchar("copyright_text"),
+      isActive: boolean("is_active").default(true),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    aboutUsSettings = pgTable("about_us_settings", {
+      id: serial("id").primaryKey(),
+      // Section 1: Hero
+      heroTitle: varchar("hero_title").default("Our Story"),
+      heroSubtitle: text("hero_subtitle"),
+      heroImageUrl: varchar("hero_image_url"),
+      heroCtaText: varchar("hero_cta_text"),
+      heroCtaLink: varchar("hero_cta_link"),
+      // Section 2: Story
+      storyHeading: varchar("story_heading"),
+      storyDescription: text("story_description"),
+      // Rich text
+      storyImageUrl: varchar("story_image_url"),
+      // Section 3: Values
+      valuesTitle: varchar("values_title").default("Our Core Values"),
+      values: jsonb("values"),
+      // Array of { icon, title, description }
+      // Section 4: Process
+      processTitle: varchar("process_title").default("How It Works"),
+      processSteps: jsonb("process_steps"),
+      // Array of { icon, title, description }
+      // Section 5: CTA
+      ctaHeading: varchar("cta_heading"),
+      ctaSubheading: text("cta_subheading"),
+      ctaButtonText: varchar("cta_button_text"),
+      ctaButtonLink: varchar("cta_button_link"),
+      isActive: boolean("is_active").default(true),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    contactSettings = pgTable("contact_settings", {
+      id: serial("id").primaryKey(),
+      // Section 1: Hero
+      heroTitle: varchar("hero_title").default("Contact Us"),
+      heroSubtitle: text("hero_subtitle"),
+      heroImageUrl: varchar("hero_image_url"),
+      // Section 2: Info
+      phone: varchar("phone"),
+      email: varchar("email"),
+      address: text("address"),
+      businessHours: text("business_hours"),
+      socialLinks: jsonb("social_links"),
+      mapEmbedUrl: text("map_embed_url"),
+      // Use text for long iframe links
+      isActive: boolean("is_active").default(true),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    termsOfServiceSettings = pgTable("terms_of_service_settings", {
+      id: serial("id").primaryKey(),
+      title: varchar("title").default("Terms of Service"),
+      lastUpdated: timestamp("last_updated").defaultNow(),
+      content: text("content"),
+      sections: jsonb("sections"),
+      // Array of { title, content }
+      isActive: boolean("is_active").default(true),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    privacyPolicySettings = pgTable("privacy_policy_settings", {
+      id: serial("id").primaryKey(),
+      title: varchar("title").default("Privacy Policy"),
+      lastUpdated: timestamp("last_updated").defaultNow(),
+      content: text("content"),
+      sections: jsonb("sections"),
+      // Array of { title, content }
+      isActive: boolean("is_active").default(true),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    siteSettings = pgTable("site_settings", {
+      id: serial("id").primaryKey(),
+      brandName: varchar("brand_name").notNull().default("Divine Naturals"),
+      logoUrl: varchar("logo_url"),
+      faviconUrl: varchar("favicon_url"),
+      primaryColor: varchar("primary_color").default("#16A34A"),
+      secondaryColor: varchar("secondary_color").default("#FFF9F2"),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    contactSubmissions = pgTable("contact_submissions", {
+      id: serial("id").primaryKey(),
+      name: varchar("name").notNull(),
+      email: varchar("email").notNull(),
+      phone: varchar("phone"),
+      message: text("message").notNull(),
+      status: varchar("status").default("new"),
+      // new, read, replied
+      createdAt: timestamp("created_at").defaultNow(),
+      updatedAt: timestamp("updated_at").defaultNow()
+    });
+    insertAddressSchema = createInsertSchema(addresses);
+    insertOrderSchema = createInsertSchema(orders);
+    insertSubscriptionSchema = createInsertSchema(milkSubscriptions);
+    insertMilkSubscriptionSchema = createInsertSchema(milkSubscriptions);
+    insertSupportTicketSchema = createInsertSchema(supportTickets);
+    insertTicketMessageSchema = createInsertSchema(ticketMessages);
+    insertProductSchema = createInsertSchema(products);
+    insertBannerSchema = createInsertSchema(banners);
+    insertHomepageSectionSchema = createInsertSchema(homepageSections);
+    insertContactSubmissionSchema = createInsertSchema(contactSubmissions);
+    insertSiteSettingsSchema = createInsertSchema(siteSettings);
+  }
 });
-var categories = pgTable("categories", {
-  id: serial("id").primaryKey(),
-  name: varchar("name").notNull().unique(),
-  description: text("description"),
-  icon: varchar("icon"),
-  // emoji or icon name - kept for compatibility, can store image URLs too
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var products = pgTable("products", {
-  id: serial("id").primaryKey(),
-  name: varchar("name").notNull(),
-  sku: varchar("sku").unique(),
-  description: text("description"),
-  category: varchar("category").notNull(),
-  // References categories.name
-  type: varchar("type").notNull(),
-  // MILK, DAIRY
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  unit: varchar("unit").notNull(),
-  // L, kg, g, piece
-  stock: integer("stock").default(0),
-  expiryDate: date("expiry_date"),
-  imageUrl: varchar("image_url"),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var vendors = pgTable("vendors", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id),
-  businessName: varchar("business_name").notNull(),
-  licenseNumber: varchar("license_number"),
-  locationName: varchar("location_name").notNull(),
-  // Borivali, Santa Cruz, Andheri etc.
-  vendorType: varchar("vendor_type").notNull().default("SUB_VENDOR"),
-  // HEAD_VENDOR, VENDOR, SUB_VENDOR
-  headVendorId: integer("head_vendor_id"),
-  // self-reference, will add constraint later
-  parentVendorId: integer("parent_vendor_id"),
-  // self-reference, will add constraint later
-  dailyCapacity: integer("daily_capacity"),
-  // in liters
-  currentQuota: integer("current_quota").default(0),
-  requirementToday: integer("requirement_today").default(0),
-  requirementTomorrowForecast: integer("requirement_tomorrow_forecast").default(0),
-  circulatedLiters: integer("circulated_liters").default(0),
-  revenueToday: decimal("revenue_today", { precision: 10, scale: 2 }).default("0"),
-  revenueTotal: decimal("revenue_total", { precision: 10, scale: 2 }).default("0"),
-  paymentsPending: decimal("payments_pending", { precision: 10, scale: 2 }).default("0"),
-  weeklyEarnings: decimal("weekly_earnings", { precision: 10, scale: 2 }).default("0"),
-  monthlyEarnings: decimal("monthly_earnings", { precision: 10, scale: 2 }).default("0"),
-  zone: varchar("zone"),
-  isVerified: boolean("is_verified").default(false),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var deliveryPartners = pgTable("delivery_partners", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id),
-  vehicleType: varchar("vehicle_type"),
-  licenseNumber: varchar("license_number"),
-  zone: varchar("zone"),
-  isAvailable: boolean("is_available").default(true),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var drivers = pgTable("drivers", {
-  id: serial("id").primaryKey(),
-  name: varchar("name").notNull(),
-  age: integer("age").notNull(),
-  phone: varchar("phone").notNull(),
-  aadharUrl: varchar("aadhar_url"),
-  // optional KYC document
-  panUrl: varchar("pan_url"),
-  // optional KYC document
-  vendorId: integer("vendor_id").references(() => vendors.id).notNull(),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var admins = pgTable("admins", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id).notNull(),
-  name: varchar("name").notNull(),
-  phone: varchar("phone").notNull(),
-  role: varchar("role").notNull(),
-  // SUPER, HEAD, SUB
-  locationScope: jsonb("location_scope"),
-  // array of location strings
-  permissions: jsonb("permissions").notNull(),
-  // permission flags object
-  createdByUserId: varchar("created_by_user_id").references(() => users2.id),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var delegationLogs = pgTable("delegation_logs", {
-  id: serial("id").primaryKey(),
-  fromVendorId: integer("from_vendor_id").references(() => vendors.id).notNull(),
-  toVendorId: integer("to_vendor_id").references(() => vendors.id).notNull(),
-  orderIds: jsonb("order_ids").notNull(),
-  // array of order IDs
-  delegatedByAdminId: integer("delegated_by_admin_id").references(() => admins.id).notNull(),
-  reason: text("reason").notNull(),
-  timestamp: timestamp("timestamp").defaultNow()
-});
-var orders = pgTable("orders", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id),
-  vendorId: integer("vendor_id").references(() => vendors.id),
-  deliveryPartnerId: integer("delivery_partner_id").references(() => deliveryPartners.id),
-  totalAmount: decimal("total_amount", { precision: 10, scale: 2 }).notNull(),
-  liters: integer("liters").default(0),
-  // total milk liters in order
-  status: varchar("status").notNull().default("PLACED"),
-  // PLACED, PREPARING, OUT, DELIVERED, FAILED
-  deliverySlot: varchar("delivery_slot"),
-  // morning, evening etc.
-  deliveryDate: date("delivery_date").notNull(),
-  deliveryTime: varchar("delivery_time"),
-  deliveryAddress: text("delivery_address").notNull(),
-  paymentStatus: varchar("payment_status").default("pending"),
-  // pending, paid, failed
-  paymentMethod: varchar("payment_method").default("cash_on_delivery"),
-  // cash_on_delivery, online, wallet, upi
-  paymentDate: timestamp("payment_date"),
-  // when payment was received
-  delegationLogId: integer("delegation_log_id").references(() => delegationLogs.id),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var orderItems = pgTable("order_items", {
-  id: serial("id").primaryKey(),
-  orderId: integer("order_id").references(() => orders.id),
-  productId: integer("product_id").references(() => products.id),
-  quantity: integer("quantity").notNull(),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  totalPrice: decimal("total_price", { precision: 10, scale: 2 }).notNull()
-});
-var milkSubscriptions = pgTable("milk_subscriptions", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id),
-  productId: integer("product_id").references(() => products.id),
-  quantity: decimal("quantity", { precision: 5, scale: 2 }).notNull(),
-  // supports 0.5L, 1L, 1.5L, etc
-  frequency: varchar("frequency").notNull(),
-  // daily, weekly, alternate
-  deliveryTime: varchar("delivery_time").notNull(),
-  // 6-7 AM, 7-8 AM, etc
-  startDate: date("start_date").notNull(),
-  nextDeliveryDate: date("next_delivery_date"),
-  endDate: date("end_date"),
-  status: varchar("status").default("ACTIVE"),
-  // ACTIVE, PAUSED, CANCELLED
-  isActive: boolean("is_active").default(true),
-  isPaused: boolean("is_paused").default(false),
-  pauseRange: jsonb("pause_range"),
-  // {from: date, to: date}
-  vendorId: integer("vendor_id").references(() => vendors.id),
-  pricePerL: decimal("price_per_l", { precision: 10, scale: 2 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow()
-});
-var subscriptionDeliveries = pgTable("subscription_deliveries", {
-  id: serial("id").primaryKey(),
-  subscriptionId: integer("subscription_id").references(() => milkSubscriptions.id),
-  userId: varchar("user_id").references(() => users2.id),
-  deliveryDate: date("delivery_date").notNull(),
-  quantity: decimal("quantity", { precision: 5, scale: 2 }).notNull(),
-  status: varchar("status").default("UPCOMING"),
-  // UPCOMING, DELIVERED, SKIPPED, MISSED
-  deliveredAt: timestamp("delivered_at"),
-  createdAt: timestamp("created_at").defaultNow()
-}, (table) => ({
-  uniqueSubscriptionDate: index("unique_subscription_date").on(table.subscriptionId, table.deliveryDate)
-}));
-var vendorSupply = pgTable("vendor_supply", {
-  id: serial("id").primaryKey(),
-  vendorId: integer("vendor_id").references(() => vendors.id),
-  date: date("date").notNull(),
-  requiredQuantity: integer("required_quantity"),
-  // assigned by admin
-  confirmedQuantity: integer("confirmed_quantity"),
-  // confirmed by vendor
-  actualQuantity: integer("actual_quantity"),
-  // delivered quantity
-  notes: text("notes"),
-  status: varchar("status").default("pending"),
-  // pending, confirmed, delivered
-  createdAt: timestamp("created_at").defaultNow()
-});
-var inwardLogs = pgTable("inward_logs", {
-  id: serial("id").primaryKey(),
-  vendorId: integer("vendor_id").references(() => vendors.id).notNull(),
-  litersArrived: integer("liters_arrived").notNull(),
-  litersDelivered: integer("liters_delivered").notNull(),
-  litersPending: integer("liters_pending").notNull(),
-  driverInfo: jsonb("driver_info").notNull(),
-  // {name, age, phone, aadharUrl?, panUrl?}
-  reportedByUserId: varchar("reported_by_user_id").references(() => users2.id).notNull(),
-  sentToAdmin: boolean("sent_to_admin").default(false),
-  status: varchar("status").default("PENDING"),
-  // PENDING, APPROVED, REJECTED
-  adminComments: text("admin_comments"),
-  approvedByUserId: varchar("approved_by_user_id").references(() => users2.id),
-  approvedAt: timestamp("approved_at"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var dailyVendorPerformance = pgTable("daily_vendor_performance", {
-  id: serial("id").primaryKey(),
-  vendorId: integer("vendor_id").references(() => vendors.id).notNull(),
-  date: date("date").notNull(),
-  requirementSet: integer("requirement_set").default(0),
-  // what was originally required
-  milkCirculated: integer("milk_circulated").default(0),
-  // what was actually received/procured
-  milkDelivered: integer("milk_delivered").default(0),
-  // what was delivered to customers
-  milkPending: integer("milk_pending").default(0),
-  // what's pending delivery
-  totalEarnings: decimal("total_earnings", { precision: 10, scale: 2 }).default("0"),
-  deliveryCompletionRate: decimal("delivery_completion_rate", { precision: 5, scale: 2 }).default("0"),
-  // percentage
-  paymentReceived: decimal("payment_received", { precision: 10, scale: 2 }).default("0"),
-  paymentDue: decimal("payment_due", { precision: 10, scale: 2 }).default("0"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var vendorDeliveryAssignments = pgTable("vendor_delivery_assignments", {
-  id: serial("id").primaryKey(),
-  vendorId: integer("vendor_id").references(() => vendors.id).notNull(),
-  deliveryPartnerId: integer("delivery_partner_id").references(() => drivers.id).notNull(),
-  assignmentDate: date("assignment_date").notNull(),
-  deliveryStatus: varchar("delivery_status").default("PENDING"),
-  // PENDING, IN_PROGRESS, COMPLETED, FAILED
-  route: text("route"),
-  // delivery route information
-  assignedLiters: integer("assigned_liters").default(0),
-  deliveredLiters: integer("delivered_liters").default(0),
-  completedAt: timestamp("completed_at"),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var vendorRequirements = pgTable("vendor_requirements", {
-  id: serial("id").primaryKey(),
-  vendorId: integer("vendor_id").references(() => vendors.id).notNull(),
-  date: date("date").notNull(),
-  requiredLiters: integer("required_liters").notNull(),
-  forecastType: varchar("forecast_type").notNull().default("MANUAL"),
-  // MANUAL, AI, HISTORICAL
-  actualDemand: integer("actual_demand").default(0),
-  // actual demand that day
-  demandFulfilled: integer("demand_fulfilled").default(0),
-  // how much was actually fulfilled
-  shortfall: integer("shortfall").default(0),
-  // difference between demand and fulfillment
-  fulfillmentRate: decimal("fulfillment_rate", { precision: 5, scale: 2 }).default("0"),
-  // percentage
-  submittedByUserId: varchar("submitted_by_user_id").references(() => users2.id).notNull(),
-  isSubmitted: boolean("is_submitted").default(false),
-  submittedAt: timestamp("submitted_at"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var marketingStaff = pgTable("marketing_staff", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id).notNull(),
-  name: varchar("name").notNull(),
-  role: varchar("role").default("MARKETING_EXEC"),
-  assignedLocations: jsonb("assigned_locations").notNull(),
-  // array of location strings
-  createdByAdminId: integer("created_by_admin_id").references(() => admins.id).notNull(),
-  offlineOrdersCaptured: jsonb("offline_orders_captured").default("[]"),
-  // array of order IDs
-  createdAt: timestamp("created_at").defaultNow()
-});
-var alerts = pgTable("alerts", {
-  id: serial("id").primaryKey(),
-  type: varchar("type").notNull(),
-  // DELAY, INWARD, COMPLAINT, LOW_STOCK
-  scope: varchar("scope"),
-  // location name or vendor ID
-  severity: varchar("severity").notNull(),
-  // INFO, WARNING, CRITICAL
-  title: varchar("title").notNull(),
-  message: text("message").notNull(),
-  resolved: boolean("resolved").default(false),
-  assignedToUserId: varchar("assigned_to_user_id").references(() => users2.id),
-  resolvedByUserId: varchar("resolved_by_user_id").references(() => users2.id),
-  resolvedAt: timestamp("resolved_at"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var notifications = pgTable("notifications", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id),
-  title: varchar("title").notNull(),
-  message: text("message").notNull(),
-  type: varchar("type").notNull(),
-  // order, delivery, payment, general, alert
-  isRead: boolean("is_read").default(false),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var cart = pgTable("cart", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id).notNull().unique(),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow()
-});
-var cartItems = pgTable("cart_items", {
-  id: serial("id").primaryKey(),
-  cartId: integer("cart_id").references(() => cart.id, { onDelete: "cascade" }).notNull(),
-  productId: integer("product_id").references(() => products.id).notNull(),
-  quantity: integer("quantity").notNull().default(1),
-  price: decimal("price", { precision: 10, scale: 2 }).notNull(),
-  addedAt: timestamp("added_at").defaultNow()
-}, (table) => ({
-  uniqueCartProduct: index("unique_cart_product").on(table.cartId, table.productId)
-}));
-var addresses = pgTable("addresses", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id).notNull(),
-  type: varchar("type").notNull(),
-  // home, work, other
-  name: varchar("name").notNull(),
-  phone: varchar("phone").notNull(),
-  addressLine1: text("address_line1").notNull(),
-  addressLine2: text("address_line2"),
-  landmark: text("landmark"),
-  city: varchar("city").notNull(),
-  state: varchar("state").notNull(),
-  pincode: varchar("pincode").notNull(),
-  instructions: text("instructions"),
-  isDefault: boolean("is_default").default(false),
-  latitude: decimal("latitude", { precision: 10, scale: 7 }),
-  longitude: decimal("longitude", { precision: 10, scale: 7 }),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var walletTransactions = pgTable("wallet_transactions", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id).notNull(),
-  type: varchar("type").notNull(),
-  // credit, debit
-  amount: decimal("amount", { precision: 10, scale: 2 }).notNull(),
-  description: text("description").notNull(),
-  balanceAfter: decimal("balance_after", { precision: 10, scale: 2 }).notNull(),
-  referenceId: varchar("reference_id"),
-  category: varchar("category"),
-  // order, refund, cashback, topup, withdrawal
-  createdAt: timestamp("created_at").defaultNow()
-});
-var offers = pgTable("offers", {
-  id: serial("id").primaryKey(),
-  title: varchar("title").notNull(),
-  description: text("description").notNull(),
-  type: varchar("type").notNull(),
-  // discount, cashback, bundle, seasonal
-  discountType: varchar("discount_type"),
-  // percentage, fixed
-  discountValue: decimal("discount_value", { precision: 10, scale: 2 }),
-  minOrderValue: decimal("min_order_value", { precision: 10, scale: 2 }),
-  maxDiscount: decimal("max_discount", { precision: 10, scale: 2 }),
-  validFrom: date("valid_from").notNull(),
-  validTo: date("valid_to").notNull(),
-  usageLimit: integer("usage_limit"),
-  usageCount: integer("usage_count").default(0),
-  isActive: boolean("is_active").default(true),
-  imageUrl: varchar("image_url"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var coupons = pgTable("coupons", {
-  id: serial("id").primaryKey(),
-  code: varchar("code").unique().notNull(),
-  title: varchar("title").notNull(),
-  description: text("description"),
-  discountType: varchar("discount_type").notNull(),
-  // percentage, fixed
-  discountValue: decimal("discount_value", { precision: 10, scale: 2 }).notNull(),
-  minOrderValue: decimal("min_order_value", { precision: 10, scale: 2 }),
-  maxDiscount: decimal("max_discount", { precision: 10, scale: 2 }),
-  validFrom: date("valid_from").notNull(),
-  validTo: date("valid_to").notNull(),
-  usageLimit: integer("usage_limit"),
-  usagePerUser: integer("usage_per_user").default(1),
-  usageCount: integer("usage_count").default(0),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var rewardPoints = pgTable("reward_points", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id).notNull(),
-  points: integer("points").default(0),
-  tier: varchar("tier").default("silver"),
-  // silver, gold, platinum
-  lifetimePoints: integer("lifetime_points").default(0),
-  updatedAt: timestamp("updated_at").defaultNow()
-});
-var referrals = pgTable("referrals", {
-  id: serial("id").primaryKey(),
-  referrerId: varchar("referrer_id").references(() => users2.id).notNull(),
-  referredUserId: varchar("referred_user_id").references(() => users2.id),
-  referralCode: varchar("referral_code").unique().notNull(),
-  status: varchar("status").default("pending"),
-  // pending, completed, rewarded
-  referrerReward: decimal("referrer_reward", { precision: 10, scale: 2 }),
-  referredReward: decimal("referred_reward", { precision: 10, scale: 2 }),
-  createdAt: timestamp("created_at").defaultNow(),
-  completedAt: timestamp("completed_at")
-});
-var supportTickets = pgTable("support_tickets", {
-  id: serial("id").primaryKey(),
-  userId: varchar("user_id").references(() => users2.id).notNull(),
-  category: varchar("category").notNull(),
-  // delivery, payment, quality, technical, other
-  subject: varchar("subject").notNull(),
-  description: text("description").notNull(),
-  status: varchar("status").default("open"),
-  // open, in_progress, resolved, closed
-  priority: varchar("priority").default("medium"),
-  // low, medium, high
-  orderId: integer("order_id").references(() => orders.id),
-  assignedToUserId: varchar("assigned_to_user_id").references(() => users2.id),
-  resolution: text("resolution"),
-  createdAt: timestamp("created_at").defaultNow(),
-  updatedAt: timestamp("updated_at").defaultNow(),
-  resolvedAt: timestamp("resolved_at")
-});
-var ticketMessages = pgTable("ticket_messages", {
-  id: serial("id").primaryKey(),
-  ticketId: integer("ticket_id").references(() => supportTickets.id, { onDelete: "cascade" }).notNull(),
-  userId: varchar("user_id").references(() => users2.id).notNull(),
-  message: text("message").notNull(),
-  isStaff: boolean("is_staff").default(false),
-  attachments: jsonb("attachments"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var faqs = pgTable("faqs", {
-  id: serial("id").primaryKey(),
-  category: varchar("category").notNull(),
-  // delivery, products, subscription, payment
-  question: text("question").notNull(),
-  answer: text("answer").notNull(),
-  order: integer("order").default(0),
-  isActive: boolean("is_active").default(true),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var orderRatings = pgTable("order_ratings", {
-  id: serial("id").primaryKey(),
-  orderId: integer("order_id").references(() => orders.id).notNull(),
-  userId: varchar("user_id").references(() => users2.id).notNull(),
-  productRating: integer("product_rating"),
-  // 1-5
-  deliveryRating: integer("delivery_rating"),
-  // 1-5
-  overallRating: integer("overall_rating").notNull(),
-  // 1-5
-  review: text("review"),
-  images: jsonb("images"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var stockMovements = pgTable("stock_movements", {
-  id: serial("id").primaryKey(),
-  productId: integer("product_id").references(() => products.id).notNull(),
-  type: varchar("type").notNull(),
-  // "IN" or "OUT"
-  reason: varchar("reason").notNull(),
-  // "ADMIN_ADJUST" | "ORDER_PLACED" | "ORDER_CANCELLED" | "RETURN" | "RESTOCK"
-  quantity: integer("quantity").notNull(),
-  // positive for IN, negative for OUT
-  previousStock: integer("previous_stock").notNull(),
-  newStock: integer("new_stock").notNull(),
-  createdBy: varchar("created_by").references(() => users2.id),
-  orderId: integer("order_id").references(() => orders.id),
-  notes: text("notes"),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var productVendors = pgTable("product_vendors", {
-  id: serial("id").primaryKey(),
-  productId: integer("product_id").references(() => products.id).notNull(),
-  vendorId: integer("vendor_id").references(() => vendors.id).notNull(),
-  stock: integer("stock").default(0),
-  priceOverride: decimal("price_override", { precision: 10, scale: 2 }),
-  // vendor-specific pricing
-  isAvailable: boolean("is_available").default(true),
-  createdAt: timestamp("created_at").defaultNow()
-});
-var usersRelations = relations(users2, ({ many, one }) => ({
-  orders: many(orders),
-  milkSubscriptions: many(milkSubscriptions),
-  vendor: one(vendors, {
-    fields: [users2.id],
-    references: [vendors.userId]
-  }),
-  deliveryPartner: one(deliveryPartners, {
-    fields: [users2.id],
-    references: [deliveryPartners.userId]
-  }),
-  admin: one(admins, {
-    fields: [users2.id],
-    references: [admins.userId]
-  })
-}));
-var productsRelations = relations(products, ({ many }) => ({
-  subscriptions: many(milkSubscriptions)
-}));
-var milkSubscriptionsRelations = relations(milkSubscriptions, ({ one, many }) => ({
-  user: one(users2, {
-    fields: [milkSubscriptions.userId],
-    references: [users2.id]
-  }),
-  product: one(products, {
-    fields: [milkSubscriptions.productId],
-    references: [products.id]
-  }),
-  deliveries: many(subscriptionDeliveries)
-}));
-var subscriptionDeliveriesRelations = relations(subscriptionDeliveries, ({ one }) => ({
-  subscription: one(milkSubscriptions, {
-    fields: [subscriptionDeliveries.subscriptionId],
-    references: [milkSubscriptions.id]
-  }),
-  user: one(users2, {
-    fields: [subscriptionDeliveries.userId],
-    references: [users2.id]
-  })
-}));
-var ordersRelations = relations(orders, ({ many, one }) => ({
-  items: many(orderItems),
-  user: one(users2, {
-    fields: [orders.userId],
-    references: [users2.id]
-  })
-}));
-var orderItemsRelations = relations(orderItems, ({ one }) => ({
-  order: one(orders, {
-    fields: [orderItems.orderId],
-    references: [orders.id]
-  }),
-  product: one(products, {
-    fields: [orderItems.productId],
-    references: [products.id]
-  })
-}));
-var vendorsRelations = relations(vendors, ({ many, one }) => ({
-  orders: many(orders),
-  productVendors: many(productVendors),
-  subscriptions: many(milkSubscriptions)
-}));
-var deliveryPartnersRelations = relations(deliveryPartners, ({ one }) => ({
-  user: one(users2, {
-    fields: [deliveryPartners.userId],
-    references: [users2.id]
-  })
-}));
-var driversRelations = relations(drivers, ({ one }) => ({
-  vendor: one(vendors, {
-    fields: [drivers.vendorId],
-    references: [vendors.id]
-  })
-}));
-var adminsRelations = relations(admins, ({ one }) => ({
-  user: one(users2, {
-    fields: [admins.userId],
-    references: [users2.id]
-  })
-}));
-var cartRelations = relations(cart, ({ many }) => ({
-  items: many(cartItems)
-}));
-var cartItemsRelations = relations(cartItems, ({ one }) => ({
-  cart: one(cart, {
-    fields: [cartItems.cartId],
-    references: [cart.id]
-  }),
-  product: one(products, {
-    fields: [cartItems.productId],
-    references: [products.id]
-  })
-}));
-var addressesRelations = relations(addresses, ({ one }) => ({
-  user: one(users2, {
-    fields: [addresses.userId],
-    references: [users2.id]
-  })
-}));
-var productVendorsRelations = relations(productVendors, ({ one }) => ({
-  product: one(products, {
-    fields: [productVendors.productId],
-    references: [products.id]
-  }),
-  vendor: one(vendors, {
-    fields: [productVendors.vendorId],
-    references: [vendors.id]
-  })
-}));
-var insertAddressSchema = createInsertSchema(addresses);
-var insertOrderSchema = createInsertSchema(orders);
-var insertSubscriptionSchema = createInsertSchema(milkSubscriptions);
-var insertMilkSubscriptionSchema = createInsertSchema(milkSubscriptions);
-var insertSupportTicketSchema = createInsertSchema(supportTickets);
-var insertTicketMessageSchema = createInsertSchema(ticketMessages);
-var insertProductSchema = createInsertSchema(products);
 
 // server/db.ts
-import { Pool, neonConfig } from "@neondatabase/serverless";
-import { drizzle } from "drizzle-orm/neon-serverless";
+var db_exports = {};
+__export(db_exports, {
+  db: () => db,
+  pool: () => pool
+});
+import { Pool as NeonPool, neonConfig } from "@neondatabase/serverless";
+import { drizzle as neonDrizzle } from "drizzle-orm/neon-serverless";
+import pkg from "pg";
+import { drizzle as pgDrizzle } from "drizzle-orm/node-postgres";
 import ws from "ws";
-neonConfig.webSocketConstructor = ws;
-if (!process.env.DATABASE_URL) {
-  throw new Error(
-    "DATABASE_URL must be set. Did you forget to provision a database?"
-  );
+var PgPool, isNeon, pool, db;
+var init_db = __esm({
+  "server/db.ts"() {
+    "use strict";
+    init_schema();
+    ({ Pool: PgPool } = pkg);
+    if (!process.env.DATABASE_URL) {
+      throw new Error(
+        "DATABASE_URL must be set. Did you forget to provision a database?"
+      );
+    }
+    isNeon = process.env.DATABASE_URL.includes("neon.tech");
+    pool = isNeon ? new NeonPool({ connectionString: process.env.DATABASE_URL }) : new PgPool({ connectionString: process.env.DATABASE_URL });
+    if (isNeon) {
+      neonConfig.webSocketConstructor = ws;
+    }
+    db = isNeon ? neonDrizzle({ client: pool, schema: schema_exports }) : pgDrizzle({ client: pool, schema: schema_exports });
+  }
+});
+
+// server/utils/generateInvoice.ts
+var generateInvoice_exports = {};
+__export(generateInvoice_exports, {
+  createInvoiceHTML: () => createInvoiceHTML,
+  getBillInvoiceData: () => getBillInvoiceData
+});
+import { eq as eq18 } from "drizzle-orm";
+function createInvoiceHTML(data) {
+  const createdDate = (/* @__PURE__ */ new Date()).toLocaleDateString("en-IN", {
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+  const monthYear = `${data.month} ${data.year}`;
+  const itemsHTML = data.items.map(
+    (item) => `
+    <tr style="border-bottom: 1px solid #e5e7eb;">
+      <td style="padding: 0.75rem; font-size: 0.875rem; text-align: left;">${item.date}</td>
+      <td style="padding: 0.75rem; font-size: 0.875rem; text-align: left;">${item.description}</td>
+      <td style="padding: 0.75rem; font-size: 0.875rem; text-align: center;">${item.quantity}</td>
+      <td style="padding: 0.75rem; font-size: 0.875rem; text-align: right;">\u20B9${item.price.toLocaleString()}</td>
+      <td style="padding: 0.75rem; font-size: 0.875rem; text-align: right; font-weight: 600;">\u20B9${item.total.toLocaleString()}</td>
+    </tr>
+  `
+  ).join("");
+  const html = `
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Divine Naturals Invoice</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f9fafb;
+            padding: 2rem;
+        }
+        .invoice-container {
+            background: white;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 2rem;
+            border-bottom: 3px solid #10b981;
+            padding-bottom: 1.5rem;
+        }
+        .company-name {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #10b981;
+            margin-bottom: 0.25rem;
+        }
+        .company-tagline {
+            font-size: 0.875rem;
+            color: #6b7280;
+            font-style: italic;
+        }
+        .invoice-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+        .info-section h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+        }
+        .info-section p {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.6;
+        }
+        .summary-cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+        .summary-card {
+            background: #f3f4f6;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            border-left: 4px solid #3b82f6;
+        }
+        .summary-card.success {
+            border-left-color: #10b981;
+        }
+        .summary-card.warning {
+            border-left-color: #f59e0b;
+        }
+        .summary-card label {
+            display: block;
+            font-size: 0.75rem;
+            color: #6b7280;
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            text-transform: uppercase;
+        }
+        .summary-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #111827;
+        }
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 2rem;
+            margin-top: 2rem;
+        }
+        .items-table thead {
+            background: #f3f4f6;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        .items-table th {
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #374151;
+        }
+        .items-table td {
+            padding: 0.75rem;
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        .totals-section {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2rem;
+        }
+        .totals-box {
+            width: 300px;
+            border: 2px solid #e5e7eb;
+            border-radius: 0.5rem;
+            padding: 1rem;
+        }
+        .total-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            font-size: 0.875rem;
+            color: #6b7280;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        .total-row.grand {
+            border: none;
+            padding: 1rem 0;
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #111827;
+            margin-top: 0.5rem;
+        }
+        .status-badge {
+            display: inline-block;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-top: 1rem;
+        }
+        .status-badge.paid {
+            background: #d1fae5;
+            color: #065f46;
+        }
+        .status-badge.unpaid {
+            background: #fef3c7;
+            color: #92400e;
+        }
+        .status-badge.overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 2rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e5e7eb;
+            font-size: 0.75rem;
+            color: #9ca3af;
+        }
+        @media print {
+            body {
+                padding: 0;
+                background: white;
+            }
+            .invoice-container {
+                box-shadow: none;
+                max-width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="invoice-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="company-name">\u{1F95B} DIVINE NATURALS</div>
+            <div class="company-tagline">Pure. Fresh. Daily.</div>
+        </div>
+
+        <!-- Invoice Info -->
+        <div class="invoice-info">
+            <div class="info-section">
+                <h3>\u{1F4CB} Bill Details</h3>
+                <p><strong>Bill ID:</strong> #${data.billId}</p>
+                <p><strong>Month:</strong> ${monthYear}</p>
+                <p><strong>Generated:</strong> ${createdDate}</p>
+                <p><strong>Due Date:</strong> ${new Date(data.dueDate).toLocaleDateString("en-IN")}</p>
+            </div>
+            <div class="info-section">
+                <h3>\u{1F464} Customer Details</h3>
+                <p><strong>${data.customerName}</strong></p>
+                <p>${data.address}</p>
+            </div>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card">
+                <label>Subscriptions</label>
+                <div class="value">\u20B9${data.subscriptionTotal.toLocaleString()}</div>
+            </div>
+            <div class="summary-card">
+                <label>Orders</label>
+                <div class="value">\u20B9${data.ordersTotal.toLocaleString()}</div>
+            </div>
+            <div class="summary-card success">
+                <label>Total Amount</label>
+                <div class="value">\u20B9${data.finalAmount.toLocaleString()}</div>
+            </div>
+        </div>
+
+        <!-- Items Table -->
+        <table class="items-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th style="text-align: center;">Qty</th>
+                    <th style="text-align: right;">Rate</th>
+                    <th style="text-align: right;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${itemsHTML}
+            </tbody>
+        </table>
+
+        <!-- Totals -->
+        <div class="totals-section">
+            <div class="totals-box">
+                <div class="total-row">
+                    <span>Subscriptions:</span>
+                    <span>\u20B9${data.subscriptionTotal.toLocaleString()}</span>
+                </div>
+                <div class="total-row">
+                    <span>Orders:</span>
+                    <span>\u20B9${data.ordersTotal.toLocaleString()}</span>
+                </div>
+                ${data.previousPending > 0 ? `
+                <div class="total-row">
+                    <span>Previous Due:</span>
+                    <span>\u20B9${data.previousPending.toLocaleString()}</span>
+                </div>
+                ` : ""}
+                ${data.penalty > 0 ? `
+                <div class="total-row warning">
+                    <span>\u26A0\uFE0F Penalty:</span>
+                    <span>\u20B9${data.penalty.toLocaleString()}</span>
+                </div>
+                ` : ""}
+                ${data.discount > 0 ? `
+                <div class="total-row success">
+                    <span>\u2705 Discount:</span>
+                    <span>-\u20B9${data.discount.toLocaleString()}</span>
+                </div>
+                ` : ""}
+                <div class="total-row grand">
+                    <span>Grand Total:</span>
+                    <span>\u20B9${data.finalAmount.toLocaleString()}</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Badge -->
+        <div>
+            <span class="status-badge ${data.status === "paid" ? "paid" : data.status === "overdue" ? "overdue" : "unpaid"}">
+                ${data.status === "paid" ? "\u2705 PAID" : data.status === "overdue" ? "\u26A0\uFE0F OVERDUE" : "\u{1F7E7} UNPAID"}
+            </span>
+        </div>
+
+        <!-- Footer -->
+        <div class="footer">
+            <p>This is an automatically generated invoice. Please retain for your records.</p>
+            <p>For queries, contact Divine Naturals customer support.</p>
+        </div>
+    </div>
+</body>
+</html>
+  `;
+  return html;
 }
-var pool = new Pool({ connectionString: process.env.DATABASE_URL });
-var db = drizzle({ client: pool, schema: schema_exports });
+async function getBillInvoiceData(billId) {
+  const bill = await db.select().from(bills).where(eq18(bills.id, billId));
+  if (!bill.length) return null;
+  const billRecord = bill[0];
+  const user = await db.select().from(users2).where(eq18(users2.id, billRecord.userId));
+  if (!user.length) return null;
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December"
+  ];
+  const items = typeof billRecord.items === "string" ? JSON.parse(billRecord.items) : billRecord.items;
+  const dueDateStr = typeof billRecord.dueDate === "string" ? billRecord.dueDate : billRecord.dueDate instanceof Date ? billRecord.dueDate.toISOString() : new Date(billRecord.dueDate).toISOString();
+  const createdAtStr = billRecord.createdAt instanceof Date ? billRecord.createdAt.toISOString() : new Date(billRecord.createdAt).toISOString();
+  return {
+    billId: billRecord.id,
+    customerName: `${user[0].firstName || ""} ${user[0].lastName || ""}`.trim() || "N/A",
+    address: user[0].address || "N/A",
+    month: monthNames[billRecord.month - 1],
+    year: billRecord.year,
+    items: items || [],
+    subscriptionTotal: Number(billRecord.subscriptionTotal || 0),
+    ordersTotal: Number(billRecord.ordersTotal || 0),
+    previousPending: Number(billRecord.previousPending || 0),
+    penalty: Number(billRecord.penalty || 0),
+    discount: Number(billRecord.discount || 0),
+    finalAmount: Number(billRecord.finalAmount || 0),
+    dueDate: dueDateStr,
+    status: billRecord.status,
+    generatedDate: createdAtStr
+  };
+}
+var init_generateInvoice = __esm({
+  "server/utils/generateInvoice.ts"() {
+    "use strict";
+    init_db();
+    init_schema();
+  }
+});
+
+// server/index.ts
+import "dotenv/config";
+import express2 from "express";
+import fileUpload from "express-fileupload";
+import cron from "node-cron";
+import path4 from "path";
+
+// server/routes.ts
+import { createServer } from "http";
 
 // server/storage.ts
+init_schema();
+init_db();
 import { eq, and, desc, asc } from "drizzle-orm";
 var DatabaseStorage = class {
   // User operations - mandatory for Replit Auth
@@ -739,6 +1149,16 @@ var DatabaseStorage = class {
         updatedAt: /* @__PURE__ */ new Date()
       }
     }).returning();
+    return user;
+  }
+  async updateUser(id, userData) {
+    const [user] = await db.update(users2).set({
+      ...userData,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq(users2.id, id)).returning();
+    if (!user) {
+      throw new Error("User not found");
+    }
     return user;
   }
   // Get user by email
@@ -800,8 +1220,48 @@ var DatabaseStorage = class {
     return newOrder;
   }
   async updateOrderStatus(id, status) {
+    const [order] = await db.select().from(orders).where(eq(orders.id, id));
     const [updatedOrder] = await db.update(orders).set({ status }).where(eq(orders.id, id)).returning();
+    if (status.toUpperCase() === "DELIVERED" && order && order.status.toUpperCase() !== "DELIVERED") {
+      const items = await this.getOrderItemsByOrder(id);
+      for (const item of items) {
+        await this.decrementProductStock(item.productId, item.quantity);
+        await this.recordStockMovement({
+          productId: item.productId,
+          type: "OUT",
+          reason: "ORDER_DELIVERED",
+          quantity: item.quantity,
+          previousStock: 0,
+          // Would need more queries to get exact
+          newStock: 0,
+          notes: `Order #${id} delivered`
+        });
+      }
+    }
     return updatedOrder;
+  }
+  async decrementProductStock(productId, quantity) {
+    const [product] = await db.select().from(products).where(eq(products.id, productId));
+    if (product) {
+      const newStock = Math.max(0, (product.stock || 0) - quantity);
+      await db.update(products).set({ stock: newStock }).where(eq(products.id, productId));
+    }
+  }
+  async updateVendorRequirement(vendorId, liters) {
+    const [vendor] = await db.select().from(vendors).where(eq(vendors.id, vendorId));
+    if (vendor) {
+      const currentCirculated = vendor.circulatedLiters || 0;
+      const currentRequirement = vendor.requirementToday || 0;
+      const newCirculated = currentCirculated + liters;
+      const newRequirement = Math.max(0, currentRequirement - liters);
+      await db.update(vendors).set({
+        circulatedLiters: newCirculated,
+        requirementToday: newRequirement
+      }).where(eq(vendors.id, vendorId));
+    }
+  }
+  async recordStockMovement(movement) {
+    console.log("\u{1F4E6} Stock Movement Recorded:", movement);
   }
   async getOrdersForDelivery(deliveryPartnerId) {
     return await db.select().from(orders).where(eq(orders.deliveryPartnerId, deliveryPartnerId)).orderBy(asc(orders.deliveryDate));
@@ -850,18 +1310,6 @@ var DatabaseStorage = class {
   async createDeliveryPartner(partner) {
     const [newPartner] = await db.insert(deliveryPartners).values(partner).returning();
     return newPartner;
-  }
-  // Vendor supply operations
-  async getVendorSuppliesByVendor(vendorId) {
-    return await db.select().from(vendorSupply).where(eq(vendorSupply.vendorId, vendorId)).orderBy(desc(vendorSupply.date));
-  }
-  async createVendorSupply(supply) {
-    const [newSupply] = await db.insert(vendorSupply).values(supply).returning();
-    return newSupply;
-  }
-  async updateVendorSupply(id, supply) {
-    const [updatedSupply] = await db.update(vendorSupply).set(supply).where(eq(vendorSupply.id, id)).returning();
-    return updatedSupply;
   }
   // Notification operations
   async getNotificationsByUser(userId) {
@@ -921,10 +1369,9 @@ var DatabaseStorage = class {
       await db.delete(cartItems).where(eq(cartItems.cartId, userCart[0].id));
     }
   }
-  // Inward log operations
+  // Inward log operations (deprecated - table removed from schema)
   async createInwardLog(inwardLog) {
-    const [newLog] = await db.insert(inwardLogs).values(inwardLog).returning();
-    return newLog;
+    return {};
   }
   // Vendor approval
   async approveVendor(vendorId) {
@@ -1017,16 +1464,173 @@ var DatabaseStorage = class {
       lowStockProducts
     };
   }
-  // Stock movement operations
-  async recordStockMovement(movement) {
-    const [newMovement] = await db.insert(stockMovements).values(movement).returning();
-    return newMovement;
+  // Banner operations
+  async getBanners() {
+    const { banners: banners2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    return await db.select().from(banners2).orderBy(asc(banners2.displayOrder));
   }
-  async getStockMovementsByProduct(productId) {
-    return await db.select().from(stockMovements).where(eq(stockMovements.productId, productId)).orderBy(desc(stockMovements.createdAt));
+  async getActiveBanners() {
+    const { banners: banners2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const now = /* @__PURE__ */ new Date();
+    return await db.select().from(banners2).where(
+      and(
+        eq(banners2.isActive, true),
+        or(isNull(banners2.startDate), lte(banners2.startDate, now)),
+        or(isNull(banners2.endDate), gte(banners2.endDate, now))
+      )
+    ).orderBy(asc(banners2.displayOrder));
   }
-  async getAllStockMovements() {
-    return await db.select().from(stockMovements).orderBy(desc(stockMovements.createdAt));
+  async createBanner(bannerData) {
+    const { banners: banners2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [banner] = await db.insert(banners2).values(bannerData).returning();
+    return banner;
+  }
+  async updateBanner(id, bannerData) {
+    const { banners: banners2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [banner] = await db.update(banners2).set({ ...bannerData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(banners2.id, id)).returning();
+    return banner;
+  }
+  async deleteBanner(id) {
+    const { banners: banners2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    await db.delete(banners2).where(eq(banners2.id, id));
+  }
+  // Homepage CMS operations
+  async getEthosCards() {
+    const { ethosCards: ethosCards2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    return await db.select().from(ethosCards2).orderBy(asc(ethosCards2.displayOrder));
+  }
+  async getActiveEthosCards() {
+    const { ethosCards: ethosCards2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    return await db.select().from(ethosCards2).where(eq(ethosCards2.isActive, true)).orderBy(asc(ethosCards2.displayOrder));
+  }
+  async getStatsCounters() {
+    const { statsCounters: statsCounters2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    return await db.select().from(statsCounters2).orderBy(asc(statsCounters2.displayOrder));
+  }
+  async getActiveStatsCounters() {
+    const { statsCounters: statsCounters2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    return await db.select().from(statsCounters2).where(eq(statsCounters2.isActive, true)).orderBy(asc(statsCounters2.displayOrder));
+  }
+  async getFAQs() {
+    const { faqs: faqs3 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    return await db.select().from(faqs3).orderBy(asc(faqs3.displayOrder));
+  }
+  async getActiveFAQs() {
+    const { faqs: faqs3 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    return await db.select().from(faqs3).where(eq(faqs3.isActive, true)).orderBy(asc(faqs3.displayOrder));
+  }
+  async getNewsletterSettings() {
+    const { newsletterSettings: newsletterSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [settings] = await db.select().from(newsletterSettings2).limit(1);
+    return settings || null;
+  }
+  async getFooterSettings() {
+    const { footerSettings: footerSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [settings] = await db.select().from(footerSettings2).limit(1);
+    return settings || null;
+  }
+  async updateNewsletterSettings(settingsData) {
+    const { newsletterSettings: newsletterSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const existing = await this.getNewsletterSettings();
+    if (existing) {
+      const [updated] = await db.update(newsletterSettings2).set({ ...settingsData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(newsletterSettings2.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(newsletterSettings2).values(settingsData).returning();
+      return created;
+    }
+  }
+  async updateFooterSettings(settingsData) {
+    const { footerSettings: footerSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const existing = await this.getFooterSettings();
+    if (existing) {
+      const [updated] = await db.update(footerSettings2).set({ ...settingsData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(footerSettings2.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(footerSettings2).values(settingsData).returning();
+      return created;
+    }
+  }
+  // CMS Settings operations
+  async getAboutUsSettings() {
+    const { aboutUsSettings: aboutUsSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [settings] = await db.select().from(aboutUsSettings2).limit(1);
+    return settings || null;
+  }
+  async getContactSettings() {
+    const { contactSettings: contactSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [settings] = await db.select().from(contactSettings2).limit(1);
+    return settings || null;
+  }
+  async getTermsOfServiceSettings() {
+    const { termsOfServiceSettings: termsOfServiceSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [settings] = await db.select().from(termsOfServiceSettings2).limit(1);
+    return settings || null;
+  }
+  async getPrivacyPolicySettings() {
+    const { privacyPolicySettings: privacyPolicySettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [settings] = await db.select().from(privacyPolicySettings2).limit(1);
+    return settings || null;
+  }
+  async updateAboutUsSettings(settingsData) {
+    const { aboutUsSettings: aboutUsSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const existing = await this.getAboutUsSettings();
+    if (existing) {
+      const [updated] = await db.update(aboutUsSettings2).set({ ...settingsData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(aboutUsSettings2.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(aboutUsSettings2).values(settingsData).returning();
+      return created;
+    }
+  }
+  async updateContactSettings(settingsData) {
+    const { contactSettings: contactSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const existing = await this.getContactSettings();
+    if (existing) {
+      const [updated] = await db.update(contactSettings2).set({ ...settingsData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(contactSettings2.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(contactSettings2).values(settingsData).returning();
+      return created;
+    }
+  }
+  async updateTermsOfServiceSettings(settingsData) {
+    const { termsOfServiceSettings: termsOfServiceSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const existing = await this.getTermsOfServiceSettings();
+    if (existing) {
+      const [updated] = await db.update(termsOfServiceSettings2).set({ ...settingsData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(termsOfServiceSettings2.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(termsOfServiceSettings2).values(settingsData).returning();
+      return created;
+    }
+  }
+  async updatePrivacyPolicySettings(settingsData) {
+    const { privacyPolicySettings: privacyPolicySettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const existing = await this.getPrivacyPolicySettings();
+    if (existing) {
+      const [updated] = await db.update(privacyPolicySettings2).set({ ...settingsData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(privacyPolicySettings2.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(privacyPolicySettings2).values(settingsData).returning();
+      return created;
+    }
+  }
+  async getSiteSettings() {
+    const { siteSettings: siteSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const [settings] = await db.select().from(siteSettings2).limit(1);
+    return settings || null;
+  }
+  async updateSiteSettings(settingsData) {
+    const { siteSettings: siteSettings2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+    const existing = await this.getSiteSettings();
+    if (existing) {
+      const [updated] = await db.update(siteSettings2).set({ ...settingsData, updatedAt: /* @__PURE__ */ new Date() }).where(eq(siteSettings2.id, existing.id)).returning();
+      return updated;
+    } else {
+      const [created] = await db.insert(siteSettings2).values(settingsData).returning();
+      return created;
+    }
   }
 };
 var storage = new DatabaseStorage();
@@ -1039,10 +1643,11 @@ import session from "express-session";
 import memoize from "memoizee";
 import connectPg from "connect-pg-simple";
 if (!process.env.REPLIT_DOMAINS) {
-  throw new Error("Environment variable REPLIT_DOMAINS not provided");
+  console.warn("REPLIT_DOMAINS not provided, OIDC auth will be disabled");
 }
 var getOidcConfig = memoize(
   async () => {
+    if (!process.env.REPLIT_DOMAINS) return null;
     return await client.discovery(
       new URL(process.env.ISSUER_URL ?? "https://replit.com/oidc"),
       process.env.REPL_ID
@@ -1092,25 +1697,24 @@ async function setupAuth(app2) {
   app2.set("trust proxy", 1);
   const sessionMiddleware = getSession();
   app2.use((req, res, next) => {
-    console.log("\u{1F4E5} Before session middleware:", {
-      method: req.method,
-      path: req.path,
-      cookiesHeader: req.headers.cookie?.substring(0, 100)
-    });
-    next();
+    const path5 = req.path;
+    if (!path5.startsWith("/api")) {
+      return next();
+    }
+    sessionMiddleware(req, res, next);
   });
-  app2.use(sessionMiddleware);
   app2.use((req, res, next) => {
-    console.log("\u{1F4E4} After session middleware:", {
-      method: req.method,
-      path: req.path,
-      sessionId: req.sessionID,
-      sessionUserId: req.session?.userId
-    });
-    next();
+    if (!req.path.startsWith("/api")) {
+      return next();
+    }
+    passport.initialize()(req, res, next);
   });
-  app2.use(passport.initialize());
-  app2.use(passport.session());
+  app2.use((req, res, next) => {
+    if (!req.path.startsWith("/api")) {
+      return next();
+    }
+    passport.session()(req, res, next);
+  });
   const config = await getOidcConfig();
   const verify = async (tokens, verified) => {
     const user = {};
@@ -1126,17 +1730,19 @@ async function setupAuth(app2) {
     }
     verified(null, user);
   };
-  for (const domain of process.env.REPLIT_DOMAINS.split(",")) {
-    const strategy = new Strategy(
-      {
-        name: `replitauth:${domain}`,
-        config,
-        scope: "openid email profile offline_access",
-        callbackURL: `https://${domain}/api/callback`
-      },
-      verify
-    );
-    passport.use(strategy);
+  if (process.env.REPLIT_DOMAINS) {
+    for (const domain of process.env.REPLIT_DOMAINS.split(",")) {
+      const strategy = new Strategy(
+        {
+          name: `replitauth:${domain}`,
+          config,
+          scope: "openid email profile offline_access",
+          callbackURL: `https://${domain}/api/callback`
+        },
+        verify
+      );
+      passport.use(strategy);
+    }
   }
   passport.serializeUser((user, cb) => cb(null, user));
   passport.deserializeUser((user, cb) => cb(null, user));
@@ -1164,22 +1770,11 @@ async function setupAuth(app2) {
   });
 }
 var isAuthenticated = async (req, res, next) => {
-  console.log("\u{1F510} isAuthenticated middleware:", {
-    method: req.method,
-    path: req.path,
-    sessionId: req.sessionID,
-    hasSession: !!req.session,
-    sessionUserId: req.session?.userId,
-    cookies: req.headers.cookie?.substring(0, 100)
-  });
   if (req.session && req.session.userId) {
-    console.log("\u2705 Session auth PASSED for", req.method, req.path);
     return next();
   }
-  console.log("\u274C No session userId, checking OIDC for", req.method, req.path);
   const user = req.user;
   if (!req.isAuthenticated() || !user?.expires_at) {
-    console.log("\u274C OIDC auth also failed");
     return res.status(401).json({ message: "Unauthorized - Please log in" });
   }
   const now = Math.floor(Date.now() / 1e3);
@@ -1343,6 +1938,61 @@ function setupAuthRoutes(app2) {
       res.status(500).json({ message: "Failed to fetch user" });
     }
   });
+  app2.post("/api/admin/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) {
+        return res.status(400).json({ message: "Username and password are required" });
+      }
+      const adminUsername = process.env.ADMIN_USERNAME || "DivineNaturalsMDKauldeepRao";
+      const adminPassword = process.env.ADMIN_PASSWORD || "DivineNaturals@2025";
+      if (username !== adminUsername || password !== adminPassword) {
+        console.log("\u274C Admin login failed: Invalid credentials for", username);
+        return res.status(401).json({ message: "Invalid admin credentials" });
+      }
+      req.session.isAdminLoggedIn = true;
+      req.session.adminUsername = username;
+      req.session.save((err) => {
+        if (err) {
+          console.error("\u274C Admin session save error:", err);
+          return res.status(500).json({ message: "Failed to create session" });
+        }
+        console.log("\u2705 Admin session created:", {
+          sessionId: req.sessionID,
+          admin: username
+        });
+        res.json({
+          message: "Admin login successful",
+          admin: {
+            username
+          }
+        });
+      });
+    } catch (error) {
+      console.error("Admin login error:", error);
+      res.status(500).json({ message: "Admin login failed" });
+    }
+  });
+  app2.get("/api/admin/current-admin", (req, res) => {
+    console.log("\u{1F50D} Checking admin session:", {
+      sessionId: req.sessionID,
+      isAdminLoggedIn: req.session?.isAdminLoggedIn,
+      username: req.session?.adminUsername
+    });
+    if (!req.session?.isAdminLoggedIn) {
+      return res.status(401).json({ message: "Not authenticated as admin" });
+    }
+    res.json({
+      username: req.session.adminUsername
+    });
+  });
+  app2.post("/api/admin/logout", (req, res) => {
+    req.session.isAdminLoggedIn = false;
+    req.session.adminUsername = null;
+    req.session.save(() => {
+      res.json({ message: "Admin logged out" });
+    });
+  });
   app2.post("/api/auth/logout", (req, res) => {
     req.session.destroy(() => {
       res.json({ message: "Logged out" });
@@ -1354,6 +2004,8 @@ function setupAuthRoutes(app2) {
 import { Router } from "express";
 
 // server/storage/cart.repository.ts
+init_db();
+init_schema();
 import { eq as eq2, and as and2 } from "drizzle-orm";
 var CartRepository = class {
   async getOrCreateCart(userId) {
@@ -1543,12 +2195,14 @@ var cart_routes_default = router;
 import { Router as Router2 } from "express";
 
 // server/storage/address.repository.ts
+init_db();
+init_schema();
 import { eq as eq3, and as and3 } from "drizzle-orm";
 var AddressRepository = class {
   async getAddressesByUser(userId) {
     return await db.query.addresses.findMany({
       where: eq3(addresses.userId, userId),
-      orderBy: (addresses2, { desc: desc3 }) => [desc3(addresses2.isDefault)]
+      orderBy: (addresses3, { desc: desc5 }) => [desc5(addresses3.isDefault)]
     });
   }
   async getAddressById(addressId) {
@@ -1587,6 +2241,7 @@ var AddressRepository = class {
 var addressRepository = new AddressRepository();
 
 // server/routes/address.routes.ts
+init_schema();
 var router2 = Router2();
 router2.use(isAuthenticated);
 router2.get("/", async (req, res) => {
@@ -1595,8 +2250,8 @@ router2.get("/", async (req, res) => {
     if (!userId) {
       return res.status(401).json({ message: "Unauthorized" });
     }
-    const addresses2 = await addressRepository.getAddressesByUser(userId);
-    res.json(addresses2);
+    const addresses3 = await addressRepository.getAddressesByUser(userId);
+    res.json(addresses3);
   } catch (error) {
     console.error("Error fetching addresses:", error);
     res.status(500).json({ message: "Failed to fetch addresses" });
@@ -1675,6 +2330,8 @@ router2.patch("/:id/set-default", async (req, res) => {
 var address_routes_default = router2;
 
 // server/routes/order.routes.ts
+init_db();
+init_schema();
 import { Router as Router3 } from "express";
 import { eq as eq4, and as and4 } from "drizzle-orm";
 import { z as z2 } from "zod";
@@ -1815,6 +2472,8 @@ var order_routes_default = router3;
 import { Router as Router4 } from "express";
 
 // server/storage/support.repository.ts
+init_db();
+init_schema();
 import { eq as eq5, desc as desc2 } from "drizzle-orm";
 var SupportRepository = class {
   async getTicketsByUser(userId) {
@@ -1830,7 +2489,7 @@ var SupportRepository = class {
     if (!ticket) return null;
     const messages = await db.query.ticketMessages.findMany({
       where: eq5(ticketMessages.ticketId, ticketId),
-      orderBy: (ticketMessages2, { asc: asc2 }) => [asc2(ticketMessages2.createdAt)]
+      orderBy: (ticketMessages2, { asc: asc4 }) => [asc4(ticketMessages2.createdAt)]
     });
     return { ticket, messages };
   }
@@ -1855,18 +2514,19 @@ var SupportRepository = class {
     if (category) {
       return await db.query.faqs.findMany({
         where: eq5(faqs.category, category),
-        orderBy: (faqs2, { asc: asc2 }) => [asc2(faqs2.order)]
+        orderBy: (faqs3, { asc: asc4 }) => [asc4(faqs3.order)]
       });
     }
     return await db.query.faqs.findMany({
       where: eq5(faqs.isActive, true),
-      orderBy: (faqs2, { asc: asc2 }) => [asc2(faqs2.order)]
+      orderBy: (faqs3, { asc: asc4 }) => [asc4(faqs3.order)]
     });
   }
 };
 var supportRepository = new SupportRepository();
 
 // server/routes/support.routes.ts
+init_schema();
 var router4 = Router4();
 var requireAuth = (req, res, next) => {
   if (req.path.startsWith("/faqs")) {
@@ -1929,8 +2589,8 @@ router4.post("/tickets/:id/messages", async (req, res) => {
 router4.get("/faqs", async (req, res) => {
   try {
     const category = req.query.category;
-    const faqs2 = await supportRepository.getFaqs(category);
-    res.json(faqs2);
+    const faqs3 = await supportRepository.getFaqs(category);
+    res.json(faqs3);
   } catch (error) {
     console.error("Error fetching FAQs:", error);
     res.status(500).json({ message: "Failed to fetch FAQs" });
@@ -1942,6 +2602,7 @@ var support_routes_default = router4;
 import { Router as Router5 } from "express";
 
 // server/storage/offers.repository.ts
+init_db();
 import { eq as eq6, and as and5, sql } from "drizzle-orm";
 var OffersRepository = class {
   async getActiveOffers() {
@@ -1952,7 +2613,7 @@ var OffersRepository = class {
         sql`${offers.validFrom} <= ${today}`,
         sql`${offers.validTo} >= ${today}`
       ),
-      orderBy: (offers2, { desc: desc3 }) => [desc3(offers2.createdAt)]
+      orderBy: (offers2, { desc: desc5 }) => [desc5(offers2.createdAt)]
     });
   }
   async getOfferById(offerId) {
@@ -2060,6 +2721,8 @@ router5.post("/apply-coupon", async (req, res) => {
 var offers_routes_default = router5;
 
 // server/routes/subscription.routes.ts
+init_db();
+init_schema();
 import { Router as Router6 } from "express";
 import { eq as eq7, and as and6 } from "drizzle-orm";
 var router6 = Router6();
@@ -2099,13 +2762,19 @@ router6.get("/me", async (req, res) => {
   try {
     const userId = req.session?.userId || req.user?.claims?.sub;
     if (!userId) return res.status(401).json({ message: "Unauthorized" });
-    const subscription = await db.query.milkSubscriptions.findFirst({
-      where: and6(eq7(milkSubscriptions.userId, userId), eq7(milkSubscriptions.status, "ACTIVE"))
-    });
-    res.json(subscription || null);
+    const subscriptions = await db.select().from(milkSubscriptions).where(eq7(milkSubscriptions.userId, userId));
+    const subscriptionsWithProducts = await Promise.all(
+      subscriptions.map(async (sub) => {
+        const product = await db.query.products.findFirst({
+          where: eq7(products.id, sub.productId)
+        });
+        return { ...sub, product };
+      })
+    );
+    res.json(subscriptionsWithProducts || []);
   } catch (error) {
-    console.error("Error fetching subscription:", error);
-    res.status(500).json({ message: "Failed to fetch subscription" });
+    console.error("Error fetching subscriptions:", error);
+    res.status(500).json({ message: "Failed to fetch subscriptions" });
   }
 });
 router6.put("/:id", async (req, res) => {
@@ -2202,100 +2871,83 @@ router6.get("/me/history", async (req, res) => {
 });
 var subscription_routes_default = router6;
 
-// server/routes/admin-orders.routes.ts
+// server/routes/admin-subscriptions.routes.ts
+init_db();
+init_schema();
 import { Router as Router7 } from "express";
 import { eq as eq8 } from "drizzle-orm";
-var router7 = Router7();
-router7.use(isAuthenticated);
-router7.get("/", async (req, res) => {
-  try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq8(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
+
+// server/middleware/auth.ts
+function checkRole(allowedRoles) {
+  return async (req, res, next) => {
+    if (req.session?.isAdminLoggedIn && allowedRoles.includes("admin")) {
+      return next();
     }
-    const status = req.query.status;
-    let allOrders = await db.select().from(orders);
-    if (status) {
-      allOrders = allOrders.filter((o) => o.status === status);
+    if (!req.user) {
+      return res.status(401).json({ message: "Unauthorized - Please log in" });
     }
-    res.json(allOrders);
-  } catch (error) {
-    console.error("Error fetching orders:", error);
-    res.status(500).json({ message: "Failed to fetch orders" });
-  }
-});
-router7.get("/:id", async (req, res) => {
-  try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq8(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
-    const orderId = parseInt(req.params.id);
-    const order = await db.select().from(orders).where(eq8(orders.id, orderId));
-    if (!order.length) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-    const items = await db.select().from(orderItems).where(eq8(orderItems.orderId, orderId));
-    const itemsWithProducts = await Promise.all(
-      items.map(async (item) => {
-        const product = await db.query.products.findFirst({
-          where: eq8(products.id, item.productId)
+    try {
+      const freshUser = await storage.getUser(req.user.id);
+      const userRole = freshUser?.role || req.user.role;
+      if (!allowedRoles.includes(userRole)) {
+        return res.status(403).json({
+          message: `Forbidden - This endpoint requires one of these roles: ${allowedRoles.join(", ")}`,
+          yourRole: userRole
         });
-        return { ...item, product };
-      })
-    );
-    res.json({ ...order[0], items: itemsWithProducts });
-  } catch (error) {
-    console.error("Error fetching order:", error);
-    res.status(500).json({ message: "Failed to fetch order" });
+      }
+      req.user.role = userRole;
+      next();
+    } catch (error) {
+      console.error("Error checking user role:", error);
+      return res.status(500).json({ message: "Internal server error" });
+    }
+  };
+}
+async function requireAdminAccess(req, res, next) {
+  if (req.session?.isAdminLoggedIn) {
+    console.log(`\u2705 Authorized ${req.method} ${req.originalUrl} via Admin Session`);
+    return next();
   }
-});
-router7.patch("/:id/status", async (req, res) => {
+  if (!req.user) {
+    return res.status(401).json({ message: "Unauthorized - Please log in" });
+  }
   try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq8(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
+    const freshUser = await storage.getUser(req.user.id);
+    const userRole = freshUser?.role || req.user.role;
+    if (userRole !== "admin") {
+      console.log(`\u{1F6AB} 403 Forbidden - Admin access required for ${req.method} ${req.originalUrl}. userRole:`, userRole);
+      return res.status(403).json({
+        message: "Admin access required (middleware/auth)",
+        yourRole: userRole
+      });
     }
-    const orderId = parseInt(req.params.id);
-    const { status, paymentStatus } = req.body;
-    const updated = await db.update(orders).set({
-      status: status || void 0,
-      paymentStatus: paymentStatus || void 0
-    }).where(eq8(orders.id, orderId)).returning();
-    if (!updated.length) {
-      return res.status(404).json({ message: "Order not found" });
-    }
-    res.json(updated[0]);
+    req.user.role = userRole;
+    console.log(`\u2705 Authorized ${req.method} ${req.originalUrl} for user:`, freshUser?.id);
+    next();
   } catch (error) {
-    console.error("Error updating order:", error);
-    res.status(500).json({ message: "Failed to update order" });
+    console.error("Error checking user role:", error);
+    return res.status(500).json({ message: "Internal server error" });
   }
-});
-var admin_orders_routes_default = router7;
+}
+var requireCustomer = checkRole(["customer"]);
+var requireVendor = checkRole(["vendor"]);
+var requireDelivery = checkRole(["delivery"]);
+var requireAdmin = checkRole(["admin"]);
+var requireCustomerOrAdmin = checkRole(["customer", "admin"]);
+var requireVendorOrAdmin = checkRole(["vendor", "admin"]);
 
 // server/routes/admin-subscriptions.routes.ts
-import { Router as Router8 } from "express";
-import { eq as eq9 } from "drizzle-orm";
-var router8 = Router8();
-router8.use(isAuthenticated);
-router8.get("/", async (req, res) => {
+var router7 = Router7();
+router7.get("/", requireAdminAccess, async (req, res) => {
   try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq9(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
     const allSubs = await db.select().from(milkSubscriptions);
     const withDetails = await Promise.all(
       allSubs.map(async (sub) => {
         const customer = await db.query.users.findFirst({
-          where: eq9(users2.id, sub.userId)
+          where: eq8(users2.id, sub.userId)
         });
         const product = await db.query.products.findFirst({
-          where: eq9(products.id, sub.productId)
+          where: eq8(products.id, sub.productId)
         });
         return { ...sub, customer, product };
       })
@@ -2306,15 +2958,10 @@ router8.get("/", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch subscriptions" });
   }
 });
-router8.get("/today/requirement", async (req, res) => {
+router7.get("/today/requirement", requireAdminAccess, async (req, res) => {
   try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq9(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
     const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
-    const deliveries = await db.select().from(subscriptionDeliveries).where(eq9(subscriptionDeliveries.deliveryDate, new Date(today)));
+    const deliveries = await db.select().from(subscriptionDeliveries).where(eq8(subscriptionDeliveries.deliveryDate, new Date(today)));
     const totalRequired = deliveries.reduce((sum, d) => sum + parseFloat(d.quantity.toString()), 0);
     res.json({
       date: today,
@@ -2327,16 +2974,11 @@ router8.get("/today/requirement", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch daily requirement" });
   }
 });
-router8.patch("/:id/status", async (req, res) => {
+router7.patch("/:id/status", requireAdminAccess, async (req, res) => {
   try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq9(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
     const subId = parseInt(req.params.id);
     const { status } = req.body;
-    const updated = await db.update(milkSubscriptions).set({ status }).where(eq9(milkSubscriptions.id, subId)).returning();
+    const updated = await db.update(milkSubscriptions).set({ status }).where(eq8(milkSubscriptions.id, subId)).returning();
     if (!updated.length) {
       return res.status(404).json({ message: "Subscription not found" });
     }
@@ -2346,27 +2988,68 @@ router8.patch("/:id/status", async (req, res) => {
     res.status(500).json({ message: "Failed to update subscription" });
   }
 });
-var admin_subscriptions_routes_default = router8;
+router7.post("/", requireAdminAccess, async (req, res) => {
+  try {
+    const { userId, productId, quantity, frequency, deliveryTime, startDate } = req.body;
+    if (!userId || !productId) {
+      return res.status(400).json({ message: "Customer and Product are required" });
+    }
+    const productIdInt = parseInt(productId);
+    const product = await db.query.products.findFirst({
+      where: eq8(products.id, productIdInt)
+    });
+    if (!product) {
+      return res.status(404).json({ message: "Product not found" });
+    }
+    const newSub = await db.insert(milkSubscriptions).values({
+      userId,
+      productId: productIdInt,
+      quantity: parseFloat(quantity || "1").toString(),
+      frequency: frequency || "daily",
+      deliveryTime: deliveryTime || "7-8 AM",
+      startDate: startDate ? new Date(startDate) : /* @__PURE__ */ new Date(),
+      status: "ACTIVE",
+      isActive: true,
+      isPaused: false,
+      pricePerL: product.price,
+      nextDeliveryDate: startDate ? new Date(startDate) : /* @__PURE__ */ new Date()
+    }).returning();
+    res.status(201).json({ message: "Subscription created", subscription: newSub[0] });
+  } catch (error) {
+    console.error("Error creating subscription:", error);
+    res.status(500).json({ message: "Failed to create subscription" });
+  }
+});
+router7.delete("/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const subId = parseInt(req.params.id);
+    const deleted = await db.delete(milkSubscriptions).where(eq8(milkSubscriptions.id, subId)).returning();
+    if (!deleted.length) {
+      return res.status(404).json({ message: "Subscription not found" });
+    }
+    res.json({ message: "Subscription deleted", subscription: deleted[0] });
+  } catch (error) {
+    console.error("Error deleting subscription:", error);
+    res.status(500).json({ message: "Failed to delete subscription" });
+  }
+});
+var admin_subscriptions_routes_default = router7;
 
 // server/routes/admin-customers.routes.ts
-import { Router as Router9 } from "express";
-import { eq as eq10 } from "drizzle-orm";
-var router9 = Router9();
-router9.use(isAuthenticated);
-router9.get("/", async (req, res) => {
+init_db();
+init_schema();
+import { Router as Router8 } from "express";
+import { eq as eq9 } from "drizzle-orm";
+var router8 = Router8();
+router8.get("/", async (req, res) => {
   try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq10(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
     const allCustomers = await db.query.users.findMany({
       where: (table, { ne }) => ne(table.role, "admin")
     });
     const customersWithStats = await Promise.all(
       allCustomers.map(async (customer) => {
-        const customerOrders = await db.select().from(orders).where(eq10(orders.userId, customer.id));
-        const customerSubs = await db.select().from(milkSubscriptions).where(eq10(milkSubscriptions.userId, customer.id));
+        const customerOrders = await db.select().from(orders).where(eq9(orders.userId, customer.id));
+        const customerSubs = await db.select().from(milkSubscriptions).where(eq9(milkSubscriptions.userId, customer.id));
         let totalSpending = "0";
         if (customerOrders.length > 0) {
           const total = customerOrders.reduce((sum, order) => {
@@ -2392,75 +3075,562 @@ router9.get("/", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch customers" });
   }
 });
-router9.get("/:id/orders", async (req, res) => {
+router8.get("/:id/orders", async (req, res) => {
   try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq10(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
     const customerId = req.params.id;
-    const customerOrders = await db.select().from(orders).where(eq10(orders.userId, customerId));
+    const customerOrders = await db.select().from(orders).where(eq9(orders.userId, customerId));
     res.json(customerOrders);
   } catch (error) {
     console.error("Error fetching customer orders:", error);
     res.status(500).json({ message: "Failed to fetch customer orders" });
   }
 });
-router9.get("/:id/subscriptions", async (req, res) => {
+router8.get("/:id/subscriptions", async (req, res) => {
   try {
-    const userId = req.session?.userId || req.user?.claims?.sub;
-    const user = await db.query.users.findFirst({ where: eq10(users2.id, userId) });
-    if (user?.role !== "admin") {
-      return res.status(403).json({ message: "Admin access required" });
-    }
     const customerId = req.params.id;
-    const customerSubs = await db.select().from(milkSubscriptions).where(eq10(milkSubscriptions.userId, customerId));
+    const customerSubs = await db.select().from(milkSubscriptions).where(eq9(milkSubscriptions.userId, customerId));
     res.json(customerSubs);
   } catch (error) {
     console.error("Error fetching customer subscriptions:", error);
     res.status(500).json({ message: "Failed to fetch customer subscriptions" });
   }
 });
-var admin_customers_routes_default = router9;
+var admin_customers_routes_default = router8;
 
-// server/routes/rbac.routes.ts
-import { Router as Router10 } from "express";
-
-// server/middleware/auth.ts
-function checkRole(allowedRoles) {
-  return async (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized - Please log in" });
-    }
-    try {
-      const freshUser = await storage.getUser(req.user.id);
-      const userRole = freshUser?.role || req.user.role;
-      if (!allowedRoles.includes(userRole)) {
-        return res.status(403).json({
-          message: `Forbidden - This endpoint requires one of these roles: ${allowedRoles.join(", ")}`,
-          yourRole: userRole
+// server/routes/billing.routes.ts
+init_db();
+init_schema();
+import { Router as Router9 } from "express";
+import { eq as eq10, and as and7, gte as gte3, lte as lte3 } from "drizzle-orm";
+import Razorpay from "razorpay";
+var router9 = Router9();
+var razorpayInstance = null;
+var getRazorpayInstance = () => {
+  if (!razorpayInstance && process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET) {
+    razorpayInstance = new Razorpay({
+      key_id: process.env.RAZORPAY_KEY_ID,
+      key_secret: process.env.RAZORPAY_KEY_SECRET
+    });
+  }
+  return razorpayInstance;
+};
+router9.get("/today-requirements", async (req, res) => {
+  try {
+    const today = /* @__PURE__ */ new Date();
+    const todayStr = today.toISOString().split("T")[0];
+    const dayOfWeek = today.getDay();
+    const activeSubscriptions = await db.select().from(milkSubscriptions).where(eq10(milkSubscriptions.status, "ACTIVE"));
+    let totalLiters = 0;
+    let totalDeliveries = 0;
+    const subscriptionMap = /* @__PURE__ */ new Map();
+    for (const sub of activeSubscriptions) {
+      const startDate = sub.startDate ? new Date(sub.startDate) : null;
+      const endDate = sub.endDate ? new Date(sub.endDate) : null;
+      if (startDate && startDate > today) continue;
+      if (endDate && endDate < today) continue;
+      let isDeliveryDay = false;
+      if (sub.frequency === "daily") {
+        isDeliveryDay = true;
+      } else if (sub.frequency === "weekly") {
+        if (startDate) {
+          const startDayOfWeek = startDate.getDay();
+          isDeliveryDay = dayOfWeek === startDayOfWeek;
+        }
+      } else if (sub.frequency === "alternate") {
+        if (startDate) {
+          const daysDiff = Math.floor((today.getTime() - startDate.getTime()) / (1e3 * 60 * 60 * 24));
+          isDeliveryDay = daysDiff % 2 === 0;
+        }
+      }
+      if (!isDeliveryDay) continue;
+      const user = await db.query.users.findFirst({
+        where: eq10(users2.id, sub.userId)
+      });
+      const product = await db.query.products.findFirst({
+        where: eq10(products.id, sub.productId)
+      });
+      if (user && product) {
+        let defaultAddr = null;
+        try {
+          const addrs = await db.select().from(addresses).where(and7(eq10(addresses.userId, sub.userId), eq10(addresses.isDefault, true))).limit(1);
+          defaultAddr = addrs[0] || null;
+        } catch (err) {
+          console.error("Error fetching address:", err);
+        }
+        const quantity = Number(sub.quantity || 0);
+        totalLiters += quantity;
+        totalDeliveries += 1;
+        if (!subscriptionMap.has(sub.productId)) {
+          subscriptionMap.set(sub.productId, {
+            productId: sub.productId,
+            productName: product.name || "Unknown",
+            totalLiters: 0,
+            byArea: /* @__PURE__ */ new Map()
+            // Group by area
+          });
+        }
+        const mapEntry = subscriptionMap.get(sub.productId);
+        mapEntry.totalLiters += quantity;
+        const area = defaultAddr?.city || "Mumbai";
+        if (!mapEntry.byArea.has(area)) {
+          mapEntry.byArea.set(area, []);
+        }
+        mapEntry.byArea.get(area).push({
+          userId: user.id,
+          customerName: `${user.firstName || ""} ${user.lastName || ""}`.trim(),
+          liters: quantity,
+          deliveryTime: sub.deliveryTime || "Not specified",
+          address: defaultAddr?.address || "Awaiting address details",
+          landmark: defaultAddr?.landmark || "",
+          city: defaultAddr?.city || "Mumbai",
+          state: defaultAddr?.state || "Maharashtra",
+          pincode: defaultAddr?.pincode || "",
+          phone: defaultAddr?.phone || user.phone || ""
         });
       }
-      req.user.role = userRole;
-      next();
-    } catch (error) {
-      console.error("Error checking user role:", error);
-      return res.status(500).json({ message: "Internal server error" });
     }
-  };
-}
-var requireCustomer = checkRole(["customer"]);
-var requireVendor = checkRole(["vendor"]);
-var requireDelivery = checkRole(["delivery"]);
-var requireAdmin = checkRole(["admin"]);
-var requireCustomerOrAdmin = checkRole(["customer", "admin"]);
-var requireVendorOrAdmin = checkRole(["vendor", "admin"]);
+    const requirements = Array.from(subscriptionMap.values()).map((req2) => ({
+      productId: req2.productId,
+      productName: req2.productName,
+      totalLiters: req2.totalLiters,
+      byArea: Object.fromEntries(req2.byArea)
+    }));
+    res.json({
+      date: todayStr,
+      totalLitersNeeded: totalLiters,
+      totalDeliveries,
+      requirements
+    });
+  } catch (error) {
+    console.error("Error fetching today's requirements:", error);
+    res.status(500).json({ message: "Failed to fetch requirements" });
+  }
+});
+router9.get("/current", async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const currentDate = /* @__PURE__ */ new Date();
+    const currentMonth = currentDate.getMonth();
+    const currentYear = currentDate.getFullYear();
+    const subscriptions = await db.select().from(milkSubscriptions).where(and7(eq10(milkSubscriptions.userId, userId), eq10(milkSubscriptions.status, "ACTIVE")));
+    const startDate = new Date(currentYear, currentMonth, 1);
+    const endDate = new Date(currentYear, currentMonth + 1, 0);
+    const monthOrders = await db.select().from(orders).where(
+      and7(
+        eq10(orders.userId, userId),
+        gte3(orders.createdAt, startDate),
+        lte3(orders.createdAt, endDate)
+      )
+    );
+    let subscriptionTotal = 0;
+    const subscriptionItems = [];
+    for (const sub of subscriptions) {
+      const product = await db.query.products.findFirst({
+        where: eq10(products.id, sub.productId)
+      });
+      if (product) {
+        const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+        let deliveryDays = daysInMonth;
+        if (sub.frequency === "weekly") {
+          deliveryDays = Math.ceil(daysInMonth / 7);
+        } else if (sub.frequency === "alternate") {
+          deliveryDays = Math.ceil(daysInMonth / 2);
+        }
+        const total = Number(sub.quantity || 0) * Number(sub.pricePerL || product.price) * deliveryDays;
+        subscriptionTotal += total;
+        subscriptionItems.push({
+          name: `${product.name} (Subscription)`,
+          quantity: deliveryDays,
+          rate: Number(sub.pricePerL || product.price),
+          total: Math.round(total)
+        });
+      }
+    }
+    let orderTotal = 0;
+    for (const order of monthOrders) {
+      orderTotal += Number(order.totalAmount || 0);
+    }
+    const adjustments = [];
+    let penalty = 0;
+    const dueDate = new Date(currentYear, currentMonth + 1, 5);
+    if (/* @__PURE__ */ new Date() > dueDate) {
+      penalty = 50;
+      adjustments.push({ type: "Penalty", amount: penalty });
+    }
+    const monthName = new Date(currentYear, currentMonth).toLocaleDateString("en-IN", {
+      month: "long",
+      year: "numeric"
+    });
+    const totalAmount = subscriptionTotal + orderTotal + penalty;
+    res.json({
+      month: monthName,
+      amount: Math.round(totalAmount),
+      penalty,
+      previousDue: 0,
+      status: "PENDING",
+      dueDate: new Date(currentYear, currentMonth + 1, 5).toISOString(),
+      daysLeft: Math.max(0, Math.ceil((new Date(currentYear, currentMonth + 1, 5).getTime() - (/* @__PURE__ */ new Date()).getTime()) / (1e3 * 60 * 60 * 24))),
+      subscriptionItems,
+      orderItems: monthOrders.map((o) => ({
+        name: `Order #${o.id}`,
+        quantity: 1,
+        rate: Number(o.totalAmount || 0),
+        total: Math.round(Number(o.totalAmount || 0))
+      })),
+      adjustments
+    });
+  } catch (error) {
+    console.error("Error fetching billing:", error);
+    res.status(500).json({ message: "Failed to fetch billing data" });
+  }
+});
+router9.get("/history", async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const sixMonthsAgo = /* @__PURE__ */ new Date();
+    sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+    const historyOrders = await db.select().from(orders).where(
+      and7(
+        eq10(orders.userId, userId),
+        gte3(orders.createdAt, sixMonthsAgo)
+      )
+    );
+    const monthlyBills = {};
+    historyOrders.forEach((order) => {
+      const monthKey = new Date(order.createdAt).toLocaleDateString("en-IN", {
+        month: "long",
+        year: "numeric"
+      });
+      if (!monthlyBills[monthKey]) {
+        monthlyBills[monthKey] = {
+          month: monthKey,
+          amount: 0,
+          status: order.paymentStatus === "paid" ? "PAID" : "PENDING",
+          paidDate: order.paymentDate?.toISOString() || ""
+        };
+      }
+      monthlyBills[monthKey].amount += Number(order.totalAmount || 0);
+    });
+    res.json(Object.values(monthlyBills));
+  } catch (error) {
+    console.error("Error fetching billing history:", error);
+    res.status(500).json({ message: "Failed to fetch billing history" });
+  }
+});
+router9.post("/pay", async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const { amount, currency = "INR" } = req.body;
+    if (!amount || amount <= 0) {
+      return res.status(400).json({ message: "Invalid amount" });
+    }
+    const options = {
+      amount: Math.round(amount * 100),
+      // Convert to paise
+      currency,
+      receipt: `bill_${userId}_${Date.now()}`,
+      payment_capture: 1
+    };
+    const instance = getRazorpayInstance();
+    if (!instance) {
+      return res.status(500).json({ message: "Payment service not configured" });
+    }
+    const response = await instance.orders.create(options);
+    res.json({
+      orderId: response.id,
+      amount,
+      currency,
+      keyId: process.env.RAZORPAY_KEY_ID
+    });
+  } catch (error) {
+    console.error("Error creating Razorpay order:", error);
+    res.status(500).json({ message: "Failed to create payment order" });
+  }
+});
+router9.post("/verify-payment", async (req, res) => {
+  try {
+    const userId = req.session?.userId;
+    if (!userId) return res.status(401).json({ message: "Unauthorized" });
+    const { razorpay_order_id, razorpay_payment_id, razorpay_signature } = req.body;
+    const crypto = __require("crypto");
+    const generated_signature = crypto.createHmac("sha256", process.env.RAZORPAY_KEY_SECRET || "").update(`${razorpay_order_id}|${razorpay_payment_id}`).digest("hex");
+    if (generated_signature === razorpay_signature) {
+      const currentDate = /* @__PURE__ */ new Date();
+      const currentMonth = currentDate.getMonth();
+      const currentYear = currentDate.getFullYear();
+      const startDate = new Date(currentYear, currentMonth, 1);
+      const endDate = new Date(currentYear, currentMonth + 1, 0);
+      await db.update(orders).set({
+        paymentStatus: "paid",
+        paymentDate: /* @__PURE__ */ new Date()
+      }).where(
+        and7(
+          eq10(orders.userId, userId),
+          eq10(orders.paymentStatus, "pending"),
+          gte3(orders.createdAt, startDate),
+          lte3(orders.createdAt, endDate)
+        )
+      );
+      res.json({
+        success: true,
+        message: "Payment verified successfully",
+        orderId: razorpay_order_id
+      });
+    } else {
+      res.status(400).json({ message: "Payment verification failed" });
+    }
+  } catch (error) {
+    console.error("Error verifying payment:", error);
+    res.status(500).json({ message: "Failed to verify payment" });
+  }
+});
+var billing_routes_default = router9;
+
+// server/routes/admin-billing.routes.ts
+init_db();
+init_schema();
+import { Router as Router10 } from "express";
+import { eq as eq11, and as and8, gte as gte4, lte as lte4, sql as sql3 } from "drizzle-orm";
+var router10 = Router10();
+router10.get("/", async (req, res) => {
+  try {
+    const status = req.query.status;
+    const userId = req.query.userId;
+    let whereConditions = [];
+    if (status && status !== "all") {
+      whereConditions.push(eq11(bills.status, status));
+    }
+    if (userId) {
+      whereConditions.push(eq11(bills.userId, userId));
+    }
+    let query = db.select().from(bills);
+    if (whereConditions.length > 0) {
+      query = query.where(and8(...whereConditions));
+    }
+    const allBills = await query;
+    const billsWithUsers = await Promise.all(
+      allBills.map(async (bill) => {
+        const user = await db.query.users.findFirst({
+          where: eq11(users2.id, bill.userId)
+        });
+        return { ...bill, user };
+      })
+    );
+    res.json(billsWithUsers);
+  } catch (error) {
+    console.error("Error fetching bills:", error);
+    res.status(500).json({ message: "Failed to fetch bills" });
+  }
+});
+router10.get("/:id", async (req, res) => {
+  try {
+    const billId = parseInt(req.params.id);
+    const bill = await db.query.bills.findFirst({
+      where: eq11(bills.id, billId)
+    });
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+    const user = await db.query.users.findFirst({
+      where: eq11(users2.id, bill.userId)
+    });
+    res.json({ ...bill, user });
+  } catch (error) {
+    console.error("Error fetching bill:", error);
+    res.status(500).json({ message: "Failed to fetch bill" });
+  }
+});
+router10.patch("/:id/mark-paid", async (req, res) => {
+  try {
+    const billId = parseInt(req.params.id);
+    const { paymentMethod } = req.body;
+    const updated = await db.update(bills).set({
+      status: "paid",
+      paymentDate: sql3`now()`,
+      paymentMethod: paymentMethod || "manual",
+      updatedAt: sql3`now()`
+    }).where(eq11(bills.id, billId)).returning();
+    if (!updated.length) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+    res.json({ success: true, bill: updated[0], message: "Bill marked as paid" });
+  } catch (error) {
+    console.error("Error marking bill as paid:", error);
+    res.status(500).json({ message: "Failed to mark bill as paid" });
+  }
+});
+router10.patch("/:id/extend-due", async (req, res) => {
+  try {
+    const billId = parseInt(req.params.id);
+    const { newDueDate } = req.body;
+    if (!newDueDate) {
+      return res.status(400).json({ message: "New due date is required" });
+    }
+    const updated = await db.update(bills).set({
+      dueDate: new Date(newDueDate).toISOString().split("T")[0],
+      updatedAt: sql3`now()`
+    }).where(eq11(bills.id, billId)).returning();
+    if (!updated.length) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+    res.json({ success: true, bill: updated[0], message: "Due date extended" });
+  } catch (error) {
+    console.error("Error extending due date:", error);
+    res.status(500).json({ message: "Failed to extend due date" });
+  }
+});
+router10.patch("/:id/penalty", async (req, res) => {
+  try {
+    const billId = parseInt(req.params.id);
+    const { penaltyAmount } = req.body;
+    if (!penaltyAmount || penaltyAmount <= 0) {
+      return res.status(400).json({ message: "Invalid penalty amount" });
+    }
+    const bill = await db.query.bills.findFirst({
+      where: eq11(bills.id, billId)
+    });
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+    const newPenalty = Number(bill.penalty || 0) + Number(penaltyAmount);
+    const newFinal = Number(bill.finalAmount) - Number(bill.penalty || 0) + newPenalty;
+    const updated = await db.update(bills).set({
+      penalty: newPenalty,
+      finalAmount: newFinal,
+      updatedAt: sql3`now()`
+    }).where(eq11(bills.id, billId)).returning();
+    res.json({ success: true, bill: updated[0], message: `Penalty of \u20B9${penaltyAmount} added` });
+  } catch (error) {
+    console.error("Error adding penalty:", error);
+    res.status(500).json({ message: "Failed to add penalty" });
+  }
+});
+router10.patch("/:id/discount", async (req, res) => {
+  try {
+    const billId = parseInt(req.params.id);
+    const { discountAmount } = req.body;
+    if (!discountAmount || discountAmount < 0) {
+      return res.status(400).json({ message: "Invalid discount amount" });
+    }
+    const bill = await db.query.bills.findFirst({
+      where: eq11(bills.id, billId)
+    });
+    if (!bill) {
+      return res.status(404).json({ message: "Bill not found" });
+    }
+    const newDiscount = Number(bill.discount || 0) + Number(discountAmount);
+    const newFinal = Number(bill.finalAmount) - Number(bill.discount || 0) + newDiscount;
+    const updated = await db.update(bills).set({
+      discount: newDiscount,
+      finalAmount: Math.max(0, newFinal),
+      updatedAt: sql3`now()`
+    }).where(eq11(bills.id, billId)).returning();
+    res.json({ success: true, bill: updated[0], message: `Discount of \u20B9${discountAmount} applied` });
+  } catch (error) {
+    console.error("Error adding discount:", error);
+    res.status(500).json({ message: "Failed to add discount" });
+  }
+});
+router10.post("/generate", async (req, res) => {
+  try {
+    const { userId, month, year } = req.body;
+    if (!userId || !month || !year) {
+      return res.status(400).json({ message: "userId, month, and year are required" });
+    }
+    const existingBill = await db.select().from(bills).where(
+      and8(
+        eq11(bills.userId, userId),
+        eq11(bills.month, month),
+        eq11(bills.year, year)
+      )
+    );
+    if (existingBill.length > 0) {
+      return res.status(400).json({ message: "Bill already exists for this month" });
+    }
+    const userSubs = await db.select().from(milkSubscriptions).where(eq11(milkSubscriptions.userId, userId));
+    const startDate = new Date(year, month - 1, 1);
+    const endDate = new Date(year, month, 0);
+    const monthOrders = await db.select().from(orders).where(
+      and8(
+        eq11(orders.userId, userId),
+        gte4(orders.createdAt, startDate),
+        lte4(orders.createdAt, endDate)
+      )
+    );
+    let subscriptionTotal = 0;
+    const billItems = [];
+    for (const sub of userSubs) {
+      const product = await db.query.products.findFirst({
+        where: eq11(products.id, sub.productId)
+      });
+      if (product && sub.status === "ACTIVE") {
+        const daysInMonth = new Date(year, month, 0).getDate();
+        let deliveries = daysInMonth;
+        if (sub.frequency === "weekly") {
+          deliveries = Math.ceil(daysInMonth / 7);
+        } else if (sub.frequency === "alternate") {
+          deliveries = Math.ceil(daysInMonth / 2);
+        }
+        const total = Number(sub.quantity || 0) * Number(sub.pricePerL || product.price) * deliveries;
+        subscriptionTotal += total;
+        billItems.push({
+          type: "subscription",
+          productId: sub.productId,
+          productName: product.name,
+          quantity: deliveries,
+          pricePerUnit: sub.pricePerL || product.price,
+          total: Math.round(total)
+        });
+      }
+    }
+    let ordersTotal = 0;
+    for (const order of monthOrders) {
+      ordersTotal += Number(order.totalAmount || 0);
+      billItems.push({
+        type: "order",
+        orderId: order.id,
+        productName: `Order #${order.id}`,
+        quantity: 1,
+        pricePerUnit: Number(order.totalAmount || 0),
+        total: Math.round(Number(order.totalAmount || 0))
+      });
+    }
+    const dueDate = new Date(year, month - 1, 5);
+    const finalAmount = subscriptionTotal + ordersTotal;
+    const newBill = await db.insert(bills).values({
+      userId,
+      month,
+      year,
+      items: billItems,
+      subscriptionTotal,
+      ordersTotal,
+      previousPending: 0,
+      penalty: 0,
+      discount: 0,
+      finalAmount,
+      dueDate: dueDate.toISOString().split("T")[0],
+      status: "unpaid"
+    }).returning();
+    res.json({ success: true, bill: newBill[0], message: "Bill generated successfully" });
+  } catch (error) {
+    console.error("Error generating bill:", error);
+    res.status(500).json({ message: "Failed to generate bill" });
+  }
+});
+var admin_billing_routes_default = router10;
 
 // server/routes/rbac.routes.ts
-import { eq as eq11 } from "drizzle-orm";
-var router10 = Router10();
-router10.post("/auth/verify-phone", async (req, res) => {
+import { Router as Router11 } from "express";
+init_schema();
+init_db();
+import { eq as eq12 } from "drizzle-orm";
+import path from "path";
+import fs from "fs";
+var router11 = Router11();
+router11.post("/auth/verify-phone", async (req, res) => {
   try {
     const { phone, otp } = req.body;
     if (!phone || !otp) {
@@ -2480,6 +3650,8 @@ router10.post("/auth/verify-phone", async (req, res) => {
     }
     req.session.userId = userId;
     req.session.user = { id: userId, phone };
+    req.session.userRole = user.role || "customer";
+    req.session.userEmail = user.email || null;
     req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);
@@ -2492,7 +3664,7 @@ router10.post("/auth/verify-phone", async (req, res) => {
     res.status(500).json({ message: "Verification failed" });
   }
 });
-router10.post("/auth/register", async (req, res) => {
+router11.post("/auth/register", async (req, res) => {
   try {
     const { phone, otp } = req.body;
     if (!phone || !otp) {
@@ -2509,6 +3681,8 @@ router10.post("/auth/register", async (req, res) => {
     });
     req.session.userId = userId;
     req.session.user = { id: userId, phone };
+    req.session.userRole = user.role || "customer";
+    req.session.userEmail = user.email || null;
     req.session.save((err) => {
       if (err) {
         console.error("Session save error:", err);
@@ -2521,7 +3695,7 @@ router10.post("/auth/register", async (req, res) => {
     res.status(500).json({ message: "Registration failed" });
   }
 });
-router10.get("/auth/user", async (req, res) => {
+router11.get("/auth/user", async (req, res) => {
   try {
     const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
     if (!userId) {
@@ -2552,16 +3726,58 @@ router10.get("/auth/user", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch user" });
   }
 });
-router10.get("/products", async (req, res) => {
+router11.put("/user/profile", async (req, res) => {
   try {
-    const products3 = await storage.getProducts();
-    res.json(products3);
+    const userId = req.session?.userId || req.user?.id || req.user?.claims?.sub;
+    if (!userId) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+    const { firstName, lastName, email, phone, address, gender, dob } = req.body;
+    const updatedUser = await storage.updateUser(userId, {
+      firstName,
+      lastName,
+      email,
+      phone,
+      address,
+      gender,
+      dob: dob ? new Date(dob) : void 0
+    });
+    res.json({
+      success: true,
+      message: "Profile updated successfully",
+      user: {
+        id: updatedUser.id,
+        firstName: updatedUser.firstName,
+        lastName: updatedUser.lastName,
+        email: updatedUser.email,
+        phone: updatedUser.phone,
+        address: updatedUser.address
+      }
+    });
+  } catch (error) {
+    console.error("Error updating user profile:", error);
+    res.status(500).json({ message: "Failed to update profile" });
+  }
+});
+router11.get("/products", async (_req, res) => {
+  try {
+    const allProducts = await storage.getProducts();
+    res.json(allProducts);
   } catch (error) {
     console.error("Error fetching products:", error);
     res.status(500).json({ message: "Failed to fetch products" });
   }
 });
-router10.get("/categories", async (req, res) => {
+router11.get("/site-settings", async (_req, res) => {
+  try {
+    const settings = await storage.getSiteSettings();
+    res.json(settings || { brandName: "Divine Naturals" });
+  } catch (error) {
+    console.error("Error fetching site settings:", error);
+    res.status(500).json({ message: "Failed to fetch site settings" });
+  }
+});
+router11.get("/categories", async (req, res) => {
   try {
     const categories2 = await storage.getCategories();
     res.json(categories2);
@@ -2570,7 +3786,34 @@ router10.get("/categories", async (req, res) => {
     res.status(500).json({ message: "Failed to fetch categories" });
   }
 });
-router10.post("/cart", requireCustomer, async (req, res) => {
+router11.put("/categories/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const categoryId = parseInt(req.params.id);
+    const updates = req.body;
+    if (isNaN(categoryId)) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
+    const category = await storage.updateCategory(categoryId, updates);
+    res.json({ success: true, category, message: "Category updated successfully" });
+  } catch (error) {
+    console.error("Error updating category:", error);
+    res.status(500).json({ message: "Failed to update category" });
+  }
+});
+router11.delete("/categories/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const categoryId = parseInt(req.params.id);
+    if (isNaN(categoryId)) {
+      return res.status(400).json({ message: "Invalid category ID" });
+    }
+    await storage.deleteCategory(categoryId);
+    res.json({ success: true, message: "Category deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting category:", error);
+    res.status(500).json({ message: "Failed to delete category" });
+  }
+});
+router11.post("/cart", requireCustomer, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const { productId, quantity } = req.body;
@@ -2584,7 +3827,7 @@ router10.post("/cart", requireCustomer, async (req, res) => {
     res.status(500).json({ message: "Failed to add item to cart" });
   }
 });
-router10.get("/cart", requireCustomer, async (req, res) => {
+router11.get("/cart", requireCustomer, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const cartItems2 = await storage.getCartItems(userId);
@@ -2594,7 +3837,7 @@ router10.get("/cart", requireCustomer, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch cart" });
   }
 });
-router10.post("/orders", requireCustomer, async (req, res) => {
+router11.post("/orders", requireCustomer, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const { deliveryAddress, deliveryDate } = req.body;
@@ -2624,21 +3867,6 @@ router10.post("/orders", requireCustomer, async (req, res) => {
         price: item.price,
         totalPrice: (parseFloat(item.price) * item.quantity).toFixed(2)
       });
-      const product = await db.select().from(products).where(eq11(products.id, item.productId));
-      if (product.length > 0) {
-        const newStock = Math.max(0, (product[0].stock || 0) - item.quantity);
-        await storage.updateProduct(item.productId, { stock: newStock });
-        await storage.recordStockMovement({
-          productId: item.productId,
-          type: "OUT",
-          reason: "ORDER_PLACED",
-          quantity: item.quantity,
-          previousStock: product[0].stock || 0,
-          newStock,
-          adminId: null,
-          notes: `Order #${order.id} placed`
-        });
-      }
     }
     await storage.clearCart(userId);
     res.json({ success: true, order });
@@ -2647,7 +3875,7 @@ router10.post("/orders", requireCustomer, async (req, res) => {
     res.status(500).json({ message: "Failed to create order" });
   }
 });
-router10.get("/milk-subscription", requireCustomer, async (req, res) => {
+router11.get("/milk-subscription", requireCustomer, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const subscription = await storage.getMilkSubscriptionByUser(userId);
@@ -2657,7 +3885,7 @@ router10.get("/milk-subscription", requireCustomer, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch subscription" });
   }
 });
-router10.post("/milk-subscription", requireCustomer, async (req, res) => {
+router11.post("/milk-subscription", requireCustomer, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const subscriptionData = insertMilkSubscriptionSchema.parse({ ...req.body, userId });
@@ -2668,7 +3896,7 @@ router10.post("/milk-subscription", requireCustomer, async (req, res) => {
     res.status(500).json({ message: "Failed to create subscription" });
   }
 });
-router10.patch("/milk-subscription/:id/pause", requireCustomer, async (req, res) => {
+router11.patch("/milk-subscription/:id/pause", requireCustomer, async (req, res) => {
   try {
     const subscriptionId = parseInt(req.params.id);
     const userId = req.user.claims.sub;
@@ -2686,7 +3914,7 @@ router10.patch("/milk-subscription/:id/pause", requireCustomer, async (req, res)
     res.status(500).json({ message: "Failed to pause subscription" });
   }
 });
-router10.patch("/milk-subscription/:id/resume", requireCustomer, async (req, res) => {
+router11.patch("/milk-subscription/:id/resume", requireCustomer, async (req, res) => {
   try {
     const subscriptionId = parseInt(req.params.id);
     const userId = req.user.claims.sub;
@@ -2704,7 +3932,7 @@ router10.patch("/milk-subscription/:id/resume", requireCustomer, async (req, res
     res.status(500).json({ message: "Failed to resume subscription" });
   }
 });
-router10.put("/personal-details", requireCustomer, async (req, res) => {
+router11.put("/personal-details", requireCustomer, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const { firstName, lastName, email, gender, dob } = req.body;
@@ -2734,7 +3962,7 @@ router10.put("/personal-details", requireCustomer, async (req, res) => {
     res.status(500).json({ message: "Failed to save personal details" });
   }
 });
-router10.get("/vendors/dashboard", requireVendor, async (req, res) => {
+router11.get(["/vendors/dashboard", "/vendor/dashboard", "/vendor/me/dashboard"], requireVendor, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const vendor = await storage.getVendorByUser(userId);
@@ -2757,7 +3985,7 @@ router10.get("/vendors/dashboard", requireVendor, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch dashboard data" });
   }
 });
-router10.post("/vendors/inward", requireVendor, async (req, res) => {
+router11.post(["/vendors/inward", "/vendor/inward"], requireVendor, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const { litersArrived, litersDelivered, litersPending, driverInfo } = req.body;
@@ -2778,13 +4006,16 @@ router10.post("/vendors/inward", requireVendor, async (req, res) => {
       sentToAdmin: true,
       status: "PENDING"
     });
+    if (litersDelivered > 0) {
+      await storage.updateVendorRequirement(vendor.id, litersDelivered);
+    }
     res.json({ success: true, inwardEntry });
   } catch (error) {
     console.error("Error logging inward entry:", error);
     res.status(500).json({ message: "Failed to log inward entry" });
   }
 });
-router10.post("/vendors/driver", requireVendor, async (req, res) => {
+router11.post("/vendors/driver", requireVendor, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const { name, age, phone, aadharUrl, panUrl } = req.body;
@@ -2809,7 +4040,7 @@ router10.post("/vendors/driver", requireVendor, async (req, res) => {
     res.status(500).json({ message: "Failed to add driver" });
   }
 });
-router10.get("/vendors/drivers", requireVendor, async (req, res) => {
+router11.get("/vendors/drivers", requireVendor, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const vendor = await storage.getVendorByUser(userId);
@@ -2823,7 +4054,7 @@ router10.get("/vendors/drivers", requireVendor, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch drivers" });
   }
 });
-router10.get("/delivery/assignments", requireDelivery, async (req, res) => {
+router11.get("/delivery/assignments", requireDelivery, async (req, res) => {
   try {
     const userId = req.user.claims.sub;
     const deliveryPartner = await storage.getDeliveryPartnerByUser(userId);
@@ -2837,7 +4068,7 @@ router10.get("/delivery/assignments", requireDelivery, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch assignments" });
   }
 });
-router10.put("/delivery/status/:id", requireDelivery, async (req, res) => {
+router11.put("/delivery/status/:id", requireDelivery, async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
     const { status } = req.body;
@@ -2867,7 +4098,7 @@ router10.put("/delivery/status/:id", requireDelivery, async (req, res) => {
     res.status(500).json({ message: "Failed to update order status" });
   }
 });
-router10.get("/admin/vendors", requireAdmin, async (req, res) => {
+router11.get("/admin/vendors", requireAdmin, async (req, res) => {
   try {
     const vendors2 = await storage.getVendors();
     const vendorList = vendors2.map((vendor) => ({
@@ -2889,7 +4120,7 @@ router10.get("/admin/vendors", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch vendors" });
   }
 });
-router10.post("/admin/vendors/approve/:id", requireAdmin, async (req, res) => {
+router11.post("/admin/vendors/approve/:id", requireAdmin, async (req, res) => {
   try {
     const vendorId = parseInt(req.params.id);
     if (isNaN(vendorId)) {
@@ -2902,7 +4133,7 @@ router10.post("/admin/vendors/approve/:id", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to approve vendor" });
   }
 });
-router10.post("/admin/update-password", async (req, res) => {
+router11.post("/admin/update-password", async (req, res) => {
   try {
     const { email, newPassword } = req.body;
     if (!email || !newPassword) {
@@ -2912,7 +4143,7 @@ router10.post("/admin/update-password", async (req, res) => {
       return res.status(400).json({ message: "Password must be at least 6 characters" });
     }
     const user = await db.query.users.findFirst({
-      where: eq11(users.email, email)
+      where: eq12(users.email, email)
     });
     if (!user) {
       return res.status(404).json({ message: "Admin user not found" });
@@ -2924,7 +4155,7 @@ router10.post("/admin/update-password", async (req, res) => {
     res.status(500).json({ message: "Failed to update password" });
   }
 });
-router10.post("/admin/categories", requireAdmin, async (req, res) => {
+router11.post("/admin/categories", requireAdminAccess, async (req, res) => {
   try {
     const { name, description, icon } = req.body;
     if (!name) {
@@ -2942,7 +4173,7 @@ router10.post("/admin/categories", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to add category" });
   }
 });
-router10.put("/admin/categories/:id", requireAdmin, async (req, res) => {
+router11.put("/admin/categories/:id", requireAdminAccess, async (req, res) => {
   try {
     const categoryId = parseInt(req.params.id);
     const updates = req.body;
@@ -2956,7 +4187,7 @@ router10.put("/admin/categories/:id", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to update category" });
   }
 });
-router10.delete("/admin/categories/:id", requireAdmin, async (req, res) => {
+router11.delete("/admin/categories/:id", requireAdminAccess, async (req, res) => {
   try {
     const categoryId = parseInt(req.params.id);
     if (isNaN(categoryId)) {
@@ -2969,7 +4200,76 @@ router10.delete("/admin/categories/:id", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to delete category" });
   }
 });
-router10.post("/admin/products", requireAdmin, async (req, res) => {
+router11.post("/admin/generate-ai-image", requireAdminAccess, async (req, res) => {
+  try {
+    const { prompt, productName } = req.body;
+    if (!prompt) {
+      return res.status(400).json({ message: "Prompt is required for generation" });
+    }
+    console.log(`AI Image generation requested for: ${productName}`);
+    console.log(`Prompt: ${prompt}`);
+    const fileName = `ai_${Date.now()}_${productName.toLowerCase().replace(/\s+/g, "_")}.png`;
+    const publicPath = `/images/products/${fileName}`;
+    res.json({
+      success: true,
+      url: "https://images.unsplash.com/photo-1550989460-0adf9ea622e2?auto=format&fit=crop&q=80&w=800",
+      // High-quality milk placeholder
+      message: "AI image generated successfully (Demo Mode)"
+    });
+  } catch (error) {
+    console.error("Error generating AI image:", error);
+    res.status(500).json({ message: "AI generation failed" });
+  }
+});
+router11.post("/admin/upload-product-image", requireAdminAccess, async (req, res) => {
+  try {
+    console.log("Upload request received");
+    if (!req.files || !req.files.image) {
+      console.log("No files in request:", req.files);
+      return res.status(400).json({ message: "No image file provided" });
+    }
+    const image = req.files.image;
+    console.log("Received image:", image.name, "Size:", image.size);
+    const sanitizedName = image.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const fileName = `${Date.now()}_${sanitizedName}`;
+    const uploadPath = path.join(process.cwd(), "public", "products", fileName);
+    console.log("Uploading to:", uploadPath);
+    const dir = path.dirname(uploadPath);
+    if (!fs.existsSync(dir)) {
+      console.log("Creating directory:", dir);
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    await image.mv(uploadPath);
+    console.log("File moved successfully");
+    const imageUrl = `/products/${fileName}`;
+    res.json({ url: imageUrl });
+  } catch (error) {
+    console.error("Error uploading product image:", error);
+    res.status(500).json({ message: "Failed to upload image" });
+  }
+});
+router11.post("/admin/upload-banner-image", requireAdminAccess, async (req, res) => {
+  try {
+    if (!req.files || !req.files.image) {
+      return res.status(400).json({ message: "No image file provided" });
+    }
+    const image = req.files.image;
+    const sanitizedName = image.name.replace(/[^a-zA-Z0-9.-]/g, "_");
+    const fileName = `${Date.now()}_banner_${sanitizedName}`;
+    const uploadPath = path.join(process.cwd(), "public", "banners", fileName);
+    const dir = path.dirname(uploadPath);
+    if (!fs.existsSync(dir)) {
+      fs.mkdirSync(dir, { recursive: true });
+    }
+    await image.mv(uploadPath);
+    const imageUrl = `/banners/${fileName}`;
+    res.json({ url: imageUrl });
+  } catch (error) {
+    console.error("Error uploading banner image:", error);
+    res.status(500).json({ message: "Failed to upload image" });
+  }
+});
+router11.post("/admin/products", requireAdminAccess, async (req, res) => {
   try {
     const { name, description, category, type, price, unit, stock, imageUrl } = req.body;
     if (!name || !category || !type || !price || !unit) {
@@ -2992,7 +4292,7 @@ router10.post("/admin/products", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to add product" });
   }
 });
-router10.put("/admin/products/:id", requireAdmin, async (req, res) => {
+router11.put("/admin/products/:id", requireAdminAccess, async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
     const updates = req.body;
@@ -3022,7 +4322,7 @@ router10.put("/admin/products/:id", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to update product" });
   }
 });
-router10.delete("/admin/products/:id", requireAdmin, async (req, res) => {
+router11.delete("/admin/products/:id", requireAdminAccess, async (req, res) => {
   try {
     const productId = parseInt(req.params.id);
     if (isNaN(productId)) {
@@ -3035,7 +4335,7 @@ router10.delete("/admin/products/:id", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to deactivate product" });
   }
 });
-router10.get("/admin/orders", requireAdmin, async (req, res) => {
+router11.get("/admin/orders", requireAdmin, async (req, res) => {
   try {
     const orders2 = await storage.getAllOrders();
     res.json(orders2);
@@ -3044,7 +4344,7 @@ router10.get("/admin/orders", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch orders" });
   }
 });
-router10.put("/admin/orders/:id/assign-delivery", requireAdmin, async (req, res) => {
+router11.put("/admin/orders/:id/assign-delivery", requireAdmin, async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
     const { deliveryPartnerId } = req.body;
@@ -3058,7 +4358,7 @@ router10.put("/admin/orders/:id/assign-delivery", requireAdmin, async (req, res)
     res.status(500).json({ message: "Failed to assign delivery partner" });
   }
 });
-router10.put("/admin/orders/:id/payment", requireAdmin, async (req, res) => {
+router11.put("/admin/orders/:id/payment", requireAdmin, async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
     const { paymentStatus, paymentMethod, paymentDate } = req.body;
@@ -3076,16 +4376,7 @@ router10.put("/admin/orders/:id/payment", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to update payment" });
   }
 });
-router10.get("/admin/delivery-partners", requireAdmin, async (req, res) => {
-  try {
-    const partners = await storage.getDeliveryPartners();
-    res.json(partners);
-  } catch (error) {
-    console.error("Error fetching delivery partners:", error);
-    res.status(500).json({ message: "Failed to fetch delivery partners" });
-  }
-});
-router10.get("/admin/customers", requireAdmin, async (req, res) => {
+router11.get("/admin/customers", requireAdmin, async (req, res) => {
   try {
     const customers = await storage.getAllCustomers();
     res.json(customers);
@@ -3094,7 +4385,7 @@ router10.get("/admin/customers", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch customers" });
   }
 });
-router10.get("/admin/subscriptions", requireAdmin, async (req, res) => {
+router11.get("/admin/subscriptions", requireAdmin, async (req, res) => {
   try {
     const subscriptions = await storage.getAllSubscriptions();
     res.json(subscriptions);
@@ -3103,7 +4394,7 @@ router10.get("/admin/subscriptions", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch subscriptions" });
   }
 });
-router10.get("/admin/vendors", requireAdmin, async (req, res) => {
+router11.get("/admin/vendors", requireAdmin, async (req, res) => {
   try {
     const vendors2 = await storage.getVendors();
     res.json(vendors2);
@@ -3112,7 +4403,19 @@ router10.get("/admin/vendors", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch vendors" });
   }
 });
-router10.get("/admin/stats", requireAdmin, async (req, res) => {
+router11.post("/admin/cms/privacy-policy", requireAdminAccess, async (req, res) => {
+  const updated = await storage.updatePrivacyPolicySettings(req.body);
+  res.json(updated);
+});
+router11.get("/admin/site-settings", requireAdminAccess, async (_req, res) => {
+  const settings = await storage.getSiteSettings();
+  res.json(settings || { brandName: "Divine Naturals" });
+});
+router11.post("/admin/site-settings", requireAdminAccess, async (req, res) => {
+  const updated = await storage.updateSiteSettings(req.body);
+  res.json(updated);
+});
+router11.get("/admin/stats", requireAdmin, async (req, res) => {
   try {
     const stats = await storage.getAdminStats();
     res.json(stats);
@@ -3121,7 +4424,7 @@ router10.get("/admin/stats", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch stats" });
   }
 });
-router10.put("/admin/orders/:id", requireAdmin, async (req, res) => {
+router11.put("/admin/orders/:id", requireAdmin, async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
     const { status } = req.body;
@@ -3135,7 +4438,7 @@ router10.put("/admin/orders/:id", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to update order status" });
   }
 });
-router10.get("/admin/stock-movements", requireAdmin, async (req, res) => {
+router11.get("/admin/stock-movements", requireAdmin, async (req, res) => {
   try {
     const movements = await storage.getAllStockMovements();
     res.json(movements);
@@ -3144,7 +4447,7 @@ router10.get("/admin/stock-movements", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to fetch stock movements" });
   }
 });
-router10.get("/admin/stock-movements/:productId", requireAdmin, async (req, res) => {
+router11.get("/admin/stock-movements/:productId", requireAdmin, async (req, res) => {
   try {
     const productId = parseInt(req.params.productId);
     if (isNaN(productId)) {
@@ -3157,17 +4460,17 @@ router10.get("/admin/stock-movements/:productId", requireAdmin, async (req, res)
     res.status(500).json({ message: "Failed to fetch stock movements" });
   }
 });
-router10.post("/storage/upload", requireAdmin, async (req, res) => {
+router11.post("/storage/upload", requireAdmin, async (req, res) => {
   try {
-    const { file, path: path3, data, dataUrl } = req.body;
+    const { file, path: path5, data, dataUrl } = req.body;
     if (dataUrl) {
       const timestamp2 = Date.now();
-      const uniquePath = `${path3}-${timestamp2}`.replace(/\s+/g, "-");
+      const uniquePath = `${path5}-${timestamp2}`.replace(/\s+/g, "-");
       return res.json({ url: dataUrl });
     }
     if (data) {
       const timestamp2 = Date.now();
-      const uniquePath = `${path3}-${timestamp2}`.replace(/\s+/g, "-");
+      const uniquePath = `${path5}-${timestamp2}`.replace(/\s+/g, "-");
       const dataURLPrefix = "data:image/jpeg;base64,";
       return res.json({ url: `${dataURLPrefix}${data}` });
     }
@@ -3177,16 +4480,728 @@ router10.post("/storage/upload", requireAdmin, async (req, res) => {
     res.status(500).json({ message: "Failed to upload file" });
   }
 });
-var rbac_routes_default = router10;
+var rbac_routes_default = router11;
+
+// server/routes/banners.routes.ts
+init_db();
+init_schema();
+import { Router as Router12 } from "express";
+import { eq as eq13, asc as asc2, and as and9, lte as lte5, gte as gte5, isNull as isNull2, or as or2 } from "drizzle-orm";
+var router12 = Router12();
+router12.get("/public", async (req, res) => {
+  try {
+    const now = /* @__PURE__ */ new Date();
+    const activeBanners = await db.select().from(banners).where(
+      and9(
+        eq13(banners.isActive, true),
+        or2(
+          isNull2(banners.startDate),
+          lte5(banners.startDate, now)
+        ),
+        or2(
+          isNull2(banners.endDate),
+          gte5(banners.endDate, now)
+        )
+      )
+    ).orderBy(asc2(banners.displayOrder));
+    res.json(activeBanners);
+  } catch (error) {
+    console.error("Error fetching public banners:", error);
+    res.status(500).json({ message: "Failed to fetch banners" });
+  }
+});
+router12.get("/", requireAdminAccess, async (req, res) => {
+  try {
+    const allBanners = await db.select().from(banners).orderBy(asc2(banners.displayOrder));
+    res.json(allBanners);
+  } catch (error) {
+    console.error("Error fetching banners:", error);
+    res.status(500).json({ message: "Failed to fetch banners" });
+  }
+});
+router12.post("/", requireAdminAccess, async (req, res) => {
+  try {
+    const { title, subtitle, imageUrl, imageUrlTablet, imageUrlMobile, ctaText, ctaLink, badgeText, displayOrder, isActive, showOverlay, startDate, endDate } = req.body;
+    const [newBanner] = await db.insert(banners).values({
+      title,
+      subtitle,
+      imageUrl,
+      imageUrlTablet: imageUrlTablet || null,
+      imageUrlMobile: imageUrlMobile || null,
+      ctaText,
+      ctaLink,
+      badgeText,
+      displayOrder: displayOrder || 0,
+      isActive: isActive !== false,
+      showOverlay: showOverlay !== false,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null
+    }).returning();
+    res.status(201).json(newBanner);
+  } catch (error) {
+    console.error("Error creating banner:", error);
+    res.status(500).json({ message: "Failed to create banner" });
+  }
+});
+router12.put("/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const bannerId = parseInt(req.params.id);
+    const { title, subtitle, imageUrl, imageUrlTablet, imageUrlMobile, ctaText, ctaLink, badgeText, displayOrder, isActive, showOverlay, startDate, endDate } = req.body;
+    const [updatedBanner] = await db.update(banners).set({
+      title,
+      subtitle,
+      imageUrl,
+      imageUrlTablet: imageUrlTablet || null,
+      imageUrlMobile: imageUrlMobile || null,
+      ctaText,
+      ctaLink,
+      badgeText,
+      displayOrder,
+      isActive,
+      showOverlay,
+      startDate: startDate ? new Date(startDate) : null,
+      endDate: endDate ? new Date(endDate) : null,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq13(banners.id, bannerId)).returning();
+    if (!updatedBanner) {
+      return res.status(404).json({ message: "Banner not found" });
+    }
+    res.json(updatedBanner);
+  } catch (error) {
+    console.error("Error updating banner:", error);
+    res.status(500).json({ message: "Failed to update banner" });
+  }
+});
+router12.delete("/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const bannerId = parseInt(req.params.id);
+    const [deletedBanner] = await db.delete(banners).where(eq13(banners.id, bannerId)).returning();
+    if (!deletedBanner) {
+      return res.status(404).json({ message: "Banner not found" });
+    }
+    res.json({ message: "Banner deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting banner:", error);
+    res.status(500).json({ message: "Failed to delete banner" });
+  }
+});
+router12.get("/sections/public", async (req, res) => {
+  try {
+    const activeSections = await db.select().from(homepageSections).where(eq13(homepageSections.isActive, true)).orderBy(asc2(homepageSections.displayOrder));
+    res.json(activeSections);
+  } catch (error) {
+    console.error("Error fetching homepage sections:", error);
+    res.status(500).json({ message: "Failed to fetch sections" });
+  }
+});
+router12.get("/sections", requireAdminAccess, async (req, res) => {
+  try {
+    const allSections = await db.select().from(homepageSections).orderBy(asc2(homepageSections.displayOrder));
+    res.json(allSections);
+  } catch (error) {
+    console.error("Error fetching sections:", error);
+    res.status(500).json({ message: "Failed to fetch sections" });
+  }
+});
+router12.post("/sections", requireAdminAccess, async (req, res) => {
+  try {
+    const { sectionType, title, subtitle, content, displayOrder, isActive } = req.body;
+    if (!sectionType) {
+      return res.status(400).json({ message: "Section type is required" });
+    }
+    const [newSection] = await db.insert(homepageSections).values({
+      sectionType,
+      title,
+      subtitle,
+      content,
+      displayOrder: displayOrder || 0,
+      isActive: isActive !== false
+    }).returning();
+    res.status(201).json(newSection);
+  } catch (error) {
+    console.error("Error creating section:", error);
+    res.status(500).json({ message: "Failed to create section" });
+  }
+});
+var banners_routes_default = router12;
+
+// server/routes/homepage.routes.ts
+init_db();
+init_schema();
+import { Router as Router13 } from "express";
+import { eq as eq14, asc as asc3, desc as desc3, and as and10, lte as lte6, gte as gte6, isNull as isNull3, or as or3 } from "drizzle-orm";
+var router13 = Router13();
+router13.get("/ethos/public", async (req, res) => {
+  try {
+    const cards = await db.select().from(ethosCards).where(eq14(ethosCards.isActive, true)).orderBy(asc3(ethosCards.displayOrder));
+    res.json(cards);
+  } catch (error) {
+    console.error("Error fetching ethos cards:", error);
+    res.status(500).json({ message: "Failed to fetch ethos cards" });
+  }
+});
+router13.get("/ethos", requireAdminAccess, async (req, res) => {
+  try {
+    const cards = await db.select().from(ethosCards).orderBy(asc3(ethosCards.displayOrder));
+    res.json(cards);
+  } catch (error) {
+    console.error("Error fetching ethos cards:", error);
+    res.status(500).json({ message: "Failed to fetch ethos cards" });
+  }
+});
+router13.post("/ethos", requireAdminAccess, async (req, res) => {
+  try {
+    const { title, description, icon, displayOrder, isActive } = req.body;
+    const [card] = await db.insert(ethosCards).values({
+      title,
+      description,
+      icon,
+      displayOrder: displayOrder || 0,
+      isActive: isActive !== false
+    }).returning();
+    res.status(201).json(card);
+  } catch (error) {
+    console.error("Error creating ethos card:", error);
+    res.status(500).json({ message: "Failed to create ethos card" });
+  }
+});
+router13.put("/ethos/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { title, description, icon, displayOrder, isActive } = req.body;
+    const [card] = await db.update(ethosCards).set({ title, description, icon, displayOrder, isActive, updatedAt: /* @__PURE__ */ new Date() }).where(eq14(ethosCards.id, id)).returning();
+    if (!card) return res.status(404).json({ message: "Card not found" });
+    res.json(card);
+  } catch (error) {
+    console.error("Error updating ethos card:", error);
+    res.status(500).json({ message: "Failed to update ethos card" });
+  }
+});
+router13.delete("/ethos/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [card] = await db.delete(ethosCards).where(eq14(ethosCards.id, id)).returning();
+    if (!card) return res.status(404).json({ message: "Card not found" });
+    res.json({ message: "Card deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting ethos card:", error);
+    res.status(500).json({ message: "Failed to delete ethos card" });
+  }
+});
+router13.get("/stats/public", async (req, res) => {
+  try {
+    const counters = await db.select().from(statsCounters).where(eq14(statsCounters.isActive, true)).orderBy(asc3(statsCounters.displayOrder));
+    res.json(counters);
+  } catch (error) {
+    console.error("Error fetching stats counters:", error);
+    res.status(500).json({ message: "Failed to fetch stats counters" });
+  }
+});
+router13.get("/stats", requireAdminAccess, async (req, res) => {
+  try {
+    const counters = await db.select().from(statsCounters).orderBy(asc3(statsCounters.displayOrder));
+    res.json(counters);
+  } catch (error) {
+    console.error("Error fetching stats counters:", error);
+    res.status(500).json({ message: "Failed to fetch stats counters" });
+  }
+});
+router13.post("/stats", requireAdminAccess, async (req, res) => {
+  try {
+    const { label, value, suffix, icon, displayOrder, isActive } = req.body;
+    const [counter] = await db.insert(statsCounters).values({
+      label,
+      value,
+      suffix,
+      icon,
+      displayOrder: displayOrder || 0,
+      isActive: isActive !== false
+    }).returning();
+    res.status(201).json(counter);
+  } catch (error) {
+    console.error("Error creating stats counter:", error);
+    res.status(500).json({ message: "Failed to create stats counter" });
+  }
+});
+router13.put("/stats/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { label, value, suffix, icon, displayOrder, isActive } = req.body;
+    const [counter] = await db.update(statsCounters).set({ label, value, suffix, icon, displayOrder, isActive, updatedAt: /* @__PURE__ */ new Date() }).where(eq14(statsCounters.id, id)).returning();
+    if (!counter) return res.status(404).json({ message: "Counter not found" });
+    res.json(counter);
+  } catch (error) {
+    console.error("Error updating stats counter:", error);
+    res.status(500).json({ message: "Failed to update stats counter" });
+  }
+});
+router13.delete("/stats/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [counter] = await db.delete(statsCounters).where(eq14(statsCounters.id, id)).returning();
+    if (!counter) return res.status(404).json({ message: "Counter not found" });
+    res.json({ message: "Counter deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting stats counter:", error);
+    res.status(500).json({ message: "Failed to delete stats counter" });
+  }
+});
+router13.get("/faqs/public", async (req, res) => {
+  try {
+    const faqList = await db.select().from(faqs2).where(eq14(faqs2.isActive, true)).orderBy(asc3(faqs2.displayOrder));
+    res.json(faqList);
+  } catch (error) {
+    console.error("Error fetching FAQs:", error);
+    res.status(500).json({ message: "Failed to fetch FAQs" });
+  }
+});
+router13.get("/faqs", requireAdminAccess, async (req, res) => {
+  try {
+    const faqList = await db.select().from(faqs2).orderBy(asc3(faqs2.displayOrder));
+    res.json(faqList);
+  } catch (error) {
+    console.error("Error fetching FAQs:", error);
+    res.status(500).json({ message: "Failed to fetch FAQs" });
+  }
+});
+router13.post("/faqs", requireAdminAccess, async (req, res) => {
+  try {
+    const { question, answer, category, displayOrder, isActive } = req.body;
+    const [faq] = await db.insert(faqs2).values({
+      question,
+      answer,
+      category: category || "General",
+      displayOrder: displayOrder || 0,
+      isActive: isActive !== false
+    }).returning();
+    res.status(201).json(faq);
+  } catch (error) {
+    console.error("Error creating FAQ:", error);
+    res.status(500).json({ message: "Failed to create FAQ" });
+  }
+});
+router13.put("/faqs/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { question, answer, category, displayOrder, isActive } = req.body;
+    const [faq] = await db.update(faqs2).set({ question, answer, category, displayOrder, isActive, updatedAt: /* @__PURE__ */ new Date() }).where(eq14(faqs2.id, id)).returning();
+    if (!faq) return res.status(404).json({ message: "FAQ not found" });
+    res.json(faq);
+  } catch (error) {
+    console.error("Error updating FAQ:", error);
+    res.status(500).json({ message: "Failed to update FAQ" });
+  }
+});
+router13.delete("/faqs/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [faq] = await db.delete(faqs2).where(eq14(faqs2.id, id)).returning();
+    if (!faq) return res.status(404).json({ message: "FAQ not found" });
+    res.json({ message: "FAQ deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting FAQ:", error);
+    res.status(500).json({ message: "Failed to delete FAQ" });
+  }
+});
+router13.get("/deals/public", async (req, res) => {
+  try {
+    const now = /* @__PURE__ */ new Date();
+    const deals = await db.select({
+      id: productDeals.id,
+      productId: productDeals.productId,
+      dealType: productDeals.dealType,
+      dealValue: productDeals.dealValue,
+      badgeText: productDeals.badgeText,
+      priority: productDeals.priority,
+      product: products
+    }).from(productDeals).innerJoin(products, eq14(productDeals.productId, products.id)).where(
+      and10(
+        eq14(productDeals.isActive, true),
+        eq14(products.isActive, true),
+        or3(isNull3(productDeals.startsAt), lte6(productDeals.startsAt, now)),
+        or3(isNull3(productDeals.endsAt), gte6(productDeals.endsAt, now))
+      )
+    ).orderBy(asc3(productDeals.priority));
+    res.json(deals);
+  } catch (error) {
+    console.error("Error fetching deals:", error);
+    res.status(500).json({ message: "Failed to fetch deals" });
+  }
+});
+router13.get("/deals", requireAdminAccess, async (req, res) => {
+  try {
+    const deals = await db.select({
+      id: productDeals.id,
+      productId: productDeals.productId,
+      dealType: productDeals.dealType,
+      dealValue: productDeals.dealValue,
+      badgeText: productDeals.badgeText,
+      priority: productDeals.priority,
+      startsAt: productDeals.startsAt,
+      endsAt: productDeals.endsAt,
+      isActive: productDeals.isActive,
+      product: products
+    }).from(productDeals).leftJoin(products, eq14(productDeals.productId, products.id)).orderBy(asc3(productDeals.priority));
+    res.json(deals);
+  } catch (error) {
+    console.error("Error fetching deals:", error);
+    res.status(500).json({ message: "Failed to fetch deals" });
+  }
+});
+router13.post("/deals", requireAdminAccess, async (req, res) => {
+  try {
+    const { productId, dealType, dealValue, badgeText, priority, startsAt, endsAt, isActive } = req.body;
+    const [deal] = await db.insert(productDeals).values({
+      productId,
+      dealType: dealType || "PERCENT",
+      dealValue,
+      badgeText,
+      priority: priority || 0,
+      startsAt: startsAt ? new Date(startsAt) : null,
+      endsAt: endsAt ? new Date(endsAt) : null,
+      isActive: isActive !== false
+    }).returning();
+    res.status(201).json(deal);
+  } catch (error) {
+    console.error("Error creating deal:", error);
+    res.status(500).json({ message: "Failed to create deal" });
+  }
+});
+router13.put("/deals/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const { productId, dealType, dealValue, badgeText, priority, startsAt, endsAt, isActive } = req.body;
+    const [deal] = await db.update(productDeals).set({
+      productId,
+      dealType,
+      dealValue,
+      badgeText,
+      priority,
+      startsAt: startsAt ? new Date(startsAt) : null,
+      endsAt: endsAt ? new Date(endsAt) : null,
+      isActive,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq14(productDeals.id, id)).returning();
+    if (!deal) return res.status(404).json({ message: "Deal not found" });
+    res.json(deal);
+  } catch (error) {
+    console.error("Error updating deal:", error);
+    res.status(500).json({ message: "Failed to update deal" });
+  }
+});
+router13.delete("/deals/:id", requireAdminAccess, async (req, res) => {
+  try {
+    const id = parseInt(req.params.id);
+    const [deal] = await db.delete(productDeals).where(eq14(productDeals.id, id)).returning();
+    if (!deal) return res.status(404).json({ message: "Deal not found" });
+    res.json({ message: "Deal deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting deal:", error);
+    res.status(500).json({ message: "Failed to delete deal" });
+  }
+});
+router13.get("/new-products/public", async (req, res) => {
+  try {
+    const newProducts = await db.select().from(products).where(and10(eq14(products.isActive, true), eq14(products.isNew, true))).orderBy(desc3(products.launchedAt), desc3(products.createdAt)).limit(8);
+    res.json(newProducts);
+  } catch (error) {
+    console.error("Error fetching new products:", error);
+    res.status(500).json({ message: "Failed to fetch new products" });
+  }
+});
+router13.get("/newsletter/public", async (req, res) => {
+  try {
+    const [settings] = await db.select().from(newsletterSettings).where(eq14(newsletterSettings.isActive, true)).limit(1);
+    res.json(settings || null);
+  } catch (error) {
+    console.error("Error fetching newsletter settings:", error);
+    res.status(500).json({ message: "Failed to fetch newsletter settings" });
+  }
+});
+router13.get("/newsletter", requireAdminAccess, async (req, res) => {
+  try {
+    const [settings] = await db.select().from(newsletterSettings).limit(1);
+    res.json(settings || null);
+  } catch (error) {
+    console.error("Error fetching newsletter settings:", error);
+    res.status(500).json({ message: "Failed to fetch newsletter settings" });
+  }
+});
+router13.put("/newsletter", requireAdminAccess, async (req, res) => {
+  try {
+    const { title, subtitle, ctaText, placeholderText, isActive } = req.body;
+    const [existing] = await db.select().from(newsletterSettings).limit(1);
+    if (existing) {
+      const [updated] = await db.update(newsletterSettings).set({ title, subtitle, ctaText, placeholderText, isActive, updatedAt: /* @__PURE__ */ new Date() }).where(eq14(newsletterSettings.id, existing.id)).returning();
+      res.json(updated);
+    } else {
+      const [created] = await db.insert(newsletterSettings).values({ title, subtitle, ctaText, placeholderText, isActive }).returning();
+      res.status(201).json(created);
+    }
+  } catch (error) {
+    console.error("Error updating newsletter settings:", error);
+    res.status(500).json({ message: "Failed to update newsletter settings" });
+  }
+});
+router13.get("/footer/public", async (req, res) => {
+  try {
+    const [settings] = await db.select().from(footerSettings).where(eq14(footerSettings.isActive, true)).limit(1);
+    res.json(settings || null);
+  } catch (error) {
+    console.error("Error fetching footer settings:", error);
+    res.status(500).json({ message: "Failed to fetch footer settings" });
+  }
+});
+router13.get("/footer", requireAdminAccess, async (req, res) => {
+  try {
+    const [settings] = await db.select().from(footerSettings).limit(1);
+    res.json(settings || null);
+  } catch (error) {
+    console.error("Error fetching footer settings:", error);
+    res.status(500).json({ message: "Failed to fetch footer settings" });
+  }
+});
+router13.put("/footer", requireAdminAccess, async (req, res) => {
+  try {
+    const { companyName, tagline, description, phone, email, address, socialLinks, footerLinks, copyrightText, isActive } = req.body;
+    const [existing] = await db.select().from(footerSettings).limit(1);
+    if (existing) {
+      const [updated] = await db.update(footerSettings).set({ companyName, tagline, description, phone, email, address, socialLinks, footerLinks, copyrightText, isActive, updatedAt: /* @__PURE__ */ new Date() }).where(eq14(footerSettings.id, existing.id)).returning();
+      res.json(updated);
+    } else {
+      const [created] = await db.insert(footerSettings).values({ companyName, tagline, description, phone, email, address, socialLinks, footerLinks, copyrightText, isActive }).returning();
+      res.status(201).json(created);
+    }
+  } catch (error) {
+    console.error("Error updating footer settings:", error);
+    res.status(500).json({ message: "Failed to update footer settings" });
+  }
+});
+var homepage_routes_default = router13;
+
+// server/routes/cms.routes.ts
+init_db();
+init_schema();
+import { Router as Router14 } from "express";
+import { eq as eq15 } from "drizzle-orm";
+var router14 = Router14();
+router14.get("/about-us/public", async (req, res) => {
+  try {
+    const [data] = await db.select().from(aboutUsSettings).where(eq15(aboutUsSettings.isActive, true));
+    res.json(data || {});
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch about us" });
+  }
+});
+router14.get("/about-us", requireAdminAccess, async (req, res) => {
+  try {
+    const [data] = await db.select().from(aboutUsSettings);
+    res.json(data || {});
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch about us" });
+  }
+});
+router14.put("/about-us", requireAdminAccess, async (req, res) => {
+  try {
+    const {
+      heroTitle,
+      heroSubtitle,
+      heroImageUrl,
+      heroCtaText,
+      heroCtaLink,
+      storyHeading,
+      storyDescription,
+      storyImageUrl,
+      valuesTitle,
+      values,
+      processTitle,
+      processSteps,
+      ctaHeading,
+      ctaSubheading,
+      ctaButtonText,
+      ctaButtonLink,
+      isActive
+    } = req.body;
+    const [data] = await db.update(aboutUsSettings).set({
+      heroTitle,
+      heroSubtitle,
+      heroImageUrl,
+      heroCtaText,
+      heroCtaLink,
+      storyHeading,
+      storyDescription,
+      storyImageUrl,
+      valuesTitle,
+      values,
+      processTitle,
+      processSteps,
+      ctaHeading,
+      ctaSubheading,
+      ctaButtonText,
+      ctaButtonLink,
+      isActive,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq15(aboutUsSettings.id, 1)).returning();
+    res.json(data);
+  } catch (error) {
+    console.error("Update About Us error:", error);
+    res.status(500).json({ message: "Failed to update about us" });
+  }
+});
+router14.get("/contact/public", async (req, res) => {
+  try {
+    const [data] = await db.select().from(contactSettings).where(eq15(contactSettings.isActive, true));
+    res.json(data || {});
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch contact info" });
+  }
+});
+router14.get("/contact", requireAdminAccess, async (req, res) => {
+  try {
+    const [data] = await db.select().from(contactSettings);
+    res.json(data || {});
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch contact info" });
+  }
+});
+router14.put("/contact", requireAdminAccess, async (req, res) => {
+  try {
+    const {
+      heroTitle,
+      heroSubtitle,
+      heroImageUrl,
+      phone,
+      email,
+      address,
+      businessHours,
+      socialLinks,
+      mapEmbedUrl,
+      isActive
+    } = req.body;
+    const [data] = await db.update(contactSettings).set({
+      heroTitle,
+      heroSubtitle,
+      heroImageUrl,
+      phone,
+      email,
+      address,
+      businessHours,
+      socialLinks,
+      mapEmbedUrl,
+      isActive,
+      updatedAt: /* @__PURE__ */ new Date()
+    }).where(eq15(contactSettings.id, 1)).returning();
+    res.json(data);
+  } catch (error) {
+    console.error("Update Contact error:", error);
+    res.status(500).json({ message: "Failed to update contact info" });
+  }
+});
+router14.get("/terms-of-service/public", async (req, res) => {
+  try {
+    const [data] = await db.select().from(termsOfServiceSettings).where(eq15(termsOfServiceSettings.isActive, true));
+    res.json(data || {});
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch terms of service" });
+  }
+});
+router14.get("/terms-of-service", requireAdminAccess, async (req, res) => {
+  try {
+    const [data] = await db.select().from(termsOfServiceSettings);
+    res.json(data || {});
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch terms of service" });
+  }
+});
+router14.put("/terms-of-service", requireAdminAccess, async (req, res) => {
+  try {
+    const { title, content, sections, isActive } = req.body;
+    const [data] = await db.update(termsOfServiceSettings).set({ title, content, sections, isActive, updatedAt: /* @__PURE__ */ new Date() }).where(eq15(termsOfServiceSettings.id, 1)).returning();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update terms of service" });
+  }
+});
+router14.get("/privacy-policy/public", async (req, res) => {
+  try {
+    const [data] = await db.select().from(privacyPolicySettings).where(eq15(privacyPolicySettings.isActive, true));
+    res.json(data || {});
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch privacy policy" });
+  }
+});
+router14.get("/privacy-policy", requireAdminAccess, async (req, res) => {
+  try {
+    const [data] = await db.select().from(privacyPolicySettings);
+    res.json(data || {});
+  } catch (error) {
+    res.status(500).json({ message: "Failed to fetch privacy policy" });
+  }
+});
+router14.put("/privacy-policy", requireAdminAccess, async (req, res) => {
+  try {
+    const { title, content, sections, isActive } = req.body;
+    const [data] = await db.update(privacyPolicySettings).set({ title, content, sections, isActive, updatedAt: /* @__PURE__ */ new Date() }).where(eq15(privacyPolicySettings.id, 1)).returning();
+    res.json(data);
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update privacy policy" });
+  }
+});
+var cms_routes_default = router14;
+
+// server/routes/contact-submissions.routes.ts
+init_db();
+init_schema();
+import { eq as eq16, desc as desc4 } from "drizzle-orm";
+function setupContactSubmissionsRoutes(app2) {
+  app2.post("/api/contact-submissions", async (req, res) => {
+    try {
+      const { name, email, phone, message } = req.body;
+      if (!name || !email || !message) {
+        return res.status(400).json({ message: "Name, email and message are required" });
+      }
+      const [submission] = await db.insert(contactSubmissions).values({ name, email, phone, message, status: "new" }).returning();
+      res.status(201).json(submission);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to submit contact form" });
+    }
+  });
+  app2.get("/api/admin/contact-submissions", async (req, res) => {
+    try {
+      const submissions = await db.select().from(contactSubmissions).orderBy(desc4(contactSubmissions.createdAt));
+      res.json(submissions);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch submissions" });
+    }
+  });
+  app2.put("/api/admin/contact-submissions/:id/read", async (req, res) => {
+    try {
+      const [submission] = await db.update(contactSubmissions).set({ status: "read", updatedAt: /* @__PURE__ */ new Date() }).where(eq16(contactSubmissions.id, parseInt(req.params.id))).returning();
+      res.json(submission);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update submission" });
+    }
+  });
+  app2.delete("/api/admin/contact-submissions/:id", async (req, res) => {
+    try {
+      await db.delete(contactSubmissions).where(eq16(contactSubmissions.id, parseInt(req.params.id)));
+      res.json({ message: "Deleted" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete submission" });
+    }
+  });
+}
 
 // server/jobs/auto-delivery.ts
-import { eq as eq12 } from "drizzle-orm";
+init_db();
+init_schema();
+import { eq as eq17 } from "drizzle-orm";
 async function generateDailyDeliveries() {
   try {
     const tomorrow = /* @__PURE__ */ new Date();
     tomorrow.setDate(tomorrow.getDate() + 1);
     const tomorrowStr = tomorrow.toISOString().split("T")[0];
-    const activeSubscriptions = await db.select().from(milkSubscriptions).where(eq12(milkSubscriptions.status, "ACTIVE"));
+    const activeSubscriptions = await db.select().from(milkSubscriptions).where(eq17(milkSubscriptions.status, "ACTIVE"));
     for (const sub of activeSubscriptions) {
       if (sub.frequency === "daily") {
         await db.insert(subscriptionDeliveries).values({
@@ -3208,7 +5223,7 @@ async function generateDailyDeliveries() {
           }).catch(() => null);
         }
       } else if (sub.frequency === "alternate") {
-        const lastDelivery = await db.select().from(subscriptionDeliveries).where(eq12(subscriptionDeliveries.subscriptionId, sub.id));
+        const lastDelivery = await db.select().from(subscriptionDeliveries).where(eq17(subscriptionDeliveries.subscriptionId, sub.id));
         if (lastDelivery.length === 0) {
           await db.insert(subscriptionDeliveries).values({
             subscriptionId: sub.id,
@@ -3240,16 +5255,63 @@ function startDeliveryScheduler() {
 async function registerRoutes(app2) {
   await setupAuth(app2);
   setupAuthRoutes(app2);
+  setupContactSubmissionsRoutes(app2);
   startDeliveryScheduler();
   app2.use("/api/cart", cart_routes_default);
   app2.use("/api/addresses", address_routes_default);
   app2.use("/api/orders", order_routes_default);
-  app2.use("/api/admin-orders", admin_orders_routes_default);
+  app2.get("/api/admin/orders", requireAdminAccess, async (req, res) => {
+    try {
+      const { orders: orders2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+      const { db: db2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+      const status = req.query.status;
+      let allOrders = await db2.select().from(orders2);
+      if (status) allOrders = allOrders.filter((o) => o.status === status);
+      res.json(allOrders);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to fetch orders" });
+    }
+  });
+  app2.post("/api/admin/orders/:id/update-status", requireAdminAccess, async (req, res) => {
+    try {
+      const { orders: orders2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+      const { db: db2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+      const { eq: eq23 } = await import("drizzle-orm");
+      const orderId = parseInt(req.params.id);
+      const { status, paymentStatus } = req.body;
+      const updated = await storage.updateOrderStatus(orderId, status);
+      if (paymentStatus) {
+        await storage.updateOrderPayment(orderId, { paymentStatus });
+      }
+      res.json(updated);
+    } catch (error) {
+      res.status(500).json({ message: "Failed to update order" });
+    }
+  });
+  app2.delete("/api/admin/orders/:id", requireAdminAccess, async (req, res) => {
+    try {
+      const { orders: orders2, orderItems: orderItems4 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+      const { db: db2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+      const { eq: eq23 } = await import("drizzle-orm");
+      const orderId = parseInt(req.params.id);
+      await db2.delete(orderItems4).where(eq23(orderItems4.orderId, orderId));
+      const deleted = await db2.delete(orders2).where(eq23(orders2.id, orderId)).returning();
+      if (!deleted.length) return res.status(404).json({ message: "Order not found" });
+      res.json({ success: true, message: "Order deleted successfully" });
+    } catch (error) {
+      res.status(500).json({ message: "Failed to delete order" });
+    }
+  });
   app2.use("/api/admin/customers", admin_customers_routes_default);
+  app2.use("/api/admin/billing", admin_billing_routes_default);
   app2.use("/api/support", support_routes_default);
   app2.use("/api/offers", offers_routes_default);
   app2.use("/api/subscriptions", subscription_routes_default);
-  app2.use("/api/admin-subscriptions", admin_subscriptions_routes_default);
+  app2.use("/api/admin/subscriptions", admin_subscriptions_routes_default);
+  app2.use("/api/billing", billing_routes_default);
+  app2.use("/api/banners", banners_routes_default);
+  app2.use("/api/homepage", homepage_routes_default);
+  app2.use("/api/cms", cms_routes_default);
   app2.use("/api", rbac_routes_default);
   app2.get("/api/auth/user", async (req, res) => {
     try {
@@ -3287,20 +5349,59 @@ async function registerRoutes(app2) {
       res.status(500).json({ message: "Failed to mark notification as read" });
     }
   });
+  app2.get("/api/bills/:billId/pdf", async (req, res) => {
+    try {
+      const billId = parseInt(req.params.billId);
+      const { getBillInvoiceData: getBillInvoiceData2, createInvoiceHTML: createInvoiceHTML2 } = await Promise.resolve().then(() => (init_generateInvoice(), generateInvoice_exports));
+      const invoiceData = await getBillInvoiceData2(billId);
+      if (!invoiceData) {
+        return res.status(404).json({ message: "Bill not found" });
+      }
+      const html = createInvoiceHTML2(invoiceData);
+      res.setHeader("Content-Type", "text/html");
+      res.setHeader("Content-Disposition", `attachment; filename="invoice_${billId}.html"`);
+      res.send(html);
+    } catch (error) {
+      console.error("Error generating invoice:", error);
+      res.status(500).json({ message: "Failed to generate invoice" });
+    }
+  });
+  app2.post("/api/billing/:billId/mark-paid", async (req, res) => {
+    try {
+      const billId = parseInt(req.params.billId);
+      const userId = req.session?.userId || req.user?.claims?.sub;
+      const { bills: bills2 } = await Promise.resolve().then(() => (init_schema(), schema_exports));
+      const { eq: eq23 } = await import("drizzle-orm");
+      const { db: db2 } = await Promise.resolve().then(() => (init_db(), db_exports));
+      const bill = await db2.select().from(bills2).where(eq23(bills2.id, billId));
+      if (!bill.length || bill[0].userId !== userId) {
+        return res.status(403).json({ message: "Unauthorized" });
+      }
+      const updated = await db2.update(bills2).set({
+        status: "paid",
+        paymentDate: /* @__PURE__ */ new Date(),
+        paymentMethod: "cash"
+      }).where(eq23(bills2.id, billId)).returning();
+      res.json(updated[0]);
+    } catch (error) {
+      console.error("Error marking bill as paid:", error);
+      res.status(500).json({ message: "Failed to mark bill as paid" });
+    }
+  });
   const httpServer = createServer(app2);
   return httpServer;
 }
 
 // server/vite.ts
 import express from "express";
-import fs from "fs";
-import path2 from "path";
+import fs2 from "fs";
+import path3 from "path";
 import { createServer as createViteServer, createLogger } from "vite";
 
 // vite.config.ts
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
-import path from "path";
+import path2 from "path";
 import runtimeErrorOverlay from "@replit/vite-plugin-runtime-error-modal";
 var vite_config_default = defineConfig({
   plugins: [
@@ -3314,14 +5415,14 @@ var vite_config_default = defineConfig({
   ],
   resolve: {
     alias: {
-      "@": path.resolve(import.meta.dirname, "client", "src"),
-      "@shared": path.resolve(import.meta.dirname, "shared"),
-      "@assets": path.resolve(import.meta.dirname, "attached_assets")
+      "@": path2.resolve(import.meta.dirname, "client", "src"),
+      "@shared": path2.resolve(import.meta.dirname, "shared"),
+      "@assets": path2.resolve(import.meta.dirname, "attached_assets")
     }
   },
-  root: path.resolve(import.meta.dirname, "client"),
+  root: path2.resolve(import.meta.dirname, "client"),
   build: {
-    outDir: path.resolve(import.meta.dirname, "dist/public"),
+    outDir: path2.resolve(import.meta.dirname, "dist/public"),
     emptyOutDir: true
   },
   server: {
@@ -3367,13 +5468,13 @@ async function setupVite(app2, server) {
   app2.use("*", async (req, res, next) => {
     const url = req.originalUrl;
     try {
-      const clientTemplate = path2.resolve(
+      const clientTemplate = path3.resolve(
         import.meta.dirname,
         "..",
         "client",
         "index.html"
       );
-      let template = await fs.promises.readFile(clientTemplate, "utf-8");
+      let template = await fs2.promises.readFile(clientTemplate, "utf-8");
       template = template.replace(
         `src="/src/main.tsx"`,
         `src="/src/main.tsx?v=${nanoid2()}"`
@@ -3387,210 +5488,1047 @@ async function setupVite(app2, server) {
   });
 }
 function serveStatic(app2) {
-  const distPath = path2.resolve(import.meta.dirname, "public");
-  if (!fs.existsSync(distPath)) {
+  const distPath = path3.resolve(import.meta.dirname, "public");
+  if (!fs2.existsSync(distPath)) {
     throw new Error(
       `Could not find the build directory: ${distPath}, make sure to build the client first`
     );
   }
   app2.use(express.static(distPath));
   app2.use("*", (_req, res) => {
-    res.sendFile(path2.resolve(distPath, "index.html"));
+    res.sendFile(path3.resolve(distPath, "index.html"));
   });
 }
 
 // server/seed.ts
-import * as bcryptjs2 from "bcryptjs";
+init_db();
+init_schema();
+import { eq as eq19 } from "drizzle-orm";
+import bcrypt from "bcryptjs";
+import { nanoid as nanoid3 } from "nanoid";
 async function seedDatabase() {
   try {
-    const existingUsers = await db.select().from(users2).limit(1);
+    console.log("Seeding database...");
+    const adminEmail = "md@divinenaturals.in";
+    const existingUsers = await db.select().from(users2).where(eq19(users2.email, adminEmail));
     if (existingUsers.length > 0) {
-      console.log("Database already seeded, skipping...");
-      return;
-    }
-    console.log("Seeding database with mock data...");
-    const salt = await bcryptjs2.genSalt(10);
-    const adminPasswordHash = await bcryptjs2.hash("admin123", salt);
-    const customerPasswordHash = await bcryptjs2.hash("customer123", salt);
-    const mockUsers = [
-      // Customers
-      { id: "user-customer-1", email: "customer1@divine.com", firstName: "Priya", lastName: "Patel", role: "customer", phone: "+91-9876543210", walletBalance: "500.00", passwordHash: customerPasswordHash },
-      { id: "user-customer-2", email: "customer2@divine.com", firstName: "Rahul", lastName: "Mehta", role: "customer", phone: "+91-9876543211", walletBalance: "300.00", passwordHash: customerPasswordHash },
-      // Vendors
-      { id: "user-vendor-1", email: "vendor1@divine.com", firstName: "Rajesh", lastName: "Kumar", role: "vendor", phone: "+91-9876543212", walletBalance: "0", passwordHash: customerPasswordHash },
-      { id: "user-vendor-2", email: "vendor2@divine.com", firstName: "Amit", lastName: "Shah", role: "vendor", phone: "+91-9876543213", walletBalance: "0", passwordHash: customerPasswordHash },
-      // Delivery Partners
-      { id: "user-delivery-1", email: "delivery1@divine.com", firstName: "Suresh", lastName: "Singh", role: "delivery", phone: "+91-9876543214", walletBalance: "0", passwordHash: customerPasswordHash },
-      { id: "user-delivery-2", email: "delivery2@divine.com", firstName: "Vijay", lastName: "Sharma", role: "delivery", phone: "+91-9876543215", walletBalance: "0", passwordHash: customerPasswordHash },
-      // Admins - WITH PASSWORDS
-      { id: "user-admin-1", email: "admin1@divine.com", firstName: "Admin", lastName: "Super", role: "admin", phone: "+91-9876543216", walletBalance: "0", passwordHash: adminPasswordHash },
-      { id: "user-admin-2", email: "admin2@divine.com", firstName: "Admin", lastName: "Manager", role: "admin", phone: "+91-9876543217", walletBalance: "0", passwordHash: adminPasswordHash }
-    ];
-    for (const user of mockUsers) {
-      await db.insert(users2).values(user);
-    }
-    console.log("\u2713 Created 8 mock users (2 per role)");
-    await db.insert(vendors).values([
-      {
-        userId: "user-vendor-1",
-        businessName: "Fresh Dairy Co.",
-        licenseNumber: "DL-2018-MH-001",
-        locationName: "Andheri West",
-        vendorType: "VENDOR",
-        dailyCapacity: 2e3,
-        requirementToday: 500,
-        circulatedLiters: 425,
-        revenueToday: "21250.00",
-        weeklyEarnings: "148750.00",
-        isVerified: true
-      },
-      {
-        userId: "user-vendor-2",
-        businessName: "Divine Naturals Farm",
-        licenseNumber: "DL-2019-MH-002",
-        locationName: "Santa Cruz",
-        vendorType: "VENDOR",
-        dailyCapacity: 1500,
-        requirementToday: 400,
-        circulatedLiters: 380,
-        revenueToday: "19000.00",
-        weeklyEarnings: "133000.00",
-        isVerified: false
-      }
-    ]);
-    console.log("\u2713 Created 2 vendor profiles");
-    await db.insert(deliveryPartners).values([
-      {
-        userId: "user-delivery-1",
-        vehicleType: "Electric Scooter",
-        licenseNumber: "DL-123456",
-        zone: "Andheri-Santacruz",
-        isAvailable: true
-      },
-      {
-        userId: "user-delivery-2",
+      console.log("Database already seeded. Updating CMS content only...");
+    } else {
+      const hashedPassword = await bcrypt.hash("DivineNaturals@2025", 10);
+      const [adminUser] = await db.insert(users2).values({
+        id: nanoid3(),
+        email: adminEmail,
+        passwordHash: hashedPassword,
+        role: "admin",
+        firstName: "Kauldeep",
+        lastName: "Rao",
+        phone: "1800-DIVINE"
+      }).returning();
+      const [customerUser] = await db.insert(users2).values({
+        id: nanoid3(),
+        email: "customer@example.com",
+        passwordHash: hashedPassword,
+        role: "customer",
+        firstName: "Test",
+        lastName: "Customer",
+        phone: "9876543210",
+        address: "123 Green Lane, Mumbai"
+      }).returning();
+      const [partnerUser] = await db.insert(users2).values({
+        id: nanoid3(),
+        email: "delivery@example.com",
+        passwordHash: hashedPassword,
+        role: "delivery",
+        firstName: "Delivery",
+        lastName: "Hero"
+      }).returning();
+      await db.insert(deliveryPartners).values({
+        userId: partnerUser.id,
+        fullName: "Delivery Hero",
+        phone: "9123456789",
         vehicleType: "Bike",
-        licenseNumber: "DL-789012",
-        zone: "Borivali-Malad",
-        isAvailable: true
-      }
-    ]);
-    console.log("\u2713 Created 2 delivery partner profiles");
-    const vendorList = await db.select().from(vendors);
-    const mockProducts = [
+        status: "active"
+      });
+      console.log("\u2713 Inserted/Updated Base Data (Users)");
+    }
+    const baseProducts = [
       {
-        name: "Full Cream Milk",
-        sku: "MILK-FC-001",
-        description: "Rich and creamy full cream milk",
-        category: "MILK",
-        type: "MILK",
-        price: "60.00",
-        unit: "L",
+        name: "Cold Pressed Coconut Oil",
+        description: "Pure, edible grade cold pressed coconut oil. Multi-purpose oil with a fresh coconut aroma and superior quality.",
+        price: "380",
+        unit: "500ml",
         stock: 100,
-        imageUrl: "/images/full-cream-milk.jpg",
-        isActive: true
+        category: "Oil",
+        type: "DAIRY",
+        imageUrl: "/products/coconut_oil.png",
+        sku: "OIL-COCO-001"
       },
       {
-        name: "Toned Milk",
-        sku: "MILK-TN-002",
-        description: "Healthy toned milk with reduced fat",
-        category: "MILK",
-        type: "MILK",
-        price: "50.00",
-        unit: "L",
+        name: "Cold Pressed Groundnut Oil",
+        description: "Pure and aromatic cold pressed groundnut oil. Extracted using traditional wooden ghani methods to retain nutrients and natural flavor.",
+        price: "280",
+        unit: "1L",
         stock: 150,
-        imageUrl: "/images/toned-milk.jpg",
-        isActive: true
-      },
-      {
-        name: "Fresh Curd",
-        sku: "DAIRY-CURD-001",
-        description: "Thick and creamy fresh curd",
-        category: "DAIRY",
+        category: "Oil",
         type: "DAIRY",
-        price: "40.00",
-        unit: "500g",
-        stock: 80,
-        imageUrl: "/images/curd.jpg",
-        isActive: true
-      },
-      {
-        name: "Paneer",
-        sku: "DAIRY-PANEER-001",
-        description: "Fresh cottage cheese",
-        category: "DAIRY",
-        type: "DAIRY",
-        price: "120.00",
-        unit: "250g",
-        stock: 50,
-        imageUrl: "/images/paneer.jpg",
-        isActive: true
+        imageUrl: "/products/groundnut_oil.png",
+        sku: "OIL-GNUT-001"
       },
       {
         name: "Buttermilk",
-        sku: "DAIRY-BM-001",
         description: "Refreshing traditional buttermilk",
-        category: "DAIRY",
-        type: "DAIRY",
-        price: "25.00",
+        price: "25",
         unit: "500ml",
-        stock: 120,
-        imageUrl: "/images/buttermilk.jpg",
-        isActive: true
+        stock: 300,
+        category: "Beverages",
+        type: "DAIRY",
+        imageUrl: "https://images.unsplash.com/photo-1550583724-b2692b85b150?w=800",
+        sku: "DAIRY-BMLK-001"
       }
     ];
-    for (const product of mockProducts) {
-      await db.insert(products).values(product);
+    for (const p of baseProducts) {
+      const [existing] = await db.select().from(products).where(eq19(products.sku, p.sku));
+      if (existing) {
+        await db.update(products).set(p).where(eq19(products.sku, p.sku));
+      } else {
+        await db.insert(products).values(p);
+      }
     }
-    console.log("\u2713 Created 5 products");
-    await db.insert(milkSubscriptions).values([
+    console.log("\u2713 Updated Products from seed data");
+    console.log("Refreshing CMS content with premium assets...");
+    await db.delete(banners);
+    await db.insert(banners).values([
       {
-        userId: "user-customer-1",
-        quantity: 2,
-        frequency: "daily",
-        deliveryTime: "6:00 AM",
-        startDate: "2025-01-01",
-        isActive: true,
-        pricePerL: "60.00",
-        status: "ACTIVE"
+        title: "Pure. Fresh. From Our Farm to Your Home.",
+        subtitle: "Experience the authentic taste of raw A2 Gir Cow milk, delivered directly to your doorstep every morning.",
+        imageUrl: "/banners/farm_milk_bottles_pastoral_scene.png",
+        imageUrlTablet: "/banners/farm_milk_bottles_pastoral_scene.png",
+        imageUrlMobile: "/banners/farm_milk_bottles_pastoral_scene.png",
+        ctaText: "Start Subscription",
+        ctaLink: "/shop",
+        displayOrder: 1,
+        isActive: true
       },
       {
-        userId: "user-customer-1",
-        quantity: 1,
-        frequency: "daily",
-        deliveryTime: "6:30 AM",
-        startDate: "2025-01-01",
-        isActive: true,
-        pricePerL: "50.00",
-        status: "ACTIVE"
+        title: "Unmatched Delivery. Consistent Quality.",
+        subtitle: "At Divine Naturals, we take pride in our 4:00 AM delivery promise. Freshness that doesn't wait.",
+        imageUrl: "/banners/fresh_milk_pour_splash_banner.png",
+        imageUrlTablet: "/banners/fresh_milk_pour_splash_banner.png",
+        imageUrlMobile: "/banners/fresh_milk_pour_splash_banner.png",
+        ctaText: "View Products",
+        ctaLink: "/shop",
+        displayOrder: 2,
+        isActive: true
       },
       {
-        userId: "user-customer-2",
-        quantity: 1,
-        frequency: "daily",
-        deliveryTime: "7:00 AM",
-        startDate: "2025-01-05",
-        isActive: true,
-        pricePerL: "60.00",
-        status: "ACTIVE"
+        title: "Traditional Goodness, Modern Safety.",
+        subtitle: "We use the traditional Bilona method for Ghee and state-of-the-art testing for every batch of milk.",
+        imageUrl: "/banners/premium_dairy_products_showcase.png",
+        imageUrlTablet: "/banners/premium_dairy_products_showcase.png",
+        imageUrlMobile: "/banners/premium_dairy_products_showcase.png",
+        ctaText: "Learn About Us",
+        ctaLink: "/about",
+        displayOrder: 3,
+        isActive: true
       }
     ]);
-    console.log("\u2713 Created 3 active subscriptions");
-    console.log("\u2705 Database seeding completed successfully!");
+    console.log("\u2713 Updated 3 Hero Banners");
+    await db.delete(ethosCards);
+    await db.insert(ethosCards).values([
+      {
+        title: "Source Transparency",
+        description: "Every bottle of milk can be traced back to the specific farm it came from.",
+        icon: "Shield",
+        displayOrder: 1
+      },
+      {
+        title: "Zero Preservatives",
+        description: "Fresh milk with absolutely no additives, milk powder, or preservatives.",
+        icon: "Zap",
+        displayOrder: 2
+      },
+      {
+        title: "Eco-Friendly Loop",
+        description: "We use sterilized glass bottles and sustainable packaging to protect our planet.",
+        icon: "Recycle",
+        displayOrder: 3
+      },
+      {
+        title: "Smart Subscriptions",
+        description: "Pause, resume, and modify your daily dairy needs through our easy-to-use app.",
+        icon: "Smartphone",
+        displayOrder: 4
+      }
+    ]);
+    console.log("\u2713 Updated 4 Ethos Cards");
+    await db.delete(statsCounters);
+    await db.insert(statsCounters).values([
+      { label: "Happy Households", value: 12e3, suffix: "+", icon: "Users", displayOrder: 1 },
+      { label: "Liters of Milk Daily", value: 5500, suffix: "L", icon: "Milk", displayOrder: 2 },
+      { label: "Partner Farms", value: 45, suffix: "", icon: "Home", displayOrder: 3 },
+      { label: "On-Time Deliveries", value: 99, suffix: ".8%", icon: "Clock", displayOrder: 4 }
+    ]);
+    console.log("\u2713 Updated 4 Stats Counters");
+    await db.delete(faqs2);
+    await db.insert(faqs2).values([
+      {
+        question: "How do subscriptions work?",
+        answer: "You can choose your products, set the quantity and frequency (daily, alternate days, or custom), and we'll deliver them automatically. You can pause or cancel anytime through the app.",
+        category: "Delivery",
+        order: 1,
+        displayOrder: 1
+      },
+      {
+        question: "Is there a minimum delivery amount?",
+        answer: "No, we don't believe in forcing our customers. You can subscribe to even a single half-liter packet or bottle of milk.",
+        category: "Delivery",
+        order: 2,
+        displayOrder: 2
+      },
+      {
+        question: "How is the milk tested for quality?",
+        answer: "We test across 50+ parameters including milk fat, protein, SNF, and the absence of water, urea, or any preservatives in our ISO-certified labs.",
+        category: "Quality",
+        order: 3,
+        displayOrder: 3
+      }
+    ]);
+    console.log("\u2713 Updated 3 FAQs");
+    const [existingAbout] = await db.select().from(aboutUsSettings).limit(1);
+    const aboutData = {
+      title: "The Divine Naturals Story",
+      subtitle: "Returning to Root-Level Purity",
+      content: "Founded with a single mission to restore the vanishing purity of farm-fresh milk in our cities, Divine Naturals has grown into a community of conscious consumers and ethical farmers. We leverage technology to bridge the gap between rural farms and urban doorsteps, ensuring that what you drink is as fresh as it was at the farm.",
+      imageUrl: "/images/products/milk.png",
+      mission: "To deliver the purest dairy products while empowering traditional farming communities through technology and fair commerce.",
+      vision: "A world where fresh, organic, and ethically sourced nutrition is accessible to every household daily.",
+      values: [
+        { title: "Radical Transparency", description: "Trace every drop back to the farm" },
+        { title: "Empowering Farmers", description: "Eliminating middlemen and ensuring fair trade" },
+        { title: "Environmental Stewardship", description: "Minimizing waste through sustainable packaging" }
+      ],
+      isActive: true
+    };
+    if (existingAbout) {
+      await db.update(aboutUsSettings).set(aboutData).where(eq19(aboutUsSettings.id, existingAbout.id));
+    } else {
+      await db.insert(aboutUsSettings).values(aboutData);
+    }
+    const [existingContact] = await db.select().from(contactSettings).limit(1);
+    const contactData = {
+      title: "Get in Touch",
+      subtitle: "Our customer success team is here for you 24/7.",
+      phone: "+91 91234 56789",
+      email: "hello@divinenaturals.com",
+      address: "Divine Naturals Hub, Sector 44, Gurgaon, Haryana 122003",
+      businessHours: "Delivery: 4:00 AM - 7:30 AM | Support: 9:00 AM - 9:00 PM",
+      socialLinks: [
+        { platform: "facebook", url: "https://facebook.com/divinenaturals" },
+        { platform: "instagram", url: "https://instagram.com/divinenaturals" },
+        { platform: "whatsapp", url: "https://wa.me/919123456789" }
+      ],
+      isActive: true
+    };
+    if (existingContact) {
+      await db.update(contactSettings).set(contactData).where(eq19(contactSettings.id, existingContact.id));
+    } else {
+      await db.insert(contactSettings).values(contactData);
+    }
+    const [existingNewsletter] = await db.select().from(newsletterSettings).limit(1);
+    const newsletterData = {
+      title: "Join the Freshness Revolution",
+      subtitle: "Get nutrition tips, farm stories, and exclusive offers delivered to your inbox.",
+      ctaText: "Subscribe",
+      placeholderText: "Enter your email address",
+      isActive: true
+    };
+    if (existingNewsletter) {
+      await db.update(newsletterSettings).set(newsletterData).where(eq19(newsletterSettings.id, existingNewsletter.id));
+    } else {
+      await db.insert(newsletterSettings).values(newsletterData);
+    }
+    const [existingFooter] = await db.select().from(footerSettings).limit(1);
+    const footerData = {
+      companyName: "Divine Naturals Dairy Pvt Ltd",
+      tagline: "Pure. Fresh. Daily.",
+      description: "Dedicated to bringing the authentic taste and nutrition of the farm to the modern table through sustainable and ethical practices.",
+      phone: "+91 91234 56789",
+      email: "hello@divinenaturals.com",
+      address: "Sector 44, Gurgaon, Haryana 122003",
+      socialLinks: [
+        { platform: "facebook", url: "https://facebook.com/divinenaturals" },
+        { platform: "instagram", url: "https://instagram.com/divinenaturals" },
+        { platform: "whatsapp", url: "https://wa.me/919123456789" }
+      ],
+      footerLinks: [
+        { title: "Products", links: [{ label: "Milk", url: "/shop" }, { label: "Curd", url: "/shop" }, { label: "Ghee", url: "/shop" }] },
+        { title: "Company", links: [{ label: "About Us", url: "/about" }, { label: "Contact", url: "/contact" }, { label: "Privacy", url: "/privacy" }] }
+      ],
+      copyrightText: "\xA9 2025 Divine Naturals. All rights reserved.",
+      isActive: true
+    };
+    if (existingFooter) {
+      await db.update(footerSettings).set(footerData).where(eq19(footerSettings.id, existingFooter.id));
+    } else {
+      await db.insert(footerSettings).values(footerData);
+    }
+    console.log("\u2713 Enriched CMS content");
+    console.log("\u2705 Database seeding/update completed successfully!");
   } catch (error) {
     console.error("Error seeding database:", error);
     throw error;
   }
 }
 
+// server/jobs/generateMonthlyBills.ts
+init_db();
+init_schema();
+import { eq as eq20, and as and11, gte as gte7, lte as lte7 } from "drizzle-orm";
+async function generateMonthlyBills() {
+  console.log("\u{1F550} Starting monthly bill generation...");
+  try {
+    const now = /* @__PURE__ */ new Date();
+    const prevMonth = new Date(now.getFullYear(), now.getMonth() - 1);
+    const month = prevMonth.getMonth() + 1;
+    const year = prevMonth.getFullYear();
+    const allUsers = await db.select().from(users2);
+    for (const user of allUsers) {
+      const existingBill = await db.select().from(bills).where(
+        and11(
+          eq20(bills.userId, user.id),
+          eq20(bills.month, month),
+          eq20(bills.year, year)
+        )
+      );
+      if (existingBill.length > 0) {
+        console.log(`\u23ED\uFE0F  Bill already exists for user ${user.id} in ${month}/${year}`);
+        continue;
+      }
+      const startDateStr = `${year}-${String(month).padStart(2, "0")}-01`;
+      const endDateStr = `${year}-${String(month).padStart(2, "0")}-${new Date(year, month, 0).getDate()}`;
+      const subscriptionDeliveries_list = await db.select().from(subscriptionDeliveries).where(
+        and11(
+          eq20(subscriptionDeliveries.userId, user.id),
+          gte7(subscriptionDeliveries.deliveryDate, startDateStr),
+          lte7(subscriptionDeliveries.deliveryDate, endDateStr)
+        )
+      );
+      const startDate = new Date(year, month - 1, 1);
+      const endDate = new Date(year, month, 0);
+      const monthOrders = await db.select().from(orders).where(
+        and11(
+          eq20(orders.userId, user.id),
+          gte7(orders.createdAt, startDate),
+          lte7(orders.createdAt, endDate)
+        )
+      );
+      let subscriptionTotal = 0;
+      const billItems = [];
+      for (const delivery of subscriptionDeliveries_list) {
+        const sub = await db.query.milkSubscriptions.findFirst({
+          where: eq20(milkSubscriptions.id, delivery.subscriptionId)
+        });
+        if (sub) {
+          const product = await db.query.products.findFirst({
+            where: eq20(products.id, sub.productId)
+          });
+          const total = Number(delivery.quantity) * Number(product?.price || 0);
+          subscriptionTotal += total;
+          billItems.push({
+            date: String(delivery.deliveryDate),
+            description: `${product?.name || "Product"} (Subscription)`,
+            quantity: delivery.quantity,
+            price: Number(product?.price || 0),
+            total
+          });
+        }
+      }
+      let ordersTotal = 0;
+      for (const order of monthOrders) {
+        const orderAmount = Number(order.totalAmount || 0);
+        ordersTotal += orderAmount;
+        billItems.push({
+          date: new Date(order.createdAt).toISOString().split("T")[0],
+          description: `Order #${order.id}`,
+          quantity: 1,
+          price: orderAmount,
+          total: orderAmount
+        });
+      }
+      const previousBill = await db.select().from(bills).where(
+        and11(
+          eq20(bills.userId, user.id),
+          eq20(bills.status, "unpaid")
+        )
+      );
+      const previousPending = previousBill.length > 0 ? Number(previousBill[0].finalAmount || 0) : 0;
+      let penalty = 0;
+      if (previousBill.length > 0 && previousBill[0].status === "overdue") {
+        penalty = 50;
+      }
+      const finalAmount = subscriptionTotal + ordersTotal + previousPending + penalty;
+      const dueDate = /* @__PURE__ */ new Date();
+      dueDate.setDate(dueDate.getDate() + 5);
+      const dueDateStr = dueDate.toISOString().split("T")[0];
+      await db.insert(bills).values({
+        userId: user.id,
+        month,
+        year,
+        items: JSON.stringify(billItems),
+        subscriptionTotal: subscriptionTotal.toString(),
+        ordersTotal: ordersTotal.toString(),
+        previousPending: previousPending.toString(),
+        penalty: penalty.toString(),
+        discount: "0",
+        finalAmount: finalAmount.toString(),
+        dueDate: dueDateStr,
+        status: "unpaid",
+        paymentDate: null,
+        paymentMethod: null
+      });
+      console.log(`\u2705 Bill created for user ${user.id} in ${month}/${year} - Amount: \u20B9${finalAmount}`);
+    }
+    console.log("\u2705 Monthly bill generation completed!");
+  } catch (error) {
+    console.error("\u274C Error generating monthly bills:", error);
+  }
+}
+async function updateOverdueBills() {
+  console.log("\u{1F550} Checking for overdue bills...");
+  try {
+    const allBills = await db.select().from(bills).where(eq20(bills.status, "unpaid"));
+    for (const bill of allBills) {
+      const dueDate = new Date(bill.dueDate);
+      const today = /* @__PURE__ */ new Date();
+      if (today > dueDate) {
+        await db.update(bills).set({ status: "overdue" }).where(eq20(bills.id, bill.id));
+        console.log(`\u26A0\uFE0F  Bill #${bill.id} marked as OVERDUE`);
+      }
+    }
+    console.log("\u2705 Overdue check completed!");
+  } catch (error) {
+    console.error("\u274C Error updating overdue bills:", error);
+  }
+}
+
+// server/routes/delivery.routes.ts
+init_db();
+init_schema();
+import { Router as Router15 } from "express";
+import { eq as eq21, and as and12 } from "drizzle-orm";
+import bcryptjs2 from "bcryptjs";
+var router15 = Router15();
+router15.post("/login", async (req, res) => {
+  try {
+    const { username, password } = req.body;
+    if (!username || !password) {
+      return res.status(400).json({ message: "Username and password required" });
+    }
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq21(deliveryPartners.username, username)
+    });
+    if (!partner) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    if (partner.status === "blocked") {
+      return res.status(403).json({ message: "Your account has been blocked. Please contact support." });
+    }
+    if (!partner.isVerified || partner.status !== "active") {
+      return res.status(403).json({ message: "Your account is not yet approved. Please wait for admin verification." });
+    }
+    if (!partner.passwordHash || !bcryptjs2.compareSync(password, partner.passwordHash)) {
+      return res.status(401).json({ message: "Invalid credentials" });
+    }
+    req.session.deliveryPartnerId = partner.id;
+    res.json({
+      id: partner.id,
+      name: partner.fullName,
+      area: partner.zone,
+      username: partner.username,
+      phone: partner.phone,
+      profileCompleted: partner.profileCompleted || false
+    });
+  } catch (error) {
+    console.error("Login error:", error);
+    res.status(500).json({ message: "Login failed" });
+  }
+});
+router15.post("/:partnerId/upload-document", async (req, res) => {
+  try {
+    const { partnerId } = req.params;
+    const { docType, fileUrl } = req.body;
+    if (!docType || !fileUrl) {
+      return res.status(400).json({ message: "Document type and file URL required" });
+    }
+    const validDocTypes = ["aadhaar_front", "aadhaar_back", "pan", "license", "address_proof", "profile"];
+    if (!validDocTypes.includes(docType)) {
+      return res.status(400).json({ message: "Invalid document type" });
+    }
+    const updateData = {};
+    if (docType === "profile") updateData.profileImageUrl = fileUrl;
+    else if (docType === "aadhaar_front" || docType === "aadhaar_back") updateData.aadhaarImageUrl = fileUrl;
+    else if (docType === "pan") updateData.panImageUrl = fileUrl;
+    else if (docType === "license") updateData.licenseImageUrl = fileUrl;
+    const updated = await db.update(deliveryPartners).set(updateData).where(eq21(deliveryPartners.id, parseInt(partnerId))).returning();
+    res.json({
+      message: "Document uploaded successfully",
+      document: { type: docType, url: fileUrl }
+    });
+  } catch (error) {
+    console.error("Upload error:", error);
+    res.status(500).json({ message: "Upload failed" });
+  }
+});
+router15.post("/assign-orders", async (req, res) => {
+  try {
+    const { partnerId, orderIds, zoneFilter } = req.body;
+    if (!partnerId || !orderIds || orderIds.length === 0) {
+      return res.status(400).json({ message: "Partner ID and order IDs required" });
+    }
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq21(deliveryPartners.id, parseInt(partnerId))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    if (partner.status === "blocked") {
+      return res.status(403).json({ message: "Cannot assign orders to blocked partner" });
+    }
+    const assignments = await Promise.all(
+      orderIds.map(
+        (orderId) => db.insert(deliveryAssignments).values({
+          orderId,
+          partnerId: parseInt(partnerId),
+          assignmentDate: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+          status: "assigned"
+        }).returning()
+      )
+    );
+    console.log(`[Notification] ${partner.fullName}, you have ${orderIds.length} new deliveries assigned!`);
+    res.json({
+      message: `Assigned ${orderIds.length} orders to ${partner.fullName}`,
+      assignments: assignments.flat()
+    });
+  } catch (error) {
+    console.error("Assignment error:", error);
+    res.status(500).json({ message: "Assignment failed" });
+  }
+});
+router15.get("/earnings/:partnerId", async (req, res) => {
+  try {
+    const { partnerId } = req.params;
+    const { period = "today" } = req.query;
+    let dateFilter = null;
+    const today = /* @__PURE__ */ new Date();
+    if (period === "today") {
+      dateFilter = today.toISOString().split("T")[0];
+    } else if (period === "week") {
+      const weekAgo = new Date(today.getTime() - 7 * 24 * 60 * 60 * 1e3);
+      dateFilter = { start: weekAgo, end: today };
+    } else if (period === "month") {
+      const monthAgo = new Date(today.getTime() - 30 * 24 * 60 * 60 * 1e3);
+      dateFilter = { start: monthAgo, end: today };
+    }
+    let completedDeliveries = await db.query.deliveryAssignments.findMany({
+      where: and12(
+        eq21(deliveryAssignments.partnerId, parseInt(partnerId)),
+        eq21(deliveryAssignments.status, "delivered")
+      )
+    });
+    if (period !== "total" && dateFilter && typeof dateFilter === "object" && dateFilter.start) {
+      completedDeliveries = completedDeliveries.filter((d) => {
+        const assignDate = new Date(d.assignmentDate);
+        return assignDate >= dateFilter.start && assignDate <= dateFilter.end;
+      });
+    } else if (period === "today") {
+      completedDeliveries = completedDeliveries.filter((d) => {
+        return d.assignmentDate === dateFilter;
+      });
+    }
+    const perDeliveryRate = 50;
+    const codCollected = completedDeliveries.reduce(
+      (sum, d) => sum + parseFloat(d.collectedCash?.toString() || "0"),
+      0
+    );
+    const deliveryEarnings = completedDeliveries.length * perDeliveryRate;
+    const totalEarnings = deliveryEarnings + codCollected;
+    res.json({
+      period,
+      deliveriesCompleted: completedDeliveries.length,
+      perDeliveryRate,
+      deliveryEarnings,
+      codCollected: parseFloat(codCollected.toFixed(2)),
+      totalEarnings: parseFloat(totalEarnings.toFixed(2))
+    });
+  } catch (error) {
+    console.error("Earnings error:", error);
+    res.status(500).json({ message: "Failed to fetch earnings" });
+  }
+});
+router15.post("/send-credentials/:partnerId", async (req, res) => {
+  try {
+    const { partnerId } = req.params;
+    const { username, tempPassword, method = "sms" } = req.body;
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq21(deliveryPartners.id, parseInt(partnerId))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    const smsMessage = `Hello ${partner.fullName}, your Divine Naturals delivery account is ready! \u{1F69A}
+Username: ${username}
+Temporary Password: ${tempPassword}
+Please login and change your password: https://deliverynaturals.app/partner/login
+Need help? Call +91-XXXX-XXXX`;
+    const emailMessage = `
+Dear ${partner.fullName},
+
+Your Divine Naturals Delivery Partner account has been approved! \u{1F389}
+
+\u{1F4F1} Login Credentials:
+\u2022 Username: ${username}
+\u2022 Temporary Password: ${tempPassword}
+
+\u{1F517} Login Here: https://deliverynaturals.app/partner/login
+
+\u26A0\uFE0F Please change your password on first login for security.
+
+Questions? Contact our support team.
+
+Best regards,
+Divine Naturals Team
+    `;
+    if (method === "sms" && partner.phone) {
+      console.log(`[SMS to ${partner.phone}] ${smsMessage}`);
+    } else if (method === "email" && partner.email) {
+      console.log(`[EMAIL to ${partner.email}] ${emailMessage}`);
+    }
+    res.json({
+      message: "Credentials notification sent",
+      sentVia: method,
+      contact: method === "sms" ? partner.phone : partner.email
+    });
+  } catch (error) {
+    console.error("Notification error:", error);
+    res.status(500).json({ message: "Failed to send notification" });
+  }
+});
+router15.get("/me/:partnerId", async (req, res) => {
+  try {
+    const { partnerId } = req.params;
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq21(deliveryPartners.id, parseInt(partnerId))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    const todayDeliveries = await db.query.deliveryAssignments.findMany({
+      where: and12(
+        eq21(deliveryAssignments.partnerId, parseInt(partnerId)),
+        eq21(deliveryAssignments.assignmentDate, today)
+      )
+    });
+    res.json({
+      ...partner,
+      todayDeliveries: todayDeliveries.length,
+      todayCompleted: todayDeliveries.filter((d) => d.status === "delivered").length
+    });
+  } catch (error) {
+    console.error("Profile error:", error);
+    res.status(500).json({ message: "Failed to fetch profile" });
+  }
+});
+router15.get("/today/:partnerId", async (req, res) => {
+  try {
+    const { partnerId } = req.params;
+    const today = (/* @__PURE__ */ new Date()).toISOString().split("T")[0];
+    const assignments = await db.query.deliveryAssignments.findMany({
+      where: and12(
+        eq21(deliveryAssignments.partnerId, parseInt(partnerId)),
+        eq21(deliveryAssignments.assignmentDate, today)
+      )
+    });
+    const deliveries = await Promise.all(
+      assignments.map(async (a) => {
+        let item = null;
+        if (a.orderId) {
+          item = await db.query.orders.findFirst({ where: eq21(orders.id, a.orderId) });
+        } else if (a.subscriptionId) {
+          item = await db.query.milkSubscriptions.findFirst({
+            where: eq21(milkSubscriptions.id, a.subscriptionId)
+          });
+        }
+        const customer = item && "userId" in item ? await db.query.users.findFirst({
+          where: eq21(users2.id, item.userId)
+        }) : null;
+        return {
+          ...a,
+          item,
+          customer
+        };
+      })
+    );
+    res.json(deliveries);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Failed to fetch deliveries" });
+  }
+});
+router15.post("/:partnerId/submit-profile", async (req, res) => {
+  try {
+    const { partnerId } = req.params;
+    if (!partnerId || partnerId === "null" || isNaN(parseInt(partnerId))) {
+      return res.status(400).json({ message: "Invalid partner ID. Please login again." });
+    }
+    const {
+      dob,
+      gender,
+      alternatePhone,
+      address,
+      city,
+      state,
+      pincode,
+      aadhaarNumber,
+      panNumber,
+      licenseNumber,
+      licenseValidity,
+      vehicleNumber,
+      bankAccount,
+      bankIfsc,
+      bankName,
+      bankHolder
+    } = req.body;
+    if (!aadhaarNumber || !panNumber || !licenseNumber || !bankAccount) {
+      return res.status(400).json({ message: "All required fields must be filled" });
+    }
+    if (pincode && isNaN(parseInt(pincode))) {
+      return res.status(400).json({ message: "Pincode must be numeric" });
+    }
+    const updated = await db.update(deliveryPartners).set({
+      dob: dob ? new Date(dob) : void 0,
+      gender: gender || void 0,
+      aadhaarNumber,
+      panNumber,
+      licenseNumber,
+      vehicleType: vehicleNumber || void 0,
+      address: address ? `${address}, ${city}, ${state} - ${pincode}` : void 0,
+      zone: city || void 0,
+      bankAccountNumber: bankAccount,
+      bankIfscCode: bankIfsc || void 0,
+      bankName: bankName || void 0,
+      bankHolderName: bankHolder || void 0,
+      profileCompleted: true,
+      status: "pending_verification",
+      documentsSubmittedDate: /* @__PURE__ */ new Date()
+    }).where(eq21(deliveryPartners.id, parseInt(partnerId))).returning();
+    if (updated.length === 0) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    res.json({
+      message: "Profile submitted successfully! Your documents are being verified.",
+      partner: updated[0]
+    });
+  } catch (error) {
+    console.error("Profile submission error:", error);
+    res.status(500).json({ message: "Failed to submit profile: " + (error.message || "Unknown error") });
+  }
+});
+router15.patch("/start/:assignmentId", async (req, res) => {
+  try {
+    await db.update(deliveryAssignments).set({ status: "picked_up", timeStarted: /* @__PURE__ */ new Date() }).where(eq21(deliveryAssignments.id, parseInt(req.params.assignmentId)));
+    res.json({ message: "Delivery started" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to start delivery" });
+  }
+});
+router15.patch("/complete/:assignmentId", async (req, res) => {
+  try {
+    const { proofPhoto } = req.body;
+    await db.update(deliveryAssignments).set({ status: "delivered", timeDelivered: /* @__PURE__ */ new Date(), failedPhoto: proofPhoto }).where(eq21(deliveryAssignments.id, parseInt(req.params.assignmentId)));
+    res.json({ message: "Delivery completed" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to complete delivery" });
+  }
+});
+router15.patch("/failed/:assignmentId", async (req, res) => {
+  try {
+    const { reason, photo } = req.body;
+    await db.update(deliveryAssignments).set({ status: "failed", failedReason: reason, failedPhoto: photo }).where(eq21(deliveryAssignments.id, parseInt(req.params.assignmentId)));
+    res.json({ message: "Delivery marked as failed" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to mark delivery as failed" });
+  }
+});
+router15.patch("/collect-cash/:assignmentId", async (req, res) => {
+  try {
+    const { amount } = req.body;
+    await db.update(deliveryAssignments).set({ collectionStatus: "received", collectedCash: amount }).where(eq21(deliveryAssignments.id, parseInt(req.params.assignmentId)));
+    res.json({ message: "Cash collected" });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to collect cash" });
+  }
+});
+var delivery_routes_default = router15;
+
+// server/routes/admin-delivery.routes.ts
+init_db();
+init_schema();
+import { Router as Router16 } from "express";
+import { eq as eq22, and as and13 } from "drizzle-orm";
+import bcrypt2 from "bcryptjs";
+var router16 = Router16();
+router16.get("/", async (req, res) => {
+  try {
+    const { zone, status: statusFilter, verified } = req.query;
+    const conditions = [];
+    if (zone) conditions.push(eq22(deliveryPartners.zone, zone));
+    if (statusFilter) conditions.push(eq22(deliveryPartners.status, statusFilter));
+    if (verified === "true") conditions.push(eq22(deliveryPartners.isVerified, true));
+    if (verified === "false") conditions.push(eq22(deliveryPartners.isVerified, false));
+    let allPartners = [];
+    if (conditions.length > 0) {
+      allPartners = await db.query.deliveryPartners.findMany({
+        where: and13(...conditions)
+      });
+    } else {
+      allPartners = await db.query.deliveryPartners.findMany();
+    }
+    res.json(allPartners);
+  } catch (error) {
+    console.error("Error fetching delivery partners:", error?.message || error);
+    res.status(500).json({ message: "Failed to fetch delivery partners" });
+  }
+});
+router16.get("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq22(deliveryPartners.id, parseInt(id))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    res.json(partner);
+  } catch (error) {
+    console.error("Error fetching partner:", error?.message || error);
+    res.status(500).json({ message: "Failed to fetch partner" });
+  }
+});
+router16.patch("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { zone } = req.body;
+    if (!zone) {
+      return res.status(400).json({ message: "Zone is required" });
+    }
+    const updatedPartner = await db.update(deliveryPartners).set({ zone }).where(eq22(deliveryPartners.id, parseInt(id))).returning();
+    if (updatedPartner.length === 0) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    res.json({ ...updatedPartner[0], message: "Partner updated successfully" });
+  } catch (error) {
+    console.error("Error updating partner:", error?.message || error);
+    res.status(500).json({ message: "Failed to update partner" });
+  }
+});
+router16.post("/:id/generate-password", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { tempPassword } = req.body;
+    if (!tempPassword) {
+      return res.status(400).json({ message: "Password required" });
+    }
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq22(deliveryPartners.id, parseInt(id))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    const hashedPassword = await bcrypt2.hash(tempPassword, 10);
+    const username = partner.username || `driver_${partner.phone.replace(/\D/g, "").slice(-6)}`;
+    const updatedPartner = await db.update(deliveryPartners).set({
+      passwordHash: hashedPassword,
+      username,
+      status: "active",
+      // Auto-activate after password is set
+      isVerified: true
+    }).where(eq22(deliveryPartners.id, parseInt(id))).returning();
+    res.json({
+      ...updatedPartner[0],
+      message: "Password saved successfully",
+      tempPassword
+      // Return for display, won't be stored again
+    });
+  } catch (error) {
+    console.error("Error generating password:", error?.message || error);
+    res.status(500).json({ message: "Failed to generate password" });
+  }
+});
+router16.post("/", async (req, res) => {
+  try {
+    const { fullName, email, phone, address, zone, vehicleType, licenseNumber, password } = req.body;
+    if (!fullName || !phone || !password) {
+      return res.status(400).json({ message: "Full name, phone, and password are required" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Password must be at least 6 characters" });
+    }
+    const username = `driver_${phone.replace(/\D/g, "").slice(-6)}`;
+    const hashedPassword = await bcrypt2.hash(password, 10);
+    const newPartner = await db.insert(deliveryPartners).values({
+      fullName,
+      email,
+      phone,
+      address,
+      zone,
+      vehicleType,
+      licenseNumber,
+      username,
+      passwordHash: hashedPassword,
+      initialPassword: password,
+      // Store plain password for admin display
+      status: "active",
+      isVerified: true,
+      isAvailable: true
+    }).returning();
+    res.status(201).json(newPartner[0]);
+  } catch (error) {
+    console.error("Error creating partner:", error?.message || error);
+    res.status(500).json({ message: "Failed to create partner" });
+  }
+});
+router16.patch("/:id/verify", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, username, tempPassword } = req.body;
+    if (!action || !["approve", "reject"].includes(action)) {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq22(deliveryPartners.id, parseInt(id))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    if (action === "approve") {
+      if (!tempPassword) {
+        return res.status(400).json({ message: "Temporary password required" });
+      }
+      const hashedPassword = await bcrypt2.hash(tempPassword, 10);
+      const finalUsername = username || `driver_${partner.phone.replace(/\D/g, "").slice(-6)}`;
+      const updatedPartner = await db.update(deliveryPartners).set({
+        status: "active",
+        isVerified: true,
+        username: finalUsername,
+        passwordHash: hashedPassword
+      }).where(eq22(deliveryPartners.id, parseInt(id))).returning();
+      console.log(`[Credentials sent to ${partner.fullName}]`);
+      console.log(`Username: ${finalUsername}`);
+      console.log(`Temp Password: ${tempPassword}`);
+      res.json({ ...updatedPartner[0], message: "Partner approved and credentials sent" });
+    } else {
+      const updatedPartner = await db.update(deliveryPartners).set({ status: "rejected", isVerified: false }).where(eq22(deliveryPartners.id, parseInt(id))).returning();
+      res.json({ ...updatedPartner[0], message: "Partner rejected" });
+    }
+  } catch (error) {
+    console.error("Error verifying partner:", error?.message || error);
+    res.status(500).json({ message: "Failed to verify partner" });
+  }
+});
+router16.patch("/:id/block", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { action, reason } = req.body;
+    if (!action || !["block", "unblock"].includes(action)) {
+      return res.status(400).json({ message: "Invalid action" });
+    }
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq22(deliveryPartners.id, parseInt(id))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    const newStatus = action === "block" ? "blocked" : "active";
+    const updatedPartner = await db.update(deliveryPartners).set({ status: newStatus }).where(eq22(deliveryPartners.id, parseInt(id))).returning();
+    res.json({ ...updatedPartner[0], message: `Partner ${action}ed successfully` });
+  } catch (error) {
+    console.error("Error blocking partner:", error?.message || error);
+    res.status(500).json({ message: "Failed to block/unblock partner" });
+  }
+});
+router16.patch("/:id/approve-documents", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { remarks } = req.body;
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq22(deliveryPartners.id, parseInt(id))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    const updated = await db.update(deliveryPartners).set({
+      isVerified: true,
+      status: "active"
+    }).where(eq22(deliveryPartners.id, parseInt(id))).returning();
+    res.json({
+      message: "Partner documents approved successfully",
+      partner: updated[0]
+    });
+  } catch (error) {
+    console.error("Error approving documents:", error?.message || error);
+    res.status(500).json({ message: "Failed to approve documents" });
+  }
+});
+router16.patch("/:id/reject-documents", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { remarks } = req.body;
+    if (!remarks) {
+      return res.status(400).json({ message: "Rejection reason is required" });
+    }
+    const partner = await db.query.deliveryPartners.findFirst({
+      where: eq22(deliveryPartners.id, parseInt(id))
+    });
+    if (!partner) {
+      return res.status(404).json({ message: "Partner not found" });
+    }
+    const updated = await db.update(deliveryPartners).set({
+      isVerified: false,
+      status: "pending_verification"
+    }).where(eq22(deliveryPartners.id, parseInt(id))).returning();
+    res.json({
+      message: "Partner documents rejected. They need to resubmit.",
+      partner: updated[0]
+    });
+  } catch (error) {
+    console.error("Error rejecting documents:", error?.message || error);
+    res.status(500).json({ message: "Failed to reject documents" });
+  }
+});
+router16.delete("/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const deleted = await db.update(deliveryPartners).set({ status: "rejected" }).where(eq22(deliveryPartners.id, parseInt(id))).returning();
+    res.json({ message: "Partner deleted", partner: deleted[0] });
+  } catch (error) {
+    console.error("Error deleting partner:", error?.message || error);
+    res.status(500).json({ message: "Failed to delete partner" });
+  }
+});
+var admin_delivery_routes_default = router16;
+
 // server/index.ts
 var app = express2();
 app.use(express2.json({ limit: "50mb" }));
 app.use(express2.urlencoded({ extended: false, limit: "50mb" }));
 app.use(fileUpload());
+app.use("/banners", express2.static(path4.join(process.cwd(), "public", "banners")));
+app.use("/products", express2.static(path4.join(process.cwd(), "public", "products")));
+app.use("/icons", express2.static(path4.join(process.cwd(), "public", "icons")));
 app.use((req, res, next) => {
   const start = Date.now();
-  const path3 = req.path;
+  const path5 = req.path;
   let capturedJsonResponse = void 0;
   const originalResJson = res.json;
   res.json = function(bodyJson, ...args) {
@@ -3599,8 +6537,8 @@ app.use((req, res, next) => {
   };
   res.on("finish", () => {
     const duration = Date.now() - start;
-    if (path3.startsWith("/api")) {
-      let logLine = `${req.method} ${path3} ${res.statusCode} in ${duration}ms`;
+    if (path5.startsWith("/api")) {
+      let logLine = `${req.method} ${path5} ${res.statusCode} in ${duration}ms`;
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
@@ -3619,6 +6557,17 @@ app.use((req, res, next) => {
     log("Error seeding database, continuing anyway...");
   }
   const server = await registerRoutes(app);
+  app.use("/api/delivery", delivery_routes_default);
+  app.use("/api/admin/delivery-partners", admin_delivery_routes_default);
+  cron.schedule("0 0 1 * *", async () => {
+    log("\u{1F550} Cron job triggered: Generating monthly bills...");
+    await generateMonthlyBills();
+  });
+  cron.schedule("0 6 * * *", async () => {
+    log("\u{1F550} Cron job triggered: Checking for overdue bills...");
+    await updateOverdueBills();
+  });
+  log("\u2705 Cron jobs scheduled: Monthly bills (1st of month) & Overdue check (daily 6 AM)");
   app.use((err, _req, res, _next) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
@@ -3633,8 +6582,7 @@ app.use((req, res, next) => {
   const port = parseInt(process.env.PORT || "5000", 10);
   server.listen({
     port,
-    host: "0.0.0.0",
-    reusePort: true
+    host: "0.0.0.0"
   }, () => {
     log(`serving on port ${port}`);
   });

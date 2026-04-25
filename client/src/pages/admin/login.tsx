@@ -4,6 +4,8 @@ import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useLocation } from "wouter";
 import { useAdminAuth } from "@/hooks/useAdminAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 export default function AdminLoginPage() {
   const [, setLocation] = useLocation();
@@ -13,6 +15,7 @@ export default function AdminLoginPage() {
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
   const { login } = useAdminAuth();
+  const { settings } = useSiteSettings();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,8 +75,8 @@ export default function AdminLoginPage() {
       <div className="w-full max-w-md">
         {/* Logo Section */}
         <div className="text-center mb-8">
-          <div className="text-5xl font-bold text-green-600 mb-2">🥛</div>
-          <h1 className="text-3xl font-bold text-gray-900">Divine Naturals</h1>
+          <img src={settings.logoUrl || logoImage} className="w-20 h-20 object-contain mb-4 mx-auto" />
+          <h1 className="text-3xl font-bold text-gray-900">{settings.brandName}</h1>
           <p className="text-gray-500 mt-2">Admin Dashboard Login</p>
         </div>
 
@@ -132,7 +135,7 @@ export default function AdminLoginPage() {
               <strong>Demo Credentials:</strong>
             </p>
             <p className="text-xs text-gray-700 font-mono mb-1">
-              Username: DivineNaturalMDKauldeepRao
+              Username: DivineNaturalsMDKauldeepRao
             </p>
             <p className="text-xs text-gray-700 font-mono">
               Password: DivineNaturals@2025
@@ -142,7 +145,7 @@ export default function AdminLoginPage() {
 
         {/* Footer */}
         <div className="text-center mt-6 text-sm text-gray-500">
-          <p>Divine Naturals © 2025. All rights reserved.</p>
+          <p>{settings.brandName} © {new Date().getFullYear()}. All rights reserved.</p>
         </div>
       </div>
     </div>

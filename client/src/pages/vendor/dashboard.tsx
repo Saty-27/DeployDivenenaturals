@@ -30,11 +30,13 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import InwardEntryModal from "@/components/vendor/InwardEntryModal";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 export default function VendorDashboard() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { settings } = useSiteSettings();
 
   // Fetch vendor dashboard data according to new API specification
   const { data: vendorDashboard, isLoading: dashboardLoading } = useQuery({
@@ -71,14 +73,14 @@ export default function VendorDashboard() {
           <div className="flex items-center space-x-3 sm:space-x-6 min-w-0 flex-1">
             <div className="w-16 h-16 sm:w-20 sm:h-20 bg-white rounded-3xl flex items-center justify-center shadow-2xl relative overflow-hidden flex-shrink-0 p-3">
               <img 
-                src={logoImage} 
-                alt="Divine Naturals Tree Logo" 
+                src={settings.logoUrl || logoImage} 
+                alt={settings.brandName} 
                 className="w-full h-full object-contain"
               />
             </div>
             <div className="min-w-0 flex-1">
               <h1 className="text-2xl sm:text-3xl lg:text-4xl font-black text-[hsl(var(--eco-secondary))] mb-1 truncate">
-                Divine Naturals
+                {settings.brandName}
               </h1>
               <div className="text-sm sm:text-base lg:text-lg text-[hsl(var(--eco-text-muted))] font-semibold flex flex-col sm:flex-row sm:items-center gap-1 sm:gap-0">
                 <div className="flex items-center">
@@ -106,7 +108,7 @@ export default function VendorDashboard() {
           <div className="text-center space-y-3 sm:space-y-4">
             <div className="inline-flex items-center space-x-3 sm:space-x-4 bg-white rounded-xl sm:rounded-2xl px-4 sm:px-6 lg:px-8 py-3 sm:py-4 shadow-lg">
               <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 eco-icon-primary flex-shrink-0" />
-              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-[hsl(var(--eco-secondary))] truncate">Divine Naturals Performance</h2>
+              <h2 className="text-xl sm:text-2xl lg:text-3xl font-black text-[hsl(var(--eco-secondary))] truncate">{settings.brandName} Performance</h2>
             </div>
             <p className="text-base sm:text-lg text-[hsl(var(--eco-text-muted))] font-medium px-4">Real-time insights into your daily operations</p>
           </div>

@@ -1,42 +1,15 @@
-import { useState, useEffect } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { getQueryFn } from "@/lib/queryClient";
 
 export function useAdminAuth() {
-  const [isAdminLoggedIn, setIsAdminLoggedIn] = useState(() => {
-    // Check localStorage first
-    try {
-      const stored = localStorage.getItem("adminLoggedIn");
-      return stored === "true";
-    } catch {
-      return false;
-    }
+  const queryClient = useQueryClient();
+  
+  const { data: admin, isLoading } = useQuery({
+    queryKey: ["/api/admin/current-admin"],
+    queryFn: getQueryFn({ on401: "returnNull" }),
+    retry: false,
+    staleTime: 1000 * 60 * 5, // 5 minutes
   });
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    // Only verify session once on mount
-    const verifySession = async () => {
-      try {
-        const res = await fetch("/api/admin/current-admin", {
-          credentials: "include",
-        });
-        if (res.ok) {
-          setIsAdminLoggedIn(true);
-          localStorage.setItem("adminLoggedIn", "true");
-        } else {
-          setIsAdminLoggedIn(false);
-          localStorage.removeItem("adminLoggedIn");
-        }
-      } catch {
-        // Network error - trust localStorage
-        const stored = localStorage.getItem("adminLoggedIn") === "true";
-        setIsAdminLoggedIn(stored);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    verifySession();
-  }, []); // Only run once on mount
 
   const logout = async () => {
     try {
@@ -45,17 +18,21 @@ export function useAdminAuth() {
         credentials: "include",
       });
     } catch {}
-    setIsAdminLoggedIn(false);
+    // Clear admin from cache
+    queryClient.setQueryData(["/api/admin/current-admin"], null);
     localStorage.removeItem("adminLoggedIn");
   };
 
   const login = (username: string) => {
-    setIsAdminLoggedIn(true);
+    // Optimistically update cache or just invalidate
+    queryClient.setQueryData(["/api/admin/current-admin"], { username });
     localStorage.setItem("adminLoggedIn", "true");
+    // Invalidate to get fresh data if needed, but setQueryData is faster for instant redirect
   };
 
   return {
-    isAdminLoggedIn,
+    isAdminLoggedIn: !!admin,
+    adminUsername: admin?.username,
     isLoading,
     logout,
     login,

@@ -3,6 +3,10 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { useQueryClient } from "@tanstack/react-query";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import MainPageLayout from "@/components/layout/main-page-layout";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
+import { Eye, EyeOff, Camera, Phone as PhoneIcon, MapPin, Loader2, UserPlus, LogIn } from "lucide-react";
 
 type AuthMode = "login" | "signup";
 
@@ -21,6 +25,7 @@ export default function LoginPage() {
   const [showPasswordSignup, setShowPasswordSignup] = useState(false);
   const [loading, setLoading] = useState(false);
   const { toast } = useToast();
+  const { settings } = useSiteSettings();
 
   const handlePhotoSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -82,7 +87,7 @@ export default function LoginPage() {
 
       // Clear cache and redirect to home page
       queryClient.clear();
-      window.location.href = "/";
+      window.location.href = "/home";
     } catch (error) {
       toast({
         title: "Error",
@@ -161,7 +166,7 @@ export default function LoginPage() {
 
       // Clear cache and redirect to home page
       queryClient.clear();
-      window.location.href = "/";
+      window.location.href = "/home";
     } catch (error) {
       toast({
         title: "Error",
@@ -174,267 +179,277 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-emerald-50 via-white to-blue-50 flex items-center justify-center p-4">
-      <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-lg backdrop-blur-sm">
-        {/* Header */}
-        <div className="text-center mb-8">
-          <div className="text-6xl font-bold text-green-600 mb-2">🥛</div>
-          <h1 className="text-3xl font-bold text-gray-900">Divine Naturals</h1>
-          <p className="text-gray-500 text-sm mt-1">Pure. Fresh. Daily.</p>
-        </div>
+    <MainPageLayout>
+      <div className="min-h-[80vh] flex items-center justify-center p-4">
+        <div className="bg-white rounded-3xl shadow-2xl p-8 w-full max-w-lg backdrop-blur-sm border border-gray-100 my-8">
+          {/* Header */}
+          <div className="text-center mb-8">
+            <img src={settings.logoUrl || logoImage} className="w-20 h-20 object-contain mb-4 mx-auto" />
+            <h1 className="text-3xl font-bold text-gray-900">{settings.brandName}</h1>
+            <p className="text-gray-500 text-sm mt-1">Pure. Fresh. Daily.</p>
+          </div>
 
-        {/* Tab Buttons */}
-        <div className="flex gap-2 mb-8 bg-gray-100 p-1 rounded-lg">
-          <button
-            type="button"
-            onClick={() => {
-              setMode("login");
-              setFirstName("");
-              setLastName("");
-            }}
-            className={`flex-1 py-2 rounded-md font-semibold transition-all ${
-              mode === "login"
-                ? "bg-green-600 text-white"
-                : "bg-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Login
-          </button>
-          <button
-            type="button"
-            onClick={() => setMode("signup")}
-            className={`flex-1 py-2 rounded-md font-semibold transition-all ${
-              mode === "signup"
-                ? "bg-green-600 text-white"
-                : "bg-transparent text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            Sign Up
-          </button>
-        </div>
+          {/* Tab Buttons */}
+          <div className="flex gap-2 mb-8 bg-gray-100 p-1 rounded-lg">
+            <button
+              type="button"
+              onClick={() => {
+                setMode("login");
+                setFirstName("");
+                setLastName("");
+              }}
+              className={`flex-1 py-2 rounded-md font-semibold transition-all ${
+                mode === "login"
+                  ? "bg-green-600 text-white"
+                  : "bg-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Login
+            </button>
+            <button
+              type="button"
+              onClick={() => setMode("signup")}
+              className={`flex-1 py-2 rounded-md font-semibold transition-all ${
+                mode === "signup"
+                  ? "bg-green-600 text-white"
+                  : "bg-transparent text-gray-600 hover:text-gray-900"
+              }`}
+            >
+              Sign Up
+            </button>
+          </div>
 
-        {/* LOGIN FORM */}
-        {mode === "login" ? (
-          <form onSubmit={handleLogin} className="space-y-6">
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Email
-              </label>
-              <Input
-                type="email"
-                placeholder="Enter your email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                disabled={loading}
-                className="h-12 text-base"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-gray-700 mb-2">
-                Password
-              </label>
-              <div className="relative">
+          {/* FORM CONTENT */}
+          {mode === "login" ? (
+            <form onSubmit={handleLogin} className="space-y-6">
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Email
+                </label>
                 <Input
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   disabled={loading}
-                  className="h-12 text-base pr-12"
+                  className="h-12 text-base"
                 />
+              </div>
+
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showPassword ? "text" : "password"}
+                    placeholder="Enter your password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    className="h-12 text-base pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    disabled={loading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showPassword ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              <Button
+                type="submit"
+                disabled={loading}
+                className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-bold text-base flex items-center justify-center gap-2 rounded-xl"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <LogIn className="w-5 h-5" />}
+                {loading ? "Logging in..." : "Login"}
+              </Button>
+
+              <p className="text-center text-sm text-gray-600">
+                Don't have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  disabled={loading}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  onClick={() => setMode("signup")}
+                  className="text-green-600 font-semibold hover:underline"
                 >
-                  {showPassword ? "👁️" : "👁️‍🗨️"}
+                  Sign up here
                 </button>
+              </p>
+            </form>
+          ) : (
+            /* SIGNUP FORM */
+            <form onSubmit={handleSignup} className="max-h-[60vh] overflow-y-auto space-y-4 pr-2">
+              {/* Profile Photo Preview & Upload */}
+              <div className="text-center space-y-3">
+                {photoPreview ? (
+                  <div className="flex justify-center">
+                    <img
+                      src={photoPreview}
+                      alt="Profile preview"
+                      className="w-24 h-24 rounded-full object-cover border-3 border-green-600 shadow-md"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center">
+                    <Camera className="w-10 h-10 text-green-600" />
+                  </div>
+                )}
+                <label className="block">
+                  <span className="cursor-pointer px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition font-semibold text-sm inline-block">
+                    {photoPreview ? "Change Photo" : "Upload Photo (Optional)"}
+                  </span>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handlePhotoSelect}
+                    disabled={loading}
+                    className="hidden"
+                  />
+                </label>
               </div>
-            </div>
 
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-green-600 hover:bg-green-700 text-white font-semibold text-base"
-            >
-              {loading ? "Logging in..." : "Login"}
-            </Button>
-
-            <p className="text-center text-sm text-gray-600">
-              Don't have an account?{" "}
-              <button
-                type="button"
-                onClick={() => setMode("signup")}
-                className="text-green-600 font-semibold hover:underline"
-              >
-                Sign up here
-              </button>
-            </p>
-          </form>
-        ) : (
-          /* SIGNUP FORM */
-          <form onSubmit={handleSignup} className="max-h-[85vh] overflow-y-auto space-y-4 pr-2">
-            {/* Profile Photo Preview & Upload */}
-            <div className="text-center space-y-3">
-              {photoPreview ? (
-                <div className="flex justify-center">
-                  <img
-                    src={photoPreview}
-                    alt="Profile preview"
-                    className="w-24 h-24 rounded-full object-cover border-3 border-green-600 shadow-md"
+              {/* Name Fields - Two Column */}
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
+                    First Name
+                  </label>
+                   <Input
+                    type="text"
+                    placeholder="First Name"
+                    value={firstName}
+                    onChange={(e) => setFirstName(e.target.value)}
+                    disabled={loading}
+                    className="h-11 text-base border-2 border-gray-200 focus:border-green-600"
                   />
                 </div>
-              ) : (
-                <div className="w-24 h-24 mx-auto rounded-full bg-gradient-to-br from-green-100 to-blue-100 flex items-center justify-center text-3xl">
-                  📸
+                <div>
+                  <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
+                    Last Name
+                  </label>
+                   <Input
+                    type="text"
+                    placeholder="Last Name"
+                    value={lastName}
+                    onChange={(e) => setLastName(e.target.value)}
+                    disabled={loading}
+                    className="h-11 text-base border-2 border-gray-200 focus:border-green-600"
+                  />
                 </div>
-              )}
-              <label className="block">
-                <span className="cursor-pointer px-4 py-2 bg-green-50 text-green-700 rounded-lg hover:bg-green-100 transition font-semibold text-sm inline-block">
-                  {photoPreview ? "Change Photo" : "Upload Photo (Optional)"}
-                </span>
-                <input
-                  type="file"
-                  accept="image/*"
-                  onChange={handlePhotoSelect}
-                  disabled={loading}
-                  className="hidden"
-                />
-              </label>
-            </div>
+              </div>
 
-            {/* Name Fields - Two Column */}
-            <div className="grid grid-cols-2 gap-3">
+              {/* Email */}
               <div>
                 <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
-                  First Name
+                  Email Address
                 </label>
+                 <Input
+                   type="email"
+                   placeholder="Email Address"
+                   value={email}
+                   onChange={(e) => setEmail(e.target.value)}
+                   disabled={loading}
+                   className="h-11 text-base border-2 border-gray-200 focus:border-green-600"
+                 />
+              </div>
+
+              {/* Phone Number */}
+              <div>
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <PhoneIcon className="w-4 h-4 text-green-600" />
+                    <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide">
+                      Phone Number
+                    </label>
+                  </div>
                 <Input
-                  type="text"
-                  placeholder="John"
-                  value={firstName}
-                  onChange={(e) => setFirstName(e.target.value)}
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
+                  value={phone}
+                  onChange={(e) => setPhone(e.target.value)}
                   disabled={loading}
                   className="h-11 text-base border-2 border-gray-200 focus:border-green-600"
                 />
               </div>
+
+              {/* Address */}
               <div>
-                <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
-                  Last Name
-                </label>
-                <Input
-                  type="text"
-                  placeholder="Doe"
-                  value={lastName}
-                  onChange={(e) => setLastName(e.target.value)}
+                  <div className="flex items-center gap-2 mb-1.5">
+                    <MapPin className="w-4 h-4 text-green-600" />
+                    <label className="block text-xs font-bold text-gray-800 uppercase tracking-wide">
+                      Delivery Address
+                    </label>
+                  </div>
+                <textarea
+                  placeholder="123 Main Street, City, State 12345"
+                  value={address}
+                  onChange={(e) => setAddress(e.target.value)}
                   disabled={loading}
-                  className="h-11 text-base border-2 border-gray-200 focus:border-green-600"
+                  rows={2}
+                  className="w-full px-3 py-2 text-base border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 resize-none"
                 />
               </div>
-            </div>
 
-            {/* Email */}
-            <div>
-              <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
-                Email Address
-              </label>
-              <Input
-                type="email"
-                placeholder="john@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+              {/* Password */}
+              <div>
+                <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
+                  Password
+                </label>
+                <div className="relative">
+                  <Input
+                    type={showPasswordSignup ? "text" : "password"}
+                    placeholder="Min 6 characters"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    disabled={loading}
+                    className="h-11 text-base border-2 border-gray-200 focus:border-green-600 pr-12"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPasswordSignup(!showPasswordSignup)}
+                    disabled={loading}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  >
+                    {showPasswordSignup ? <EyeOff className="w-5 h-5" /> : <Eye className="w-5 h-5" />}
+                  </button>
+                </div>
+              </div>
+
+              {/* Submit Button */}
+              <Button
+                type="submit"
                 disabled={loading}
-                className="h-11 text-base border-2 border-gray-200 focus:border-green-600"
-              />
-            </div>
+                className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-base rounded-xl shadow-lg transition-all transform hover:scale-105 disabled:hover:scale-100 flex items-center justify-center gap-2"
+              >
+                {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <UserPlus className="w-5 h-5" />}
+                {loading ? "Creating Account..." : "Create Account"}
+              </Button>
 
-            {/* Phone Number */}
-            <div>
-              <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
-                📱 Phone Number
-              </label>
-              <Input
-                type="tel"
-                placeholder="+1 (555) 123-4567"
-                value={phone}
-                onChange={(e) => setPhone(e.target.value)}
-                disabled={loading}
-                className="h-11 text-base border-2 border-gray-200 focus:border-green-600"
-              />
-            </div>
-
-            {/* Address */}
-            <div>
-              <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
-                📍 Address
-              </label>
-              <textarea
-                placeholder="123 Main Street, City, State 12345"
-                value={address}
-                onChange={(e) => setAddress(e.target.value)}
-                disabled={loading}
-                rows={2}
-                className="w-full px-3 py-2 text-base border-2 border-gray-200 rounded-lg focus:outline-none focus:border-green-600 focus:ring-2 focus:ring-green-100 resize-none"
-              />
-            </div>
-
-            {/* Password */}
-            <div>
-              <label className="block text-xs font-bold text-gray-800 mb-1.5 uppercase tracking-wide">
-                Password
-              </label>
-              <div className="relative">
-                <Input
-                  type={showPasswordSignup ? "text" : "password"}
-                  placeholder="Min 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  disabled={loading}
-                  className="h-11 text-base border-2 border-gray-200 focus:border-green-600 pr-12"
-                />
+              <p className="text-center text-sm text-gray-600 pb-2">
+                Already have an account?{" "}
                 <button
                   type="button"
-                  onClick={() => setShowPasswordSignup(!showPasswordSignup)}
-                  disabled={loading}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+                  onClick={() => {
+                    setMode("login");
+                    setFirstName("");
+                    setLastName("");
+                    setPhone("");
+                    setAddress("");
+                    setPhotoPreview("");
+                    setProfilePhoto(null);
+                  }}
+                  className="text-green-600 font-bold hover:text-green-700 hover:underline"
                 >
-                  {showPasswordSignup ? "👁️" : "👁️‍🗨️"}
+                  Sign in here
                 </button>
-              </div>
-            </div>
-
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              disabled={loading}
-              className="w-full h-12 bg-gradient-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700 text-white font-bold text-base rounded-lg shadow-lg transition-all transform hover:scale-105 disabled:hover:scale-100"
-            >
-              {loading ? "🔄 Creating Account..." : "✨ Create Account"}
-            </Button>
-
-            <p className="text-center text-sm text-gray-600 pb-2">
-              Already have an account?{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setMode("login");
-                  setFirstName("");
-                  setLastName("");
-                  setPhone("");
-                  setAddress("");
-                  setPhotoPreview("");
-                  setProfilePhoto(null);
-                }}
-                className="text-green-600 font-bold hover:text-green-700 hover:underline"
-              >
-                Sign in here
-              </button>
-            </p>
-          </form>
-        )}
+              </p>
+            </form>
+          )}
+        </div>
       </div>
-    </div>
+    </MainPageLayout>
   );
 }

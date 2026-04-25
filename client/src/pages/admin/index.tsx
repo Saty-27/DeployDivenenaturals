@@ -11,6 +11,7 @@ import DeliveryPartnersPage from "./delivery-partners";
 import AdminBannersPage from "./banners";
 import HomepageCMS from "./homepage-cms";
 import CMSManagementPage from "./cms-management";
+import BrandSettings from "./brand-settings";
 
 export default function AdminPage() {
   const [location] = useLocation();
@@ -23,7 +24,7 @@ export default function AdminPage() {
     return <SubscriptionsAdmin />;
   } else if (location === "/admin/categories") {
     return <CategoriesAdmin />;
-  } else if (location === "/admin/products") {
+  } else if (location === "/admin/products" || location === "/admin/inventory") {
     return <ProductsAdmin />;
   } else if (location === "/admin/customers") {
     return <CustomersAdmin />;
@@ -39,6 +40,8 @@ export default function AdminPage() {
     return <HomepageCMS />;
   } else if (location?.startsWith("/admin/cms")) {
     return <CMSManagementPage />;
+  } else if (location === "/admin/brand") {
+    return <BrandSettings />;
   }
 
   return <AdminDashboard />;

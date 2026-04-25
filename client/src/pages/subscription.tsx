@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "wouter";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, Pause, Play } from "lucide-react";
+import { ArrowLeft, Pause, Play, Loader2, Sparkles, Inbox, CheckCircle2, PauseCircle, Plus } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import MainPageLayout from "@/components/layout/main-page-layout";
 
@@ -105,8 +105,8 @@ export default function SubscriptionPage() {
       <MainPageLayout>
         <div style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "400px" }}>
           <div style={{ textAlign: "center" }}>
-            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>🥛</div>
-            <p style={{ color: "#6b7280" }}>Loading subscriptions...</p>
+            <Loader2 className="w-12 h-12 animate-spin text-green-600 mx-auto mb-4" />
+            <p style={{ color: "#6b7280", fontWeight: "600" }}>Loading subscriptions...</p>
           </div>
         </div>
       </MainPageLayout>
@@ -115,188 +115,117 @@ export default function SubscriptionPage() {
 
   return (
     <MainPageLayout>
-      <div>
-        {/* Billing Alert on Subscriptions */}
-        {billingData && billingData.status === "PENDING" && (
-          <div
-            style={{
-              background: "#fef9c3",
-              border: "1px solid #fcd34d",
-              borderRadius: "8px",
-              padding: "12px",
-              marginBottom: "16px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              fontSize: "13px",
-            }}
-          >
-            <span>⚠️ Pending bill: ₹{billingData.amount?.toLocaleString()}</span>
-            <button
-              onClick={() => setLocation("/billing")}
-              style={{
-                background: "#ca8a04",
-                color: "white",
-                border: "none",
-                padding: "6px 12px",
-                borderRadius: "4px",
-                fontSize: "12px",
-                cursor: "pointer",
-              }}
-            >
-              Pay
-            </button>
-          </div>
-        )}
-
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8 mb-16">
         {/* Header */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1rem", marginBottom: "2rem" }}>
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-8 text-center sm:text-left">
           <button
             onClick={() => setLocation("/home")}
-            style={{
-              background: "white",
-              border: "none",
-              borderRadius: "0.5rem",
-              padding: "0.5rem",
-              cursor: "pointer",
-              boxShadow: "0 1px 2px rgba(0,0,0,0.1)",
-            }}
+            className="bg-white border-none rounded-lg p-2 cursor-pointer shadow-sm hover:shadow-md transition-shadow shrink-0"
           >
             <ArrowLeft size={20} />
           </button>
-          <div>
-            <h1 style={{ fontSize: "2rem", fontWeight: "bold", color: "#111827", margin: 0 }}>
-              🥛 Hi {userData?.firstName || "there"}!
+          <div className="min-w-0">
+            <h1 className="text-2xl sm:text-3xl font-black text-gray-900 m-0 truncate flex items-center justify-center sm:justify-start gap-3">
+              <Sparkles className="w-8 h-8 text-yellow-500 shrink-0" /> Hi {userData?.firstName || "there"}!
             </h1>
-            <p style={{ color: "#6b7280", fontSize: "0.875rem", margin: 0 }}>Here are your milk subscriptions</p>
+            <p className="text-gray-500 text-sm m-0 mt-1">Here are your milk subscriptions</p>
           </div>
         </div>
 
         {/* Stats */}
-        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "1rem", marginBottom: "2rem" }}>
-          <div style={{ background: "white", borderRadius: "0.5rem", padding: "1rem", boxShadow: "0 1px 2px rgba(0,0,0,0.1)", borderLeft: "4px solid #16a34a" }}>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>Active</p>
-            <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#16a34a", margin: "0.5rem 0 0 0" }}>{activeCount}</p>
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-green-500">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black m-0">Active</p>
+            <p className="text-2xl font-black text-green-600 mt-2 m-0">{activeCount}</p>
           </div>
-          <div style={{ background: "white", borderRadius: "0.5rem", padding: "1rem", boxShadow: "0 1px 2px rgba(0,0,0,0.1)", borderLeft: "4px solid #f59e0b" }}>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>Monthly Cost</p>
-            <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#f59e0b", margin: "0.5rem 0 0 0" }}>₹{totalMonthly.toLocaleString()}</p>
+          <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-orange-500">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black m-0">Monthly Cost</p>
+            <p className="text-2xl font-black text-orange-600 mt-2 m-0">₹{totalMonthly.toLocaleString()}</p>
           </div>
-          <div style={{ background: "white", borderRadius: "0.5rem", padding: "1rem", boxShadow: "0 1px 2px rgba(0,0,0,0.1)", borderLeft: "4px solid #3b82f6" }}>
-            <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: 0 }}>Total</p>
-            <p style={{ fontSize: "1.5rem", fontWeight: "bold", color: "#3b82f6", margin: "0.5rem 0 0 0" }}>{subscriptions.length}</p>
+          <div className="bg-white rounded-xl p-5 shadow-sm border-l-4 border-blue-500">
+            <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black m-0">Total</p>
+            <p className="text-2xl font-black text-blue-600 mt-2 m-0">{subscriptions.length}</p>
           </div>
         </div>
 
         {/* Subscriptions List */}
         {subscriptions.length === 0 ? (
-          <div style={{ background: "white", borderRadius: "0.5rem", padding: "3rem", textAlign: "center", boxShadow: "0 1px 2px rgba(0,0,0,0.1)" }}>
-            <div style={{ fontSize: "3rem", marginBottom: "1rem" }}>📭</div>
-            <p style={{ color: "#6b7280", marginBottom: "1rem" }}>No subscriptions yet</p>
-            <Button onClick={() => setLocation("/subscription/create")} style={{ background: "#16a34a", color: "white", padding: "0.5rem 1.5rem", border: "none", borderRadius: "0.5rem", cursor: "pointer", fontWeight: "600" }}>
-              Start Subscription
+          <div className="bg-white rounded-3xl shadow-sm border border-gray-100 p-12 sm:p-20 text-center">
+            <div className="flex justify-center mb-6">
+              <div className="p-6 bg-gray-50 rounded-full">
+                <Inbox size={64} className="text-gray-300" />
+              </div>
+            </div>
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">No subscriptions yet</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto">
+              Start a fresh daily milk subscription delivered right to your door. Pure. Fresh. Daily.
+            </p>
+            <Button 
+              onClick={() => setLocation("/subscription/create")} 
+              className="bg-green-600 hover:bg-green-700 text-white px-10 py-6 rounded-2xl font-bold text-lg shadow-lg hover:shadow-xl transition-all"
+            >
+              Start Your First Subscription
             </Button>
           </div>
         ) : (
-          <div style={{ display: "grid", gap: "1rem" }}>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {subscriptions.map((sub: any, idx: number) => (
-              <div key={idx} style={{ background: "white", borderRadius: "0.5rem", padding: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.1)" }}>
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem" }}>
+              <div key={idx} className="bg-white rounded-2xl p-6 shadow-md border border-gray-100 hover:shadow-lg transition-shadow">
+                <div className="flex justify-between items-start mb-6">
                   <div>
-                    <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Product</p>
-                    <p style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#111827", margin: "0.5rem 0 0 0" }}>
-                      {sub.product?.name || "Unknown"}
-                    </p>
-                    <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: "0.25rem 0 0 0" }}>
+                    <p className="text-[10px] text-green-600 uppercase tracking-widest font-black mb-1">Product</p>
+                    <h3 className="text-xl font-black text-gray-900">{sub.product?.name || "Unknown"}</h3>
+                    <p className="text-gray-500 text-sm mt-1">
                       {sub.quantity} L per {sub.frequency}
                     </p>
                   </div>
-
-                  <div style={{ textAlign: "right" }}>
-                    <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Price</p>
-                    <p style={{ fontSize: "1.25rem", fontWeight: "bold", color: "#16a34a", margin: "0.5rem 0 0 0" }}>
+                  <div className="text-right">
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-1">Total Price</p>
+                    <p className="text-xl font-black text-green-600">
                       ₹{(parseFloat(sub.product?.price || "0") * parseFloat(sub.quantity || 1)).toLocaleString()}
                     </p>
-                    <p style={{ fontSize: "0.875rem", color: "#6b7280", margin: "0.25rem 0 0 0" }}>per {sub.frequency}</p>
+                    <p className="text-gray-400 text-xs mt-1">per {sub.frequency}</p>
                   </div>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", marginBottom: "1rem", paddingTop: "1rem", borderTop: "1px solid #e5e7eb" }}>
+                <div className="grid grid-cols-2 gap-4 py-4 border-t border-gray-100">
                   <div>
-                    <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Status</p>
-                    <span
-                      style={{
-                        display: "inline-block",
-                        marginTop: "0.5rem",
-                        padding: "0.35rem 0.75rem",
-                        fontSize: "0.75rem",
-                        fontWeight: "600",
-                        borderRadius: "0.25rem",
-                        background: sub.status === "ACTIVE" ? "#d1fae5" : "#fef3c7",
-                        color: sub.status === "ACTIVE" ? "#065f46" : "#92400e",
-                      }}
-                    >
-                      {sub.status === "ACTIVE" ? "✅ Active" : "⏸ Paused"}
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-2">Status</p>
+                    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold ${
+                      sub.status === "ACTIVE" 
+                        ? "bg-green-100 text-green-700" 
+                        : "bg-orange-100 text-orange-700"
+                    }`}>
+                      {sub.status === "ACTIVE" ? <CheckCircle2 className="w-3 h-3" /> : <PauseCircle className="w-3 h-3" />}
+                      {sub.status === "ACTIVE" ? "Active" : "Paused"}
                     </span>
                   </div>
-
                   <div>
-                    <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Delivery Time</p>
-                    <p style={{ fontSize: "0.875rem", fontWeight: "600", color: "#111827", margin: "0.5rem 0 0 0" }}>
-                      {sub.deliveryTime || "Morning"}
-                    </p>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-2">Delivery Time</p>
+                    <p className="text-sm font-bold text-gray-900">{sub.deliveryTime || "Morning"}</p>
                   </div>
                 </div>
 
-                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "1rem", paddingTop: "1rem", borderTop: "1px solid #e5e7eb" }}>
+                <div className="flex items-center justify-between pt-4 border-t border-gray-100">
                   <div>
-                    <p style={{ fontSize: "0.75rem", color: "#6b7280", textTransform: "uppercase", fontWeight: "600", margin: 0 }}>Started</p>
-                    <p style={{ fontSize: "0.875rem", color: "#111827", margin: "0.5rem 0 0 0" }}>
-                      {new Date(sub.startDate).toLocaleDateString()}
-                    </p>
+                    <p className="text-[10px] text-gray-400 uppercase tracking-widest font-black mb-1">Started</p>
+                    <p className="text-xs text-gray-600">{new Date(sub.startDate).toLocaleDateString("en-IN", { day: 'numeric', month: 'short', year: 'numeric' })}</p>
                   </div>
-
-                  <div style={{ textAlign: "right" }}>
-                    {sub.status === "ACTIVE" ? (
-                      <button
-                        onClick={() => handlePause(sub.id)}
-                        style={{
-                          padding: "0.5rem 1rem",
-                          background: "#fef3c7",
-                          color: "#92400e",
-                          border: "none",
-                          borderRadius: "0.5rem",
-                          cursor: "pointer",
-                          fontWeight: "600",
-                          fontSize: "0.875rem",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        <Pause size={16} /> Pause
-                      </button>
-                    ) : (
-                      <button
-                        onClick={() => handleResume(sub.id)}
-                        style={{
-                          padding: "0.5rem 1rem",
-                          background: "#d1fae5",
-                          color: "#065f46",
-                          border: "none",
-                          borderRadius: "0.5rem",
-                          cursor: "pointer",
-                          fontWeight: "600",
-                          fontSize: "0.875rem",
-                          display: "inline-flex",
-                          alignItems: "center",
-                          gap: "0.5rem",
-                        }}
-                      >
-                        <Play size={16} /> Resume
-                      </button>
-                    )}
-                  </div>
+                  {sub.status === "ACTIVE" ? (
+                    <button
+                      onClick={() => handlePause(sub.id)}
+                      className="flex items-center gap-2 px-4 py-2 bg-orange-50 text-orange-700 rounded-xl hover:bg-orange-100 transition-colors text-sm font-bold"
+                    >
+                      <Pause size={16} /> Pause
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleResume(sub.id)}
+                      className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 rounded-xl hover:bg-green-100 transition-colors text-sm font-bold"
+                    >
+                      <Play size={16} /> Resume
+                    </button>
+                  )}
                 </div>
               </div>
             ))}
@@ -305,21 +234,12 @@ export default function SubscriptionPage() {
 
         {/* Footer Button */}
         {subscriptions.length > 0 && (
-          <div style={{ marginTop: "2rem", display: "flex", gap: "1rem" }}>
+          <div className="mt-12">
             <Button
               onClick={() => setLocation("/subscription/create")}
-              style={{
-                flex: 1,
-                padding: "0.75rem",
-                background: "#16a34a",
-                color: "white",
-                border: "none",
-                borderRadius: "0.5rem",
-                cursor: "pointer",
-                fontWeight: "600",
-              }}
+              className="w-full sm:w-auto px-8 py-4 bg-green-600 hover:bg-green-700 text-white rounded-2xl font-bold shadow-lg hover:shadow-xl transition-all flex items-center justify-center gap-2"
             >
-              ➕ New Subscription
+              <Plus className="w-5 h-5" /> New Subscription
             </Button>
           </div>
         )}

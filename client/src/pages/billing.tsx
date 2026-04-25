@@ -3,6 +3,22 @@ import { useState } from "react";
 import { Link } from "wouter";
 import { useToast } from "@/hooks/use-toast";
 import MainPageLayout from "@/components/layout/main-page-layout";
+import { 
+  Receipt, 
+  CheckCircle2, 
+  Clock, 
+  AlertCircle, 
+  HelpCircle, 
+  Package, 
+  Settings, 
+  History, 
+  Inbox,
+  Download,
+  CreditCard as CreditCardIcon,
+  ChevronDown,
+  ChevronRight,
+  ArrowLeft
+} from "lucide-react";
 
 export default function BillingPage() {
   const [expandedSections, setExpandedSections] = useState({
@@ -63,18 +79,18 @@ export default function BillingPage() {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "PAID":
-        return { bg: "#dcfce7", text: "#15803d", icon: "🟢", label: "PAID" };
+        return { bg: "#dcfce7", text: "#15803d", icon: <CheckCircle2 className="w-4 h-4" />, label: "PAID" };
       case "PENDING":
         return {
           bg: "#fef9c3",
           text: "#ca8a04",
-          icon: "🟡",
+          icon: <Clock className="w-4 h-4" />,
           label: "PENDING",
         };
       case "OVERDUE":
-        return { bg: "#fee2e2", text: "#b91c1c", icon: "🔴", label: "OVERDUE" };
+        return { bg: "#fee2e2", text: "#b91c1c", icon: <AlertCircle className="w-4 h-4" />, label: "OVERDUE" };
       default:
-        return { bg: "#f3f4f6", text: "#6b7280", icon: "⚪", label: "UNKNOWN" };
+        return { bg: "#f3f4f6", text: "#6b7280", icon: <HelpCircle className="w-4 h-4" />, label: "UNKNOWN" };
     }
   };
 
@@ -94,8 +110,8 @@ export default function BillingPage() {
           }}
         >
           <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-            <h1 style={{ fontSize: "28px", fontWeight: "700", margin: "0 0 8px 0" }}>
-              🧾 Monthly Billing
+            <h1 style={{ fontSize: "28px", fontWeight: "700", margin: "0 0 8px 0", display: "flex", alignItems: "center", gap: "12px" }}>
+              <Receipt className="w-8 h-8" /> Monthly Billing
             </h1>
             <p style={{ fontSize: "14px", color: "rgba(255,255,255,0.9)", margin: 0 }}>
               View and manage your dairy bills • Billing for: {currentBill.month}
@@ -129,7 +145,7 @@ export default function BillingPage() {
               <h2 style={{ fontSize: "16px", fontWeight: "600", color: "#111827", margin: "0 0 8px 0" }}>
                 {currentBill.month} Bill
               </h2>
-              <p style={{ fontSize: "14px", color: "#6b7280", margin: 0 }}>
+              <p style={{ fontSize: "14px", color: "#6b7280", margin: 0, display: "flex", alignItems: "center", gap: "6px" }}>
                 Status: {statusStyle.icon} {statusStyle.label}
               </p>
             </div>
@@ -141,6 +157,9 @@ export default function BillingPage() {
                 borderRadius: "6px",
                 fontSize: "13px",
                 fontWeight: "600",
+                display: "flex",
+                alignItems: "center",
+                gap: "6px"
               }}
             >
               {statusStyle.icon} {statusStyle.label}
@@ -261,13 +280,13 @@ export default function BillingPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "8px",
+                gap: "10px",
                 transition: "background 0.3s",
               }}
               onMouseOver={(e) => (e.currentTarget.style.background = "#15803d")}
               onMouseOut={(e) => (e.currentTarget.style.background = "#16a34a")}
             >
-              💳 Pay Now Online
+              <CreditCardIcon className="w-5 h-5" /> Pay Now Online
             </button>
             <button
               onClick={() =>
@@ -286,7 +305,7 @@ export default function BillingPage() {
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "center",
-                gap: "8px",
+                gap: "10px",
                 transition: "all 0.3s",
               }}
               onMouseOver={(e) => {
@@ -296,7 +315,7 @@ export default function BillingPage() {
                 e.currentTarget.style.background = "white";
               }}
             >
-              📄 Download Invoice PDF
+              <Download className="w-5 h-5" /> Download Invoice PDF
             </button>
           </div>
 
@@ -353,8 +372,10 @@ export default function BillingPage() {
                 color: "#111827",
               }}
             >
-              <span>🥛 Subscription Deliveries</span>
-              <span>{expandedSections.subscriptions ? "▼" : "▶"}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Package className="w-4 h-4 text-green-600" /> Subscription Deliveries
+              </span>
+              <span>{expandedSections.subscriptions ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}</span>
             </button>
             {expandedSections.subscriptions && (
               <div style={{ padding: "16px", borderTop: "1px solid #e5e7eb" }}>
@@ -429,8 +450,10 @@ export default function BillingPage() {
                 color: "#111827",
               }}
             >
-              <span>⚙️ Adjustments & Discounts</span>
-              <span>{expandedSections.adjustments ? "▼" : "▶"}</span>
+              <span style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+                <Settings className="w-4 h-4 text-blue-600" /> Adjustments & Discounts
+              </span>
+              <span>{expandedSections.adjustments ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}</span>
             </button>
             {expandedSections.adjustments && (
               <div style={{ padding: "16px", borderTop: "1px solid #e5e7eb" }}>
@@ -467,22 +490,26 @@ export default function BillingPage() {
 
         {/* BILLING HISTORY TABLE */}
         <div>
-          <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#111827", marginBottom: "16px" }}>
-            📚 Previous Bills
+          <h2 style={{ fontSize: "18px", fontWeight: "600", color: "#111827", marginBottom: "16px", display: "flex", alignItems: "center", gap: "10px" }}>
+            <History className="w-5 h-5 text-gray-400" /> Previous Bills
           </h2>
 
           {billHistory.length === 0 ? (
             <div
               style={{
                 background: "white",
-                padding: "40px",
-                borderRadius: "8px",
+                padding: "60px 40px",
+                borderRadius: "12px",
                 textAlign: "center",
                 color: "#6b7280",
+                border: "1px dashed #e5e7eb"
               }}
             >
-              <p style={{ fontSize: "16px", margin: 0 }}>
-                📭 No previous bills yet.
+              <div style={{ display: "flex", justifyContent: "center", marginBottom: "16px" }}>
+                <Inbox size={48} color="#cbd5e1" />
+              </div>
+              <p style={{ fontSize: "16px", margin: 0, fontWeight: "600" }}>
+                No previous bills yet.
               </p>
               <p style={{ fontSize: "14px", margin: "8px 0 0 0" }}>
                 You will see past bills here once generated.
@@ -621,11 +648,15 @@ export default function BillingPage() {
                             style={{
                               background: badgeStyle.bg,
                               color: badgeStyle.text,
-                              padding: "4px 8px",
-                              borderRadius: "4px",
+                              padding: "6px 10px",
+                              borderRadius: "6px",
                               fontSize: "12px",
                               fontWeight: "600",
-                              display: "inline-block",
+                              display: "flex",
+                              alignItems: "center",
+                              gap: "6px",
+                              width: "fit-content",
+                              margin: "0 auto"
                             }}
                           >
                             {badgeStyle.icon} {bill.status}
@@ -685,11 +716,20 @@ export default function BillingPage() {
             border: "1px solid #e5e7eb",
           }}
         >
-          <p style={{ fontSize: "14px", color: "#6b7280", marginBottom: "12px" }}>
+          <p style={{ fontSize: "14px", color: "#6b7280", marginBottom: "16px" }}>
             Need help with your bills?
           </p>
           <Link href="/home">
-            ← Back to Home
+            <a style={{ 
+              display: "inline-flex", 
+              alignItems: "center", 
+              gap: "8px", 
+              color: "#16a34a", 
+              fontWeight: "600",
+              textDecoration: "none"
+            }}>
+              <ArrowLeft className="w-4 h-4" /> Back to Home
+            </a>
           </Link>
         </div>
       </div>

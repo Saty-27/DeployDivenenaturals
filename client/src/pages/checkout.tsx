@@ -1,8 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
-import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { useToast } from "@/hooks/use-toast";
 import { useState } from "react";
+import { SiteHeader } from "@/components/landing/site-header";
+import { SiteFooter } from "@/components/landing/site-footer";
+import { CreditCard, Banknote, User, MapPin, Phone } from "lucide-react";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 
 interface CartItem {
   id: number;
@@ -29,10 +29,11 @@ export default function CheckoutPage() {
   const [isProcessing, setIsProcessing] = useState(false);
   const [editMode, setEditMode] = useState(false);
   const [userInfo, setUserInfo] = useState<User>({});
+  const { settings } = useSiteSettings();
 
   // Fetch cart items
   const { data: cartItems = [] } = useQuery({
-    queryKey: ["cart_items"],
+    queryKey: ["cart"],
     queryFn: async () => {
       try {
         const res = await fetch("/api/cart", { credentials: "include" });
@@ -143,164 +144,290 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-green-50 to-blue-50 p-4">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-4xl font-bold text-gray-900 mb-8">Checkout</h1>
+    <div className="min-h-screen bg-slate-50 flex flex-col">
+      <SiteHeader />
+      
+      <main className="flex-1 py-8 sm:py-12 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h1 className="text-3xl sm:text-4xl font-black text-[hsl(var(--eco-secondary))] mb-8 flex items-center">
+            <span className="w-10 h-10 bg-[hsl(var(--eco-primary))] rounded-xl flex items-center justify-center mr-4 text-white shadow-lg">
+              🛒
+            </span>
+            Complete Your Order
+          </h1>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Delivery Info */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-2xl font-bold text-gray-900">Delivery Information</h2>
-                <Button
-                  onClick={() => setEditMode(!editMode)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded"
-                >
-                  {editMode ? "Done" : "Edit"}
-                </Button>
-              </div>
-
-              {editMode ? (
-                <div className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">First Name</label>
-                    <input
-                      type="text"
-                      value={userInfo.firstName || ""}
-                      onChange={(e) => setUserInfo({ ...userInfo, firstName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Last Name</label>
-                    <input
-                      type="text"
-                      value={userInfo.lastName || ""}
-                      onChange={(e) => setUserInfo({ ...userInfo, lastName: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Phone *</label>
-                    <input
-                      type="tel"
-                      value={userInfo.phone || ""}
-                      onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      required
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">Delivery Address *</label>
-                    <textarea
-                      value={userInfo.address || ""}
-                      onChange={(e) => setUserInfo({ ...userInfo, address: e.target.value })}
-                      rows={3}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg"
-                      required
-                    />
-                  </div>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            {/* Main Content */}
+            <div className="lg:col-span-2 space-y-8">
+              {/* Delivery Info */}
+              <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 p-6 sm:p-8 border border-slate-100 overflow-hidden relative">
+                <div className="absolute top-0 left-0 w-2 h-full bg-[hsl(var(--eco-primary))]"></div>
+                <div className="flex items-center justify-between mb-6">
+                  <h2 className="text-2xl font-black text-[hsl(var(--eco-secondary))] flex items-center">
+                    <MapPin className="w-6 h-6 mr-3 text-[hsl(var(--eco-primary))]" />
+                    Delivery Information
+                  </h2>
+                  <Button
+                    onClick={() => setEditMode(!editMode)}
+                    className="eco-button-outline px-6 h-10"
+                  >
+                    {editMode ? "✅ Done" : "✏️ Edit"}
+                  </Button>
                 </div>
-              ) : (
-                <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  <p className="text-gray-900 font-bold">{userInfo.firstName} {userInfo.lastName}</p>
-                  <p className="text-gray-600">📱 {userInfo.phone}</p>
-                  <p className="text-gray-600">📍 {userInfo.address}</p>
-                </div>
-              )}
-            </div>
 
-            {/* Cart Items Summary */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Items</h2>
-              <div className="space-y-3">
-                {cartItems.map((item: any) => (
-                  <div key={item.id} className="flex justify-between pb-3 border-b border-gray-200">
-                    <div>
-                      <p className="font-bold text-gray-900">{item.product?.name}</p>
-                      <p className="text-gray-600 text-sm">Qty: {item.quantity}</p>
+                {editMode ? (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="sm:col-span-1">
+                      <label className="block text-sm font-black text-[hsl(var(--eco-text-muted))] mb-2 uppercase tracking-wider">First Name</label>
+                      <input
+                        type="text"
+                        value={userInfo.firstName || ""}
+                        onChange={(e) => setUserInfo({ ...userInfo, firstName: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-[hsl(var(--eco-primary))] focus:ring-0 transition-all font-semibold"
+                        placeholder="e.g. Rahul"
+                      />
                     </div>
-                    <p className="font-bold text-gray-900">
-                      ₹{(item.product?.price || 0) * (item.quantity || 1)}
-                    </p>
+                    <div className="sm:col-span-1">
+                      <label className="block text-sm font-black text-[hsl(var(--eco-text-muted))] mb-2 uppercase tracking-wider">Last Name</label>
+                      <input
+                        type="text"
+                        value={userInfo.lastName || ""}
+                        onChange={(e) => setUserInfo({ ...userInfo, lastName: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-[hsl(var(--eco-primary))] focus:ring-0 transition-all font-semibold"
+                        placeholder="e.g. Kumar"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-black text-[hsl(var(--eco-text-muted))] mb-2 uppercase tracking-wider">Phone Number *</label>
+                      <input
+                        type="tel"
+                        value={userInfo.phone || ""}
+                        onChange={(e) => setUserInfo({ ...userInfo, phone: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-[hsl(var(--eco-primary))] focus:ring-0 transition-all font-semibold"
+                        placeholder="10-digit mobile number"
+                        required
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-black text-[hsl(var(--eco-text-muted))] mb-2 uppercase tracking-wider">Full Delivery Address *</label>
+                      <textarea
+                        value={userInfo.address || ""}
+                        onChange={(e) => setUserInfo({ ...userInfo, address: e.target.value })}
+                        rows={3}
+                        className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-xl focus:border-[hsl(var(--eco-primary))] focus:ring-0 transition-all font-semibold"
+                        placeholder="House No, Street, Landmark, City, Pincode"
+                        required
+                      />
+                    </div>
                   </div>
-                ))}
+                ) : (
+                  <div className="bg-slate-50 rounded-2xl p-6 space-y-4 border border-slate-100">
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-4 shadow-sm border border-slate-100">
+                        <User className="w-5 h-5 text-[hsl(var(--eco-primary))]" />
+                      </div>
+                      <p className="text-xl font-black text-[hsl(var(--eco-secondary))]">{userInfo.firstName || "Guest"} {userInfo.lastName || "User"}</p>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-4 shadow-sm border border-slate-100">
+                        <Phone className="w-5 h-5 text-blue-500" />
+                      </div>
+                      <p className="text-lg font-bold text-slate-700">{userInfo.phone || "No phone added"}</p>
+                    </div>
+                    <div className="flex items-start">
+                      <div className="w-10 h-10 bg-white rounded-lg flex items-center justify-center mr-4 shadow-sm border border-slate-100 flex-shrink-0">
+                        <MapPin className="w-5 h-5 text-red-500" />
+                      </div>
+                      <p className="text-lg font-bold text-slate-700 pt-1">{userInfo.address || "No address added"}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Cart Items Summary */}
+              <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 p-6 sm:p-8 border border-slate-100">
+                <h2 className="text-2xl font-black text-[hsl(var(--eco-secondary))] mb-6 flex items-center">
+                  <CreditCard className="w-6 h-6 mr-3 text-[hsl(var(--eco-primary))]" />
+                  Order Items
+                </h2>
+                <div className="space-y-4">
+                  {cartItems.map((item: any) => (
+                    <div key={item.id} className="flex justify-between items-center p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-[hsl(var(--eco-primary))] transition-all">
+                      <div className="flex items-center">
+                        <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center mr-4 shadow-sm border border-slate-100 text-2xl">
+                          🥛
+                        </div>
+                        <div>
+                          <p className="font-black text-[hsl(var(--eco-secondary))] text-lg">{item.product?.name}</p>
+                          <p className="text-[hsl(var(--eco-text-muted))] font-bold">Quantity: {item.quantity}</p>
+                        </div>
+                      </div>
+                      <p className="font-black text-[hsl(var(--eco-primary))] text-xl">
+                        ₹{(item.product?.price || 0) * (item.quantity || 1)}
+                      </p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Payment Method */}
+              <div className="bg-white rounded-3xl shadow-xl shadow-blue-900/5 p-6 sm:p-8 border border-slate-100">
+                <h2 className="text-2xl font-black text-[hsl(var(--eco-secondary))] mb-6 flex items-center">
+                  <Banknote className="w-6 h-6 mr-3 text-[hsl(var(--eco-primary))]" />
+                  Payment Method
+                </h2>
+                <div className="space-y-4">
+                  <label 
+                    className={`flex items-center p-6 border-3 rounded-2xl cursor-pointer transition-all hover:shadow-lg ${
+                      paymentMethod === "cash" 
+                        ? "border-[hsl(var(--eco-primary))] bg-green-50 shadow-md" 
+                        : "border-slate-100 bg-white"
+                    }`}
+                  >
+                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-4 ${
+                      paymentMethod === "cash" ? "border-[hsl(var(--eco-primary))] bg-[hsl(var(--eco-primary))]" : "border-slate-300"
+                    }`}>
+                      {paymentMethod === "cash" && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                    </div>
+                    <input
+                      type="radio"
+                      name="payment"
+                      value="cash"
+                      checked={paymentMethod === "cash"}
+                      onChange={(e) => setPaymentMethod(e.target.value)}
+                      className="hidden"
+                    />
+                    <div className="flex-1 flex items-center">
+                      <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center mr-4 shadow-sm border border-slate-100 text-3xl">
+                        <Banknote className="w-8 h-8 text-green-600" />
+                      </div>
+                      <div>
+                        <p className="font-black text-[hsl(var(--eco-secondary))] text-xl">Cash on Delivery</p>
+                        <p className="text-[hsl(var(--eco-text-muted))] font-bold">Pay safely when your order arrives</p>
+                      </div>
+                    </div>
+                  </label>
+
+                  <label 
+                    className={`flex flex-col p-6 border-3 rounded-2xl cursor-pointer transition-all hover:shadow-lg ${
+                      paymentMethod === "razorpay" 
+                        ? "border-[hsl(var(--eco-primary))] bg-blue-50 shadow-md" 
+                        : "border-slate-100 bg-white"
+                    }`}
+                  >
+                    <div className="flex items-center w-full mb-4">
+                      <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center mr-4 ${
+                        paymentMethod === "razorpay" ? "border-[hsl(var(--eco-primary))] bg-[hsl(var(--eco-primary))]" : "border-slate-300"
+                      }`}>
+                        {paymentMethod === "razorpay" && <div className="w-2.5 h-2.5 bg-white rounded-full"></div>}
+                      </div>
+                      <input
+                        type="radio"
+                        name="payment"
+                        value="razorpay"
+                        checked={paymentMethod === "razorpay"}
+                        onChange={(e) => setPaymentMethod(e.target.value)}
+                        className="hidden"
+                      />
+                      <div className="flex-1 flex items-center">
+                        <div className="w-14 h-14 bg-white rounded-xl flex items-center justify-center mr-4 shadow-sm border border-slate-100 text-3xl">
+                          <CreditCard className="w-8 h-8 text-blue-600" />
+                        </div>
+                        <div>
+                          <p className="font-black text-[hsl(var(--eco-secondary))] text-xl">Online Payment</p>
+                          <p className="text-[hsl(var(--eco-text-muted))] font-bold">Secure payment via Razorpay, UPI, Cards</p>
+                        </div>
+                      </div>
+                    </div>
+                    
+                    {paymentMethod === "razorpay" && (
+                      <div className="mt-4 p-6 bg-white rounded-xl border-2 border-blue-100 shadow-inner space-y-4 animate-in fade-in slide-in-from-top-4 duration-300">
+                        <div className="grid grid-cols-1 gap-4">
+                          <div>
+                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Card Number</label>
+                            <div className="relative">
+                              <input 
+                                type="text" 
+                                placeholder="XXXX XXXX XXXX XXXX" 
+                                className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-lg font-mono font-bold text-lg focus:border-blue-500 focus:ring-0 transition-all"
+                                maxLength={19}
+                              />
+                              <div className="absolute right-3 top-1/2 -translate-y-1/2 flex gap-1">
+                                <div className="w-8 h-5 bg-slate-200 rounded"></div>
+                                <div className="w-8 h-5 bg-slate-200 rounded"></div>
+                              </div>
+                            </div>
+                          </div>
+                          <div className="grid grid-cols-2 gap-4">
+                            <div>
+                              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Expiry</label>
+                              <input 
+                                type="text" 
+                                placeholder="MM/YY" 
+                                className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-lg font-mono font-bold text-lg focus:border-blue-500 focus:ring-0 transition-all"
+                                maxLength={5}
+                              />
+                            </div>
+                            <div>
+                              <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">CVV</label>
+                              <input 
+                                type="password" 
+                                placeholder="***" 
+                                className="w-full px-4 py-3 bg-slate-50 border-2 border-slate-100 rounded-lg font-mono font-bold text-lg focus:border-blue-500 focus:ring-0 transition-all"
+                                maxLength={3}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-[10px] text-blue-500 font-bold flex items-center justify-center gap-2">
+                          <span className="w-3 h-3 bg-blue-500 rounded-full flex items-center justify-center text-[8px] text-white">✓</span>
+                          Encrypted by Razorpay Secure
+                        </p>
+                      </div>
+                    )}
+                  </label>
+                </div>
               </div>
             </div>
 
-            {/* Payment Method */}
-            <div className="bg-white rounded-lg shadow p-6">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">Payment Method</h2>
-              <div className="space-y-3">
-                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer" style={{borderColor: paymentMethod === "cash" ? "#16a34a" : "#e5e7eb"}}>
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="cash"
-                    checked={paymentMethod === "cash"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-5 h-5"
-                  />
-                  <div className="ml-4">
-                    <p className="font-bold text-gray-900">Cash on Delivery</p>
-                    <p className="text-gray-600 text-sm">Pay when your order arrives</p>
+            {/* Order Summary Sidebar */}
+            <div className="lg:col-span-1">
+              <div className="bg-white rounded-3xl shadow-2xl shadow-blue-900/10 p-8 h-fit sticky top-24 border border-slate-100">
+                <h2 className="text-2xl font-black text-[hsl(var(--eco-secondary))] mb-6">Order Summary</h2>
+                <div className="space-y-4 border-b-2 border-slate-50 pb-6 mb-6">
+                  <div className="flex justify-between text-lg font-bold text-[hsl(var(--eco-text-muted))]">
+                    <span>Subtotal</span>
+                    <span className="text-[hsl(var(--eco-secondary))]">₹{total.toFixed(2)}</span>
                   </div>
-                </label>
-
-                <label className="flex items-center p-4 border-2 rounded-lg cursor-pointer" style={{borderColor: paymentMethod === "razorpay" ? "#16a34a" : "#e5e7eb"}}>
-                  <input
-                    type="radio"
-                    name="payment"
-                    value="razorpay"
-                    checked={paymentMethod === "razorpay"}
-                    onChange={(e) => setPaymentMethod(e.target.value)}
-                    className="w-5 h-5"
-                  />
-                  <div className="ml-4">
-                    <p className="font-bold text-gray-900">Online Payment (Razorpay)</p>
-                    <p className="text-gray-600 text-sm">Secure online payment with credit/debit card, UPI, or wallet</p>
+                  <div className="flex justify-between text-lg font-bold">
+                    <span className="text-[hsl(var(--eco-text-muted))]">Delivery Fee</span>
+                    <span className="text-[hsl(var(--eco-success))]">FREE</span>
                   </div>
-                </label>
+                </div>
+                <div className="flex justify-between text-2xl font-black text-[hsl(var(--eco-secondary))] mb-8">
+                  <span>Grand Total</span>
+                  <span className="text-[hsl(var(--eco-primary))]">₹{total.toFixed(2)}</span>
+                </div>
+                <Button
+                  onClick={handlePlaceOrder}
+                  disabled={isProcessing || editMode}
+                  className="w-full eco-button h-16 text-xl font-black shadow-lg hover:shadow-2xl transition-all"
+                >
+                  {isProcessing ? "🚀 Processing..." : "🚀 Place Order"}
+                </Button>
+                <div className="mt-6 p-4 bg-slate-50 rounded-xl border border-slate-100 text-center">
+                  <p className="text-[hsl(var(--eco-text-muted))] text-xs font-bold leading-relaxed">
+                    🔒 Secure 256-bit SSL encrypted checkout. 
+                    By placing an order, you agree to {settings.brandName}'s Terms.
+                  </p>
+                </div>
               </div>
             </div>
-          </div>
-
-          {/* Order Summary Sidebar */}
-          <div className="bg-white rounded-lg shadow p-6 h-fit sticky top-4">
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">Order Summary</h2>
-            <div className="space-y-3 border-b border-gray-200 pb-4 mb-4">
-              <div className="flex justify-between text-gray-600">
-                <span>Subtotal ({cartItems.length} items)</span>
-                <span>₹{total.toFixed(2)}</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Delivery</span>
-                <span className="text-green-600">FREE</span>
-              </div>
-              <div className="flex justify-between text-gray-600">
-                <span>Tax</span>
-                <span>₹0</span>
-              </div>
-            </div>
-            <div className="flex justify-between text-xl font-bold text-gray-900 mb-6">
-              <span>Total</span>
-              <span className="text-green-600">₹{total.toFixed(2)}</span>
-            </div>
-            <Button
-              onClick={handlePlaceOrder}
-              disabled={isProcessing || editMode}
-              className="w-full bg-green-600 hover:bg-green-700 text-white py-3 rounded-lg font-bold text-lg"
-            >
-              {isProcessing ? "Processing..." : "Place Order →"}
-            </Button>
-            <p className="text-gray-600 text-xs mt-4 text-center">
-              By placing order, you agree to our Terms & Conditions
-            </p>
           </div>
         </div>
-      </div>
+      </main>
+
+      <SiteFooter />
     </div>
   );
 }

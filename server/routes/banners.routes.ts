@@ -2,42 +2,9 @@ import { Router } from "express";
 import { db } from "../db";
 import { banners, homepageSections, users } from "@shared/schema";
 import { eq, asc, and, lte, gte, isNull, or } from "drizzle-orm";
-import { isAuthenticated } from "../replitAuth";
+import { requireAdminAccess } from "../middleware/auth";
 
 const router = Router();
-
-// Middleware to check if user is admin - checks both session.userRole and database, or admin session
-const isAdmin = async (req: any, res: any, next: any) => {
-  try {
-    // Check if admin session exists
-    if (req.session?.isAdminLoggedIn === true) {
-      return next();
-    }
-    
-    const userId = req.session?.userId;
-    if (!userId) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
-    // Check session first for userRole
-    if (req.session?.userRole === "admin") {
-      return next();
-    }
-    
-    // If not in session, check the database
-    const [user] = await db.select().from(users).where(eq(users.id, userId));
-    if (user?.role === "admin") {
-      // Update session for future requests
-      req.session.userRole = "admin";
-      return next();
-    }
-    
-    return res.status(403).json({ message: "Admin access required" });
-  } catch (error) {
-    console.error("Error checking admin status:", error);
-    return res.status(500).json({ message: "Error checking permissions" });
-  }
-};
 
 // Public: Get active banners for homepage (no auth required)
 router.get("/public", async (req, res) => {
@@ -69,7 +36,7 @@ router.get("/public", async (req, res) => {
 });
 
 // Admin: Get all banners (requires admin auth)
-router.get("/", isAdmin, async (req, res) => {
+router.get("/", requireAdminAccess, async (req, res) => {
   try {
     const allBanners = await db
       .select()
@@ -84,9 +51,9 @@ router.get("/", isAdmin, async (req, res) => {
 });
 
 // Admin: Create new banner (requires admin auth)
-router.post("/", isAdmin, async (req, res) => {
+router.post("/", requireAdminAccess, async (req, res) => {
   try {
-    const { title, subtitle, imageUrl, imageUrlTablet, imageUrlMobile, ctaText, ctaLink, badgeText, displayOrder, isActive, startDate, endDate } = req.body;
+    const { title, subtitle, imageUrl, imageUrlTablet, imageUrlMobile, ctaText, ctaLink, badgeText, displayOrder, isActive, showOverlay, startDate, endDate } = req.body;
     
 
     const [newBanner] = await db
@@ -102,6 +69,7 @@ router.post("/", isAdmin, async (req, res) => {
         badgeText,
         displayOrder: displayOrder || 0,
         isActive: isActive !== false,
+        showOverlay: showOverlay !== false,
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
       })
@@ -115,10 +83,10 @@ router.post("/", isAdmin, async (req, res) => {
 });
 
 // Admin: Update banner (requires admin auth)
-router.put("/:id", isAdmin, async (req, res) => {
+router.put("/:id", requireAdminAccess, async (req, res) => {
   try {
     const bannerId = parseInt(req.params.id);
-    const { title, subtitle, imageUrl, imageUrlTablet, imageUrlMobile, ctaText, ctaLink, badgeText, displayOrder, isActive, startDate, endDate } = req.body;
+    const { title, subtitle, imageUrl, imageUrlTablet, imageUrlMobile, ctaText, ctaLink, badgeText, displayOrder, isActive, showOverlay, startDate, endDate } = req.body;
     
     const [updatedBanner] = await db
       .update(banners)
@@ -133,6 +101,7 @@ router.put("/:id", isAdmin, async (req, res) => {
         badgeText,
         displayOrder,
         isActive,
+        showOverlay,
         startDate: startDate ? new Date(startDate) : null,
         endDate: endDate ? new Date(endDate) : null,
         updatedAt: new Date(),
@@ -152,7 +121,7 @@ router.put("/:id", isAdmin, async (req, res) => {
 });
 
 // Admin: Delete banner (requires admin auth)
-router.delete("/:id", isAdmin, async (req, res) => {
+router.delete("/:id", requireAdminAccess, async (req, res) => {
   try {
     const bannerId = parseInt(req.params.id);
     
@@ -189,7 +158,7 @@ router.get("/sections/public", async (req, res) => {
 });
 
 // Admin: Get all homepage sections (requires admin auth)
-router.get("/sections", isAdmin, async (req, res) => {
+router.get("/sections", requireAdminAccess, async (req, res) => {
   try {
     const allSections = await db
       .select()
@@ -204,7 +173,7 @@ router.get("/sections", isAdmin, async (req, res) => {
 });
 
 // Admin: Create/Update homepage section (requires admin auth)
-router.post("/sections", isAdmin, async (req, res) => {
+router.post("/sections", requireAdminAccess, async (req, res) => {
   try {
     const { sectionType, title, subtitle, content, displayOrder, isActive } = req.body;
     

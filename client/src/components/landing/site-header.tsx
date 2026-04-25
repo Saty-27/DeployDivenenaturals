@@ -4,6 +4,7 @@ import { Search, ShoppingCart, User, Menu, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
 import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 export default function SiteHeader() {
@@ -11,6 +12,7 @@ export default function SiteHeader() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const { isAuthenticated, isLoading } = useAuth();
+  const { settings } = useSiteSettings();
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -37,22 +39,24 @@ export default function SiteHeader() {
     { href: "/shop", label: "Shop" },
     { href: "/subscription", label: "Subscription" },
     { href: "/orders", label: "My Orders" },
+    { href: "/about", label: "About Us" },
+    { href: "/contact", label: "Contact" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-white shadow-sm">
+    <header className="sticky top-0 z-50 bg-white shadow-sm transition-all duration-300">
       <div className="max-w-7xl mx-auto">
-        <div className="flex items-center justify-between h-16 md:h-20 px-4 lg:px-8">
-          <Link href="/" className="flex items-center gap-3">
-            <div className="w-10 h-10 md:w-12 md:h-12 bg-white rounded-full flex items-center justify-center shadow-md overflow-hidden p-1 border border-gray-100">
+        <div className="flex items-center justify-between h-28 md:h-36 px-4 lg:px-8">
+          <Link href="/" className="flex items-center gap-4">
+            <div className="w-20 h-20 md:w-28 md:h-28 bg-white rounded-full flex items-center justify-center shadow-lg overflow-hidden p-1 border-2 border-green-50 transition-transform hover:scale-105">
               <img 
-                src={logoImage} 
-                alt="Divine Naturals" 
+                src={settings.logoUrl || logoImage} 
+                alt={settings.brandName} 
                 className="w-full h-full object-contain"
               />
             </div>
             <div className="hidden sm:block">
-              <h1 className="text-lg md:text-xl font-bold text-gray-900 leading-tight tracking-tight">Divine Naturals</h1>
+              <h1 className="text-lg md:text-xl font-bold text-gray-900 leading-tight tracking-tight">{settings.brandName}</h1>
               <p className="text-[10px] md:text-xs text-green-600 font-medium -mt-0.5">Pure. Fresh. Daily.</p>
             </div>
           </Link>

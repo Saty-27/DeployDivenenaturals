@@ -7,15 +7,15 @@ export function setupContactSubmissionsRoutes(app: Express) {
   // Public: Submit contact form
   app.post("/api/contact-submissions", async (req: any, res) => {
     try {
-      const { name, email, message } = req.body;
+      const { name, email, phone, message } = req.body;
       
       if (!name || !email || !message) {
-        return res.status(400).json({ message: "All fields required" });
+        return res.status(400).json({ message: "Name, email and message are required" });
       }
 
       const [submission] = await db
         .insert(contactSubmissions)
-        .values({ name, email, message, status: "new" })
+        .values({ name, email, phone, message, status: "new" })
         .returning();
       
       res.status(201).json(submission);

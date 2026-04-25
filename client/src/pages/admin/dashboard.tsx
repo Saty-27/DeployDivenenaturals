@@ -52,10 +52,17 @@ import {
   Eye,
   CheckCircle,
   FileText,
-  User
+  User,
+  Building2,
+  ClipboardList,
+  Wrench,
+  Bike,
+  Hourglass
 } from "lucide-react";
 import AdminLayout from "@/components/layout/admin-layout";
 import { useLocation } from "wouter";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 import { CalendarWidget } from "@/components/ui/calendar-widget";
 import { RevenueChart, OrdersChart, ProductDistributionChart, DeliveryPerformanceChart } from "@/components/charts/sales-charts";
 import { DataTable } from "@/components/ui/data-table";
@@ -64,6 +71,7 @@ import { RecentOrdersTable } from "@/components/dashboard/recent-orders-table";
 
 // Today's Requirements Panel Component
 function TodaysRequirementsPanel() {
+  const { settings } = useSiteSettings();
   interface Requirement {
     productId: number;
     productName: string;
@@ -93,7 +101,16 @@ function TodaysRequirementsPanel() {
         <div className="p-4 border rounded-lg bg-blue-50">
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-bold text-blue-800">🥛 Total Milk Required Today</p>
+              <p className="font-bold text-blue-800 flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-white flex items-center justify-center p-1 shadow-sm">
+                  <img 
+                    src={settings.logoUrl || logoImage} 
+                    alt={settings.brandName} 
+                    className="w-full h-full object-contain"
+                  />
+                </div>
+                Total {settings.brandName} Required Today
+              </p>
               <p className="text-sm text-blue-600">All active subscriptions</p>
             </div>
             <div className="text-right">
@@ -104,7 +121,12 @@ function TodaysRequirementsPanel() {
         <div className="p-4 border rounded-lg bg-green-50">
           <div className="flex justify-between items-center">
             <div>
-              <p className="font-bold text-green-800">📦 Total Deliveries Today</p>
+              <p className="font-bold text-green-800 flex items-center gap-2">
+                <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center">
+                  <Package className="w-5 h-5 text-green-600" />
+                </div>
+                Total Deliveries Today
+              </p>
               <p className="text-sm text-green-600">Customer subscriptions to fulfill</p>
             </div>
             <div className="text-right">
@@ -137,7 +159,9 @@ function TodaysRequirementsPanel() {
                   <div key={idx} className="flex justify-between items-center text-sm">
                     <div>
                       <p className="font-semibold text-gray-700">{cust.customerName}</p>
-                      <p className="text-xs text-gray-500">🕐 {cust.deliveryTime}</p>
+                      <p className="text-xs text-gray-500 flex items-center gap-1 mt-0.5">
+                        <Clock className="w-3 h-3 text-emerald-500" /> {cust.deliveryTime}
+                      </p>
                     </div>
                     <Badge className="bg-emerald-100 text-emerald-800">{cust.liters}L</Badge>
                   </div>
@@ -159,6 +183,7 @@ function TodaysRequirementsPanel() {
 export default function AdminDashboard() {
   const [location] = useLocation();
   const { toast } = useToast();
+  const { settings } = useSiteSettings();
   const [searchTerm, setSearchTerm] = useState("");
   
   // Get current date and time
@@ -343,8 +368,9 @@ export default function AdminDashboard() {
           <div className="welcome-header p-3 sm:p-4 lg:p-6 mb-4 lg:mb-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div className="min-w-0 flex-1">
-                <h1 className="dairy-title text-xl sm:text-2xl mb-2 truncate">
-                  Welcome Back, Admin 👋
+                <h1 className="dairy-title text-xl sm:text-2xl mb-2 truncate flex items-center gap-2">
+                  Welcome Back, Admin 
+                  <span className="inline-block animate-bounce">✨</span>
                 </h1>
                 <div className="dairy-muted flex flex-col sm:flex-row sm:items-center gap-2 text-sm">
                   <div className="flex items-center gap-2">
@@ -382,6 +408,7 @@ export default function AdminDashboard() {
 // Enhanced Dashboard Overview Content with Comprehensive Analytics
 function DashboardOverviewContent({ totalOrders, pendingOrders, totalRevenue, weeklyRevenue, monthlyRevenue, totalMilkUnits, newCustomersThisWeek, vendors, deliveryPartners, customers, orders, products }: any) {
   const [showTodayCustomers, setShowTodayCustomers] = useState(false);
+  const { settings } = useSiteSettings();
   
   const totalVendors = Array.isArray(vendors) ? vendors.length : 0;
   const totalDeliveryPartners = Array.isArray(deliveryPartners) ? deliveryPartners.length : 0;
@@ -420,8 +447,14 @@ function DashboardOverviewContent({ totalOrders, pendingOrders, totalRevenue, we
         <CardHeader className="p-4 sm:p-6">
           <CardTitle className="text-[hsl(var(--eco-secondary))] flex items-center justify-between text-lg sm:text-xl font-black">
             <span className="flex items-center">
-              <Milk className="w-5 h-5 sm:w-6 sm:h-6 mr-3 eco-icon-primary" />
-              🥛 Today's Milk Requirements
+              <div className="w-10 h-10 rounded-xl bg-white flex items-center justify-center mr-3 shadow-inner p-1">
+                <img 
+                  src={settings.logoUrl || logoImage} 
+                  alt={settings.brandName} 
+                  className="w-full h-full object-contain"
+                />
+              </div>
+              Today's {settings.brandName} Requirements
             </span>
             <span className={`text-sm transition-transform ${showTodayCustomers ? 'rotate-180' : ''}`}>▼</span>
           </CardTitle>
@@ -449,7 +482,9 @@ function DashboardOverviewContent({ totalOrders, pendingOrders, totalRevenue, we
                       Object.entries(req.byArea).map(([area, customers]: [string, any]) => (
                         <div key={area} className="border-l-4 border-emerald-400 pl-3 bg-emerald-50 p-3 rounded">
                           <div className="flex items-center justify-between mb-2">
-                            <p className="font-bold text-emerald-800">📦 {area}</p>
+                            <p className="font-bold text-emerald-800 flex items-center gap-2">
+                              <MapPin className="w-4 h-4 text-emerald-600" /> {area}
+                            </p>
                             <Badge className="bg-emerald-200 text-emerald-900">{customers.length} deliveries</Badge>
                           </div>
                           <div className="space-y-2">
@@ -459,10 +494,20 @@ function DashboardOverviewContent({ totalOrders, pendingOrders, totalRevenue, we
                                   <span className="font-semibold text-gray-800">{cust.customerName}</span>
                                   <Badge className="bg-blue-100 text-blue-800 text-xs">{cust.liters}L @ {cust.deliveryTime}</Badge>
                                 </div>
-                                <p className="text-gray-600 text-xs">📍 {cust.address}</p>
-                                {cust.landmark && <p className="text-gray-500 text-xs">🏷️ {cust.landmark}</p>}
-                                <p className="text-gray-500 text-xs">{cust.city}, {cust.state} {cust.pincode}</p>
-                                {cust.phone && <p className="text-gray-500 text-xs">📱 {cust.phone}</p>}
+                                <p className="text-gray-600 text-xs flex items-center gap-1">
+                                  <MapPin className="w-3 h-3 text-emerald-400" /> {cust.address}
+                                </p>
+                                {cust.landmark && (
+                                  <p className="text-gray-500 text-xs flex items-center gap-1">
+                                    <Tag className="w-3 h-3 text-emerald-300" /> {cust.landmark}
+                                  </p>
+                                )}
+                                <p className="text-gray-500 text-xs ml-4">{cust.city}, {cust.state} {cust.pincode}</p>
+                                {cust.phone && (
+                                  <p className="text-gray-500 text-xs flex items-center gap-1">
+                                    <Phone className="w-3 h-3 text-emerald-300" /> {cust.phone}
+                                  </p>
+                                )}
                               </div>
                             ))}
                           </div>
@@ -755,7 +800,12 @@ function VendorPanelContent({ vendors }: any) {
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-[hsl(var(--eco-secondary))]">🏢 Vendor Hierarchy Management</h2>
+            <h2 className="text-2xl font-bold text-[hsl(var(--eco-secondary))] flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-emerald-100">
+                <Building2 className="w-6 h-6 text-emerald-600" />
+              </div>
+              Vendor Hierarchy Management
+            </h2>
             <p className="text-[hsl(var(--eco-text-muted))] font-semibold">Manage Head Vendors, Vendors & Sub-Vendors</p>
           </div>
           <div className="flex gap-2">
@@ -810,11 +860,21 @@ function VendorPanelContent({ vendors }: any) {
       {/* Management Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5 eco-tabs">
-          <TabsTrigger value="hierarchy" className="eco-tab font-bold">🏢 Hierarchy</TabsTrigger>
-          <TabsTrigger value="requirements" className="eco-tab font-bold">📋 Requirements</TabsTrigger>
-          <TabsTrigger value="finance" className="eco-tab font-bold">💰 Finance</TabsTrigger>
-          <TabsTrigger value="performance" className="eco-tab font-bold">📊 Performance</TabsTrigger>
-          <TabsTrigger value="approvals" className="eco-tab font-bold">✅ Approvals</TabsTrigger>
+          <TabsTrigger value="hierarchy" className="eco-tab font-bold flex items-center gap-2">
+            <Building2 className="w-4 h-4" /> Hierarchy
+          </TabsTrigger>
+          <TabsTrigger value="requirements" className="eco-tab font-bold flex items-center gap-1">
+            <ClipboardList className="w-4 h-4" /> Requirements
+          </TabsTrigger>
+          <TabsTrigger value="finance" className="eco-tab font-bold flex items-center gap-1">
+            <DollarSign className="w-4 h-4" /> Finance
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="eco-tab font-bold flex items-center gap-1">
+            <BarChart3 className="w-4 h-4" /> Performance
+          </TabsTrigger>
+          <TabsTrigger value="approvals" className="eco-tab font-bold flex items-center gap-1">
+            <CheckCircle className="w-4 h-4" /> Approvals
+          </TabsTrigger>
         </TabsList>
 
         {/* Hierarchy Management Tab */}
@@ -822,8 +882,10 @@ function VendorPanelContent({ vendors }: any) {
           <Card className="eco-card">
             <CardHeader>
               <CardTitle className="text-[hsl(var(--eco-secondary))] flex items-center text-xl font-black">
-                <Store className="w-6 h-6 mr-3 eco-icon-primary" />
-                🏢 Vendor Hierarchy Structure
+                <div className="w-8 h-8 rounded-lg bg-emerald-100 flex items-center justify-center mr-3">
+                  <Building2 className="w-5 h-5 text-emerald-600" />
+                </div>
+                Vendor Hierarchy Structure
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -959,8 +1021,10 @@ function VendorPanelContent({ vendors }: any) {
           <Card className="eco-card">
             <CardHeader>
               <CardTitle className="text-[hsl(var(--eco-secondary))] flex items-center text-xl font-black">
-                <Calendar className="w-6 h-6 mr-3 eco-icon-primary" />
-                📋 Today's Milk Subscription Requirements
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                  <ClipboardList className="w-5 h-5 text-blue-600" />
+                </div>
+                Today's Milk Subscription Requirements
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -974,8 +1038,10 @@ function VendorPanelContent({ vendors }: any) {
           <Card className="eco-card">
             <CardHeader>
               <CardTitle className="text-[hsl(var(--eco-secondary))] flex items-center text-xl font-black">
-                <DollarSign className="w-6 h-6 mr-3 eco-icon-primary" />
-                💰 Financial Analytics & Revenue
+                <div className="w-8 h-8 rounded-lg bg-green-100 flex items-center justify-center mr-3">
+                  <DollarSign className="w-5 h-5 text-green-600" />
+                </div>
+                Financial Analytics & Revenue
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1088,8 +1154,10 @@ function VendorPanelContent({ vendors }: any) {
           <Card className="eco-card">
             <CardHeader>
               <CardTitle className="text-[hsl(var(--eco-secondary))] flex items-center text-xl font-black">
-                <CheckCircle className="w-6 h-6 mr-3 eco-icon-primary" />
-                ✅ Vendor Approvals & Submissions
+                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center mr-3">
+                  <CheckCircle className="w-5 h-5 text-orange-600" />
+                </div>
+                Vendor Approvals & Submissions
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1273,7 +1341,12 @@ function DeliveryPartnersContent({ deliveryPartners, onAction }: any) {
       <div className="mb-6">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
           <div>
-            <h2 className="text-2xl font-bold text-[hsl(var(--eco-secondary))]">🚚 Delivery Partner Management</h2>
+            <h2 className="text-2xl font-bold text-[hsl(var(--eco-secondary))] flex items-center gap-2">
+              <div className="p-1.5 rounded-lg bg-emerald-100">
+                <Truck className="w-6 h-6 text-emerald-600" />
+              </div>
+              Delivery Partner Management
+            </h2>
             <p className="text-[hsl(var(--eco-text-muted))] font-semibold">KYC Verification, Assignment & Performance Tracking</p>
           </div>
           <div className="flex gap-2">
@@ -1340,10 +1413,18 @@ function DeliveryPartnersContent({ deliveryPartners, onAction }: any) {
       {/* Management Tabs */}
       <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-4 eco-tabs">
-          <TabsTrigger value="partners" className="eco-tab font-bold">👥 Partners</TabsTrigger>
-          <TabsTrigger value="kyc" className="eco-tab font-bold">📄 KYC Verification</TabsTrigger>
-          <TabsTrigger value="assignments" className="eco-tab font-bold">📍 Assignments</TabsTrigger>
-          <TabsTrigger value="performance" className="eco-tab font-bold">📊 Performance</TabsTrigger>
+          <TabsTrigger value="partners" className="eco-tab font-bold flex items-center gap-2">
+            <Users className="w-4 h-4" /> Partners
+          </TabsTrigger>
+          <TabsTrigger value="kyc" className="eco-tab font-bold flex items-center gap-1">
+            <FileText className="w-4 h-4" /> KYC Verification
+          </TabsTrigger>
+          <TabsTrigger value="assignments" className="eco-tab font-bold flex items-center gap-1">
+            <MapPin className="w-4 h-4" /> Assignments
+          </TabsTrigger>
+          <TabsTrigger value="performance" className="eco-tab font-bold flex items-center gap-1">
+            <BarChart3 className="w-4 h-4" /> Performance
+          </TabsTrigger>
         </TabsList>
 
         {/* Partners Overview Tab */}
@@ -1351,8 +1432,10 @@ function DeliveryPartnersContent({ deliveryPartners, onAction }: any) {
           <Card className="eco-card">
             <CardHeader>
               <CardTitle className="text-[hsl(var(--eco-secondary))] flex items-center text-xl font-black">
-                <Users className="w-6 h-6 mr-3 eco-icon-primary" />
-                👥 Active Delivery Partners
+                <div className="w-8 h-8 rounded-lg bg-blue-100 flex items-center justify-center mr-3">
+                  <Users className="w-5 h-5 text-blue-600" />
+                </div>
+                Active Delivery Partners
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -1399,7 +1482,9 @@ function DeliveryPartnersContent({ deliveryPartners, onAction }: any) {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <Badge className="bg-green-500 text-white">✅ Verified</Badge>
+                        <Badge className="bg-green-500 text-white flex items-center gap-1">
+                          <CheckCircle className="w-3 h-3" /> Verified
+                        </Badge>
                         <div className="text-xs text-green-600">Aadhaar + PAN</div>
                       </div>
                     </TableCell>
@@ -1449,7 +1534,9 @@ function DeliveryPartnersContent({ deliveryPartners, onAction }: any) {
                     </TableCell>
                     <TableCell>
                       <div className="space-y-1">
-                        <Badge className="bg-orange-500 text-white">⏳ Pending</Badge>
+                        <Badge className="bg-orange-500 text-white flex items-center gap-1">
+                          <Hourglass className="w-3 h-3 text-white" /> Pending
+                        </Badge>
                         <div className="text-xs text-orange-600">Aadhaar only</div>
                       </div>
                     </TableCell>
@@ -1480,15 +1567,19 @@ function DeliveryPartnersContent({ deliveryPartners, onAction }: any) {
           <Card className="eco-card">
             <CardHeader>
               <CardTitle className="text-[hsl(var(--eco-secondary))] flex items-center text-xl font-black">
-                <FileText className="w-6 h-6 mr-3 eco-icon-primary" />
-                📄 KYC Document Verification
+                <div className="w-8 h-8 rounded-lg bg-orange-100 flex items-center justify-center mr-3">
+                  <FileText className="w-5 h-5 text-orange-600" />
+                </div>
+                KYC Document Verification
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-6">
                 {/* Pending KYC Verification */}
                 <div className="p-6 border-2 border-orange-200 rounded-xl bg-gradient-to-r from-orange-50 to-red-50">
-                  <h3 className="text-lg font-bold text-orange-800 mb-4">⚠️ Pending KYC Verifications (5)</h3>
+                  <h3 className="text-lg font-bold text-orange-800 mb-4 flex items-center gap-2">
+                    <Hourglass className="w-5 h-5" /> Pending KYC Verifications (5)
+                  </h3>
                   
                   <div className="space-y-4">
                     <div className="p-4 bg-white rounded-lg border border-orange-200">

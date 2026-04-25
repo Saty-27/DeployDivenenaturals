@@ -1,3 +1,4 @@
+import "dotenv/config";
 import express, { type Request, Response, NextFunction } from "express";
 import fileUpload from "express-fileupload";
 import cron from "node-cron";
@@ -15,8 +16,11 @@ app.use(express.json({ limit: '50mb' }));
 app.use(express.urlencoded({ extended: false, limit: '50mb' }));
 app.use(fileUpload());
 
-// Serve static files from public folder (for banners, etc.)
+// Serve static files from public folder
 app.use('/banners', express.static(path.join(process.cwd(), 'public', 'banners')));
+app.use('/products', express.static(path.join(process.cwd(), 'public', 'products')));
+app.use('/icons', express.static(path.join(process.cwd(), 'public', 'icons')));
+
 
 app.use((req, res, next) => {
   const start = Date.now();
@@ -101,7 +105,6 @@ app.use((req, res, next) => {
   server.listen({
     port,
     host: "0.0.0.0",
-    reusePort: true,
   }, () => {
     log(`serving on port ${port}`);
   });

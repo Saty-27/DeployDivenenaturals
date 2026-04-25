@@ -1732,6 +1732,121 @@ Dashboard Statistics:
 - New Customers = COUNT(customers WHERE createdAt >= 7 days ago)
 ```
 
+
+---
+
+## VPS DEPLOYMENT GUIDE
+
+This guide provides step-by-step instructions for deploying the Divine Naturals platform on a Linux VPS (Ubuntu/Debian).
+
+### 1. Prerequisites
+- A Linux VPS (Ubuntu 22.04+ recommended)
+- Domain name pointed to your VPS IP
+- root or sudo access
+
+### 2. Server Environment Setup
+Connect to your VPS via SSH and run:
+```bash
+# Update system
+sudo apt update && sudo apt upgrade -y
+
+# Install Node.js (using NVM)
+curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash
+source ~/.bashrc
+nvm install 20
+nvm use 20
+
+# Install PostgreSQL
+sudo apt install postgresql postgresql-contrib -y
+
+# Install PM2 (Process Manager)
+npm install -g pm2
+```
+
+### 3. Database Configuration
+```bash
+# Switch to postgres user
+sudo -i -u postgres
+
+# Create database and user
+psql
+CREATE DATABASE divine_naturals;
+CREATE USER divine_admin WITH PASSWORD 'your_secure_password';
+GRANT ALL PRIVILEGES ON DATABASE divine_naturals TO divine_admin;
+\q
+exit
+```
+
+### 4. Application Deployment
+```bash
+# Clone the repository
+git clone <your-repo-link> divine-naturals
+cd divine-naturals
+
+# Install dependencies
+npm install
+
+# Create environment file
+nano .env
+```
+Add the following to `.env`:
+```env
+DATABASE_URL=postgresql://divine_admin:your_secure_password@localhost:5432/divine_naturals
+PORT=5000
+NODE_ENV=production
+ADMIN_USERNAME=DivineNaturalsMDKauldeepRao
+ADMIN_PASSWORD=DivineNaturals@2025
+```
+
+### 5. Build and Start
+```bash
+# Build the application
+npm run build
+
+# Push schema to database
+npm run db:push
+
+# Start with PM2
+pm2 start dist/index.js --name "divine-naturals"
+pm2 save
+pm2 startup
+```
+
+### 6. Nginx Reverse Proxy & SSL
+```bash
+# Install Nginx
+sudo apt install nginx -y
+
+# Configure Nginx
+sudo nano /etc/nginx/sites-available/divine-naturals
+```
+Paste this configuration:
+```nginx
+server {
+    listen 80;
+    server_name yourdomain.com; # Change to your domain
+
+    location / {
+        proxy_pass http://localhost:5000;
+        proxy_http_version 1.1;
+        proxy_set_header Upgrade $http_upgrade;
+        proxy_set_header Connection 'upgrade';
+        proxy_set_header Host $host;
+        proxy_cache_bypass $http_upgrade;
+    }
+}
+```
+Enable the site and install SSL:
+```bash
+sudo ln -s /etc/nginx/sites-available/divine-naturals /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl restart nginx
+
+# SSL with Certbot
+sudo apt install certbot python3-certbot-nginx -y
+sudo certbot --nginx -d yourdomain.com
+```
+
 ---
 
 ## SUMMARY

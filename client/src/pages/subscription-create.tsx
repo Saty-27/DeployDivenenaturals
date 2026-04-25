@@ -4,6 +4,8 @@ import { useLocation } from "wouter";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { useToast } from "@/hooks/use-toast";
+import { useSiteSettings } from "@/hooks/useSiteSettings";
+import logoImage from "@assets/WhatsApp Image 2025-08-07 at 16.06.46_1755865958874.jpg";
 
 interface Product {
   id: number;
@@ -14,6 +16,7 @@ interface Product {
 
 export default function SubscriptionCreatePage() {
   const { user, isLoading: authLoading } = useAuth() as any;
+  const { settings } = useSiteSettings();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -104,7 +107,16 @@ export default function SubscriptionCreatePage() {
         </div>
 
         <div className="bg-white rounded-2xl shadow-lg p-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">🥛 Create Milk Subscription</h1>
+          <div className="flex items-center gap-4 mb-6">
+            <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-lg p-1 border border-green-50">
+              <img 
+                src={settings.logoUrl || logoImage} 
+                alt={settings.brandName} 
+                className="w-full h-full object-contain"
+              />
+            </div>
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Create {settings.brandName} Subscription</h1>
+          </div>
           <p className="text-gray-600 mb-6">Step {step} of 5</p>
 
           {/* Step 1: Choose Product */}

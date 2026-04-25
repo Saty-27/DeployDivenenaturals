@@ -2,31 +2,13 @@ import { Router } from "express";
 import { db } from "../db";
 import { milkSubscriptions, subscriptionDeliveries, users, products } from "@shared/schema";
 import { eq } from "drizzle-orm";
+import { requireAdminAccess } from "../middleware/auth";
 
 const router = Router();
 
-// Helper function to check admin session
-async function checkAdminAuth(req: any, res: any): Promise<boolean> {
-  if (req.session?.isAdminLoggedIn) {
-    return true;
-  }
-  const userId = req.session?.userId || req.user?.claims?.sub;
-  if (!userId) {
-    res.status(401).json({ message: "Unauthorized" });
-    return false;
-  }
-  const user = await db.query.users.findFirst({ where: eq(users.id, userId) });
-  if (user?.role !== "admin") {
-    res.status(403).json({ message: "Admin access required" });
-    return false;
-  }
-  return true;
-}
-
 // Admin: Get all subscriptions
-router.get("/", async (req: any, res) => {
+router.get("/", requireAdminAccess, async (req: any, res) => {
   try {
-    if (!(await checkAdminAuth(req, res))) return;
 
     const allSubs = await db.select().from(milkSubscriptions);
     
@@ -50,9 +32,8 @@ router.get("/", async (req: any, res) => {
 });
 
 // Admin: Get expected daily milk requirement
-router.get("/today/requirement", async (req: any, res) => {
+router.get("/today/requirement", requireAdminAccess, async (req: any, res) => {
   try {
-    if (!(await checkAdminAuth(req, res))) return;
 
     const today = new Date().toISOString().split("T")[0];
     const deliveries = await db
@@ -75,9 +56,8 @@ router.get("/today/requirement", async (req: any, res) => {
 });
 
 // Admin: Pause/Resume subscription
-router.patch("/:id/status", async (req: any, res) => {
+router.patch("/:id/status", requireAdminAccess, async (req: any, res) => {
   try {
-    if (!(await checkAdminAuth(req, res))) return;
 
     const subId = parseInt(req.params.id);
     const { status } = req.body;
@@ -100,9 +80,8 @@ router.patch("/:id/status", async (req: any, res) => {
 });
 
 // Admin: Create subscription for a customer
-router.post("/", async (req: any, res) => {
+router.post("/", requireAdminAccess, async (req: any, res) => {
   try {
-    if (!(await checkAdminAuth(req, res))) return;
 
     const { userId, productId, quantity, frequency, deliveryTime, startDate } = req.body;
     
@@ -141,9 +120,8 @@ router.post("/", async (req: any, res) => {
 });
 
 // Admin: Delete subscription
-router.delete("/:id", async (req: any, res) => {
+router.delete("/:id", requireAdminAccess, async (req: any, res) => {
   try {
-    if (!(await checkAdminAuth(req, res))) return;
 
     const subId = parseInt(req.params.id);
     const deleted = await db.delete(milkSubscriptions).where(eq(milkSubscriptions.id, subId)).returning();

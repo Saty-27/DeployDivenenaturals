@@ -1,7 +1,18 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
-import { Package, Plus, Trash2, Edit, X } from "lucide-react";
+import { Package, Plus, Trash2, Edit, X, AlertTriangle, Sparkles } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
+import AdminLayout from "@/components/layout/admin-layout";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 export default function ProductsAdmin() {
   const [showForm, setShowForm] = useState(false);
@@ -9,12 +20,17 @@ export default function ProductsAdmin() {
   const [formData, setFormData] = useState({
     name: "",
     category: "",
+    type: "DAIRY",
     price: "",
     stock: "",
     description: "",
-    image: "",
+    imageUrl: "",
+    unit: "L",
+    redirectUrl: "",
     active: true,
   });
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [itemToDelete, setItemToDelete] = useState<number | null>(null);
   const queryClient = useQueryClient();
   const { toast } = useToast();
 
@@ -36,7 +52,7 @@ export default function ProductsAdmin() {
 
   const addProductMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await fetch("/api/products", {
+      const res = await fetch("/api/admin/products", {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -60,7 +76,7 @@ export default function ProductsAdmin() {
 
   const updateProductMutation = useMutation({
     mutationFn: async (data: any) => {
-      const res = await fetch(`/api/products/${editingId}`, {
+      const res = await fetch(`/api/admin/products/${editingId}`, {
         method: "PUT",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
@@ -84,7 +100,7 @@ export default function ProductsAdmin() {
 
   const deleteProductMutation = useMutation({
     mutationFn: async (id: number) => {
-      const res = await fetch(`/api/products/${id}`, {
+      const res = await fetch(`/api/admin/products/${id}`, {
         method: "DELETE",
         credentials: "include",
       });
@@ -107,10 +123,13 @@ export default function ProductsAdmin() {
     setFormData({
       name: "",
       category: "",
+      type: "DAIRY",
       price: "",
       stock: "",
       description: "",
-      image: "",
+      imageUrl: "",
+      unit: "L",
+      redirectUrl: "",
       active: true,
     });
     setEditingId(null);
@@ -121,18 +140,50 @@ export default function ProductsAdmin() {
     setFormData({
       name: product.name || "",
       category: product.category || "",
+      type: product.type || "DAIRY",
       price: product.price?.toString() || "",
       stock: product.stock?.toString() || "",
       description: product.description || "",
-      image: product.image || "",
-      active: product.active !== false,
+      imageUrl: product.imageUrl || "",
+      unit: product.unit || "L",
+      redirectUrl: product.redirectUrl || "",
+      active: product.isActive,
     });
     setEditingId(product.id);
     setShowForm(true);
   };
 
+  const handleGenerateAIImage = async () => {
+    if (!formData.name) {
+      toast({ title: "⚠️ Product name required", description: "Please enter a product name first to generate an image.", variant: "destructive" });
+      return;
+    }
+
+    try {
+      toast({ title: "✨ Generating Image...", description: "AI is creating a premium product image for you." });
+      
+      const res = await fetch("/api/admin/generate-ai-image", {
+        method: "POST",
+        credentials: "include",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          prompt: `Professional high-end studio photography of ${formData.name}. ${formData.description || ''}. Pure, clean, organic dairy product aesthetic, soft lighting, 4k, hyper-realistic.`,
+          productName: formData.name
+        }),
+      });
+
+      if (!res.ok) throw new Error("Generation failed");
+      
+      const data = await res.json();
+      setFormData((prev) => ({ ...prev, imageUrl: data.url }));
+      toast({ title: "✅ AI Image Generated!", description: "The image has been added to your product." });
+    } catch (err) {
+      toast({ title: "❌ Generation failed", description: "Please try again later.", variant: "destructive" });
+    }
+  };
+
   const handleSubmit = () => {
-    if (!formData.name || !formData.category || !formData.price || formData.stock === "") {
+    if (!formData.name || !formData.category || !formData.price || formData.stock === "" || !formData.unit) {
       toast({ title: "⚠️ Please fill all required fields", variant: "destructive" });
       return;
     }
@@ -140,11 +191,14 @@ export default function ProductsAdmin() {
     const payload = {
       name: formData.name,
       category: formData.category,
+      type: formData.type,
       price: parseFloat(formData.price),
       stock: parseInt(formData.stock),
       description: formData.description,
-      image: formData.image,
-      active: formData.active,
+      imageUrl: formData.imageUrl,
+      unit: formData.unit,
+      redirectUrl: formData.redirectUrl,
+      isActive: formData.active,
     };
 
     if (editingId) {
@@ -157,7 +211,7 @@ export default function ProductsAdmin() {
   const isLoading = addProductMutation.isPending || updateProductMutation.isPending || deleteProductMutation.isPending;
 
   return (
-    <div>
+    <AdminLayout>
       {/* Add/Edit Product Form */}
       {showForm && (
         <div style={{ background: "white", borderRadius: "0.5rem", padding: "1.5rem", marginBottom: "1.5rem", boxShadow: "0 1px 3px rgba(0,0,0,0.1)", border: "2px solid #16a34a" }}>
@@ -231,15 +285,162 @@ export default function ProductsAdmin() {
 
             <div>
               <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "600", marginBottom: "0.5rem", color: "#374151" }}>
-                Image URL
+                Product Type *
+              </label>
+              <select
+                value={formData.type}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value, unit: e.target.value === "MILK" ? "L" : "pack" })}
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.5rem", fontSize: "0.875rem", boxSizing: "border-box" }}
+              >
+                <option value="MILK">🥛 Milk</option>
+                <option value="DAIRY">🧀 Dairy</option>
+                <option value="OIL">🫗 Oil</option>
+              </select>
+            </div>
+
+            <div>
+              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "600", marginBottom: "0.5rem", color: "#374151" }}>
+                Unit *
+              </label>
+              <select
+                value={formData.unit}
+                onChange={(e) => setFormData({ ...formData, unit: e.target.value })}
+                style={{ width: "100%", padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.5rem", fontSize: "0.875rem", boxSizing: "border-box" }}
+              >
+                <option value="L">Liters (L)</option>
+                <option value="ml">Milliliters (ml)</option>
+                <option value="kg">Kilograms (kg)</option>
+                <option value="g">Grams (g)</option>
+                <option value="pack">Pack</option>
+                <option value="pc">Piece</option>
+              </select>
+            </div>
+            
+            <div style={{ gridColumn: "span 2" }}>
+              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "600", marginBottom: "0.5rem", color: "#374151" }}>
+                Redirect Hyperlink (Optional)
               </label>
               <input
-                type="url"
-                placeholder="e.g. https://..."
-                value={formData.image}
-                onChange={(e) => setFormData({ ...formData, image: e.target.value })}
+                type="text"
+                placeholder="e.g. https://example.com/special-offer"
+                value={formData.redirectUrl}
+                onChange={(e) => setFormData({ ...formData, redirectUrl: e.target.value })}
                 style={{ width: "100%", padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.5rem", fontSize: "0.875rem", boxSizing: "border-box" }}
               />
+              <p style={{ fontSize: "0.75rem", color: "#6b7280", marginTop: "0.25rem" }}>
+                If provided, clicking the product on the shop page will open this link instead of the product detail page.
+              </p>
+            </div>
+
+            <div style={{ gridColumn: "span 2" }}>
+              <label style={{ display: "block", fontSize: "0.875rem", fontWeight: "600", marginBottom: "0.5rem", color: "#374151" }}>
+                Product Image
+              </label>
+              <div style={{ display: "flex", gap: "1rem", alignItems: "center" }}>
+                <input
+                  type="text"
+                  placeholder="e.g. https://... or /uploads/..."
+                  value={formData.imageUrl}
+                  onChange={(e) => setFormData({ ...formData, imageUrl: e.target.value })}
+                  style={{ flex: 1, padding: "0.5rem", border: "1px solid #d1d5db", borderRadius: "0.5rem", fontSize: "0.875rem", boxSizing: "border-box" }}
+                />
+                <div style={{ position: "relative" }}>
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      
+                      if (file.size > 500 * 1024) {
+                        toast({ title: "❌ File too large", description: "Image must be less than 500KB", variant: "destructive" });
+                        return;
+                      }
+
+                      const formDataUpload = new FormData();
+                      formDataUpload.append("image", file);
+
+                      try {
+                        toast({ title: "⏳ Uploading...", description: "Please wait while we upload your image" });
+                        const res = await fetch("/api/admin/upload-product-image", {
+                          method: "POST",
+                          body: formDataUpload,
+                        });
+                        
+                        if (!res.ok) throw new Error("Upload failed");
+                        
+                        const data = await res.json();
+                        setFormData((prev) => ({ ...prev, imageUrl: data.url }));
+                        toast({ title: "✅ Uploaded!", description: "Image uploaded successfully" });
+                      } catch (err) {
+                        toast({ title: "❌ Upload failed", description: "Please try again", variant: "destructive" });
+                      }
+                    }}
+                    style={{
+                      position: "absolute",
+                      inset: 0,
+                      opacity: 0,
+                      cursor: "pointer",
+                      width: "100%",
+                      zIndex: 10
+                    }}
+                  />
+                  <button
+                    type="button"
+                    style={{
+                      padding: "0.5rem 1rem",
+                      background: "#3b82f6",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "0.5rem",
+                      fontSize: "0.875rem",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem"
+                    }}
+                  >
+                    📁 Upload Local
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={handleGenerateAIImage}
+                    disabled={isLoading}
+                    style={{
+                      padding: "0.5rem 1rem",
+                      background: "linear-gradient(135deg, #6366f1 0%, #a855f7 100%)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "0.5rem",
+                      fontSize: "0.875rem",
+                      fontWeight: "600",
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      boxShadow: "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+                      cursor: isLoading ? "not-allowed" : "pointer"
+                    }}
+                  >
+                    <Sparkles size={16} /> ✨ Generate with AI
+                  </button>
+                </div>
+              </div>
+              {formData.imageUrl && (
+                <div style={{ marginTop: "0.5rem", position: "relative", width: "100px", height: "100px" }}>
+                  <img 
+                    src={formData.imageUrl} 
+                    alt="Preview" 
+                    style={{ width: "100%", height: "100%", objectFit: "cover", borderRadius: "0.5rem", border: "1px solid #e5e7eb" }} 
+                  />
+                  <button 
+                    onClick={() => setFormData({ ...formData, imageUrl: "" })}
+                    style={{ position: "absolute", top: "-8px", right: "-8px", background: "#ef4444", color: "white", border: "none", borderRadius: "50%", width: "20px", height: "20px", fontSize: "12px", display: "flex", alignItems: "center", justifyCenter: "center", cursor: "pointer" }}
+                  >
+                    ×
+                  </button>
+                </div>
+              )}
             </div>
 
             <div>
@@ -365,8 +566,8 @@ export default function ProductsAdmin() {
                       </span>
                     </td>
                     <td style={{ padding: "1rem" }}>
-                      <span style={{ padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: "700", background: p.active !== false ? "#dcfce7" : "#fee2e2", color: p.active !== false ? "#166534" : "#991b1b" }}>
-                        {p.active !== false ? "✅ Active" : "❌ Inactive"}
+                      <span style={{ padding: "0.25rem 0.75rem", borderRadius: "9999px", fontSize: "0.75rem", fontWeight: "700", background: p.isActive !== false ? "#dcfce7" : "#fee2e2", color: p.isActive !== false ? "#166534" : "#991b1b" }}>
+                        {p.isActive !== false ? "✅ Active" : "❌ Inactive"}
                       </span>
                     </td>
                     <td style={{ padding: "1rem", display: "flex", gap: "0.5rem" }}>
@@ -391,9 +592,8 @@ export default function ProductsAdmin() {
                       </button>
                       <button
                         onClick={() => {
-                          if (confirm("Are you sure you want to delete this product?")) {
-                            deleteProductMutation.mutate(p.id);
-                          }
+                          setItemToDelete(p.id);
+                          setIsDeleteDialogOpen(true);
                         }}
                         disabled={isLoading}
                         style={{
@@ -424,6 +624,25 @@ export default function ProductsAdmin() {
           </p>
         )}
       </div>
-    </div>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent className="bg-white border-2 border-red-100 shadow-2xl rounded-3xl p-8">
+          <AlertDialogHeader className="items-center text-center space-y-4">
+            <div className="w-20 h-20 bg-red-50 rounded-full flex items-center justify-center mb-2">
+              <AlertTriangle className="w-10 h-10 text-red-600 animate-pulse" />
+            </div>
+            <AlertDialogTitle className="text-3xl font-black text-gray-900">Delete Product?</AlertDialogTitle>
+            <AlertDialogDescription className="text-gray-500 text-lg font-medium">This action cannot be undone.</AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className="mt-8 gap-4 sm:justify-center">
+            <AlertDialogCancel className="h-14 px-8 rounded-2xl border-2 border-gray-100 hover:bg-gray-50 font-bold text-gray-600 transition-all">Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={() => { if (itemToDelete) { deleteProductMutation.mutate(itemToDelete); setItemToDelete(null); } }}
+              className="h-14 px-8 rounded-2xl bg-red-600 hover:bg-red-700 text-white font-black shadow-lg transition-all"
+            >Confirm Delete</AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </AdminLayout>
   );
 }
